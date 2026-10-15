@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#731F94">
+  <title>Log in · SkillBridge</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { brand: { DEFAULT: '#731F94', dark: '#5E1978', tint: '#F6EEF9' } },
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-full bg-[#F8F9FB] font-sans text-slate-900 antialiased">
+  <!-- Logomark (reused via <use>, colour comes from currentColor) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logomark" viewBox="0 0 118 131">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M63.2727 21.9552C63.2727 18.9994 62.585 16.0842 61.2634 13.4405C60.1211 11.1552 59.4505 8.66344 59.2912 6.11342L58.9091 0L58.5274 6.11319C58.3677 8.66324 57.6971 11.1551 56.5549 13.4404C55.2335 16.0842 54.5456 18.9995 54.5456 21.9553V108.999C54.5456 111.955 55.2335 114.87 56.5549 117.514C57.6971 119.799 58.3677 122.291 58.5274 124.841L58.9091 130.955L59.2912 124.841C59.4505 122.291 60.1211 119.799 61.2634 117.514C62.585 114.87 63.2727 111.955 63.2727 108.999V21.9552ZM39.4451 22.1708C40.7668 24.8145 41.4544 27.7299 41.4544 30.6857V100.269C41.4544 103.225 40.7668 106.14 39.4451 108.784C38.3029 111.069 37.6323 113.561 37.4727 116.111L37.0909 122.224L36.7091 116.111C36.5495 113.561 35.8789 111.069 34.7367 108.784C33.415 106.14 32.7273 103.225 32.7273 100.269V30.6857C32.7273 27.7299 33.415 24.8145 34.7367 22.1708C35.8789 19.8855 36.5495 17.3937 36.7091 14.8437L37.0909 8.73032L37.4727 14.8437C37.6323 17.3937 38.3029 19.8855 39.4451 22.1708ZM30.5456 39.4161C30.5456 36.46 29.8577 33.5449 28.536 30.9012C27.3938 28.6157 26.7231 26.1239 26.5638 23.5739L26.1818 17.4606L25.7999 23.5739C25.6405 26.1239 24.9698 28.6157 23.8276 30.9012C22.5061 33.5449 21.8182 36.46 21.8182 39.4161V91.5387C21.8182 94.4943 22.5061 97.4096 23.8276 100.053C24.9698 102.339 25.6405 104.83 25.7999 107.381L26.1818 113.494L26.5638 107.381C26.7231 104.83 27.3938 102.339 28.536 100.053C29.8577 97.4096 30.5456 94.4943 30.5456 91.5387V39.4161ZM17.627 48.3614C18.9484 51.0054 19.6364 53.9205 19.6364 56.8766V74.078C19.6364 77.0338 18.9484 79.9491 17.627 82.5928C16.4848 84.8781 15.814 87.3699 15.6547 89.9198L15.2727 96.0333L14.8908 89.9198C14.7315 87.3699 14.0607 84.8781 12.9185 82.5928C11.5971 79.9491 10.9091 77.0338 10.9091 74.078V56.8766C10.9091 53.9205 11.5971 51.0054 12.9185 48.3614C14.0607 46.0764 14.7315 43.5843 14.8908 41.0347L15.2727 34.9212L15.6547 41.0347C15.814 43.5843 16.4848 46.0764 17.627 48.3614ZM8.72685 65.4774L8.72727 65.6069V65.3476L8.72685 65.4774ZM0 65.6069L0.000440241 65.4774C0.0202343 68.3888 0.707255 71.2575 2.00938 73.8624C3.15162 76.148 3.82236 78.6395 3.98168 81.1897L4.36365 87.3029L4.74558 81.1897C4.90493 78.6395 5.57567 76.148 6.71791 73.8624C8.02002 71.2575 8.70703 68.3888 8.72685 65.4774C8.70703 62.5657 8.02002 59.697 6.71791 57.0921C5.57567 54.8065 4.90493 52.315 4.74558 49.7648L4.36365 43.6516L3.98168 49.7648C3.82236 52.315 3.15162 54.8065 2.00938 57.0921C0.707255 59.697 0.0202344 62.5657 0.000440241 65.4774L0 65.3476V65.6069ZM50.3542 13.4405C51.6759 16.0842 52.3635 18.9995 52.3635 21.9553V108.999C52.3635 111.955 51.6759 114.87 50.3542 117.514C49.212 119.799 48.5414 122.291 48.3818 124.841L48 130.955L47.6182 124.841C47.4586 122.291 46.788 119.799 45.6458 117.514C44.3241 114.87 43.6365 111.955 43.6365 108.999V21.9553C43.6365 18.9995 44.3241 16.0842 45.6458 13.4405C46.788 11.1552 47.4586 8.66332 47.6182 6.1133L48 0L48.3818 6.1133C48.5414 8.66332 49.212 11.1552 50.3542 13.4405ZM72.1725 13.4405C73.4939 16.0842 74.1818 18.9995 74.1818 21.9553V108.999C74.1818 111.955 73.4939 114.87 72.1725 117.514C71.0302 119.799 70.3596 122.291 70.2 124.841L69.8182 130.955L69.4365 124.841C69.2768 122.291 68.6062 119.799 67.464 117.514C66.1423 114.87 65.4544 111.955 65.4544 108.999V21.9553C65.4544 18.9995 66.1423 16.0842 67.464 13.4405C68.6062 11.1552 69.2768 8.66332 69.4365 6.1133L69.8182 0L70.2 6.1133C70.3596 8.66332 71.0302 11.1552 72.1725 13.4405ZM85.0909 30.6857C85.0909 27.7299 84.403 24.8145 83.0816 22.1708C81.9394 19.8855 81.2688 17.3937 81.1091 14.8437L80.7273 8.73032L80.3456 14.8437C80.186 17.3937 79.5154 19.8855 78.3731 22.1708C77.0514 24.8145 76.3635 27.7299 76.3635 30.6857V100.269C76.3635 103.225 77.0514 106.14 78.3731 108.784C79.5154 111.069 80.186 113.561 80.3456 116.111L80.7273 122.224L81.1091 116.111C81.2688 113.561 81.9394 111.069 83.0816 108.784C84.403 106.14 85.0909 103.225 85.0909 100.269V30.6857ZM93.9904 30.9012C95.3121 33.5449 96 36.46 96 39.4161V91.5387C96 94.4943 95.3121 97.4096 93.9904 100.053C92.8485 102.339 92.1779 104.83 92.0182 107.381L91.6365 113.494L91.2544 107.381C91.0951 104.83 90.4245 102.339 89.2822 100.053C87.9608 97.4096 87.2727 94.4943 87.2727 91.5387V39.4161C87.2727 36.46 87.9608 33.5449 89.2822 30.9012C90.4245 28.6157 91.0951 26.1239 91.2544 23.5739L91.6365 17.4606L92.0182 23.5739C92.1779 26.1239 92.8485 28.6157 93.9904 30.9012ZM106.909 56.8766C106.909 53.9205 106.221 51.0054 104.9 48.3614C103.758 46.0764 103.087 43.5843 102.927 41.0347L102.546 34.9212L102.164 41.0347C102.004 43.5843 101.334 46.0764 100.191 48.3614C98.87 51.0054 98.1818 53.9205 98.1818 56.8766V74.078C98.1818 77.0338 98.87 79.9491 100.191 82.5928C101.334 84.8781 102.004 87.3699 102.164 89.9198L102.546 96.0333L102.927 89.9198C103.087 87.3699 103.758 84.8781 104.9 82.5928C106.221 79.9491 106.909 77.0338 106.909 74.078V56.8766ZM117.818 65.4774C117.818 65.5204 117.818 65.5634 117.818 65.6069V65.3476C117.818 65.3911 117.818 65.4341 117.818 65.4774ZM109.091 65.4774C109.111 68.3888 109.798 71.2575 111.1 73.8624C112.242 76.148 112.913 78.6395 113.073 81.1897L113.454 87.3029L113.836 81.1897C113.996 78.6395 114.666 76.148 115.809 73.8624C117.111 71.2575 117.798 68.3888 117.818 65.4774C117.798 62.5657 117.111 59.697 115.809 57.0921C114.666 54.8065 113.996 52.315 113.836 49.7648L113.454 43.6516L113.073 49.7648C112.913 52.315 112.242 54.8065 111.1 57.0921C109.798 59.697 109.111 62.5657 109.091 65.4774ZM109.091 65.4774C109.091 65.4341 109.091 65.3911 109.091 65.3476V65.6069C109.091 65.5634 109.091 65.5204 109.091 65.4774Z" fill="currentColor"/>
+    </symbol>
+  </svg>
+
+  <div class="min-h-screen lg:grid lg:grid-cols-2">
+
+    <!-- Brand panel (desktop only) -->
+    <aside class="hidden lg:flex flex-col items-center justify-center gap-6 bg-brand px-12 text-center text-white">
+      <svg class="w-28" viewBox="0 0 118 131" aria-hidden="true"><use href="#logomark" /></svg>
+      <span class="text-2xl font-bold tracking-tight">SkillBridge</span>
+      <p class="max-w-xs text-base text-white/80">Turn the skills you already have into your next opportunity.</p>
+    </aside>
+
+    <main class="flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:min-h-0 lg:justify-center lg:px-16">
+      <div class="mx-auto w-full max-w-md">
+        <div class="mb-8 flex items-center justify-between">
+          <button type="button" id="back" class="-ml-2 rounded-lg p-2 text-brand hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-brand" aria-label="Go back">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <svg class="h-8 w-auto text-brand lg:hidden" viewBox="0 0 118 131" aria-hidden="true"><use href="#logomark" /></svg>
+          <span class="w-10" aria-hidden="true"></span>
+        </div>
+
+        <h1 class="text-2xl font-bold tracking-tight">Welcome Back!</h1>
+
+        <form id="login-form" class="mt-8 space-y-5" novalidate>
+          <div>
+            <label for="email" class="mb-1.5 block text-sm font-bold">Email Address</label>
+            <input id="email" type="email" autocomplete="email" class="block h-12 w-full rounded-lg border border-brand bg-white px-4 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/20 aria-[invalid=true]:border-red-600 aria-[invalid=true]:focus:ring-red-600/20">
+            <p id="email-error" class="mt-1.5 flex hidden items-center gap-2 text-xs text-red-600 " role="alert"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L1 21h22L12 2z" fill="#FF0000"/><path d="M12 9v5M12 17.2v.1" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span></span></p>
+          </div>
+
+          <div>
+            <label for="password" class="mb-1.5 block text-sm font-bold">Password</label>
+            <div class="relative">
+              <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" class="block h-12 w-full rounded-lg border border-brand bg-white pl-4 pr-12 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/20 aria-[invalid=true]:border-red-600 aria-[invalid=true]:focus:ring-red-600/20">
+              <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-lg text-slate-600 hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand" aria-label="Show password" aria-pressed="false">
+                <svg id="eye-on" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye-off" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0112 5c6.5 0 10 7 10 7a17.6 17.6 0 01-3.2 4.2M6.6 6.6A17.5 17.5 0 002 12s3.5 7 10 7a10 10 0 004.4-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>
+              </button>
+            </div>
+            <p id="password-error" class="mt-1.5 flex hidden items-center gap-2 text-xs text-red-600 " role="alert"><svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L1 21h22L12 2z" fill="#FF0000"/><path d="M12 9v5M12 17.2v.1" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span></span></p>
+            <div class="mt-3 text-right">
+              <a href="forgot-password.html" class="text-sm font-bold hover:text-brand hover:underline">Forgot Password?</a>
+            </div>
+          </div>
+
+          <button type="submit" class="h-12 w-full rounded-xl bg-brand text-lg font-bold text-white transition hover:bg-brand-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2">Log in</button>
+
+          <div class="flex items-center gap-3" aria-hidden="true">
+            <span class="h-px flex-1 bg-slate-800"></span><span class="text-sm text-slate-800">or continue with</span><span class="h-px flex-1 bg-slate-800"></span>
+          </div>
+
+          <button type="button" id="google" class="flex h-12 w-full items-center justify-center gap-2.5 rounded-xl border border-brand bg-white text-sm font-medium text-slate-800 transition hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+            <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.4-4.7 7l7.3 5.7c4.3-4 6.8-9.9 6.8-17.2z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.3-5.7c-2 1.4-4.7 2.3-8.6 2.3-6.3 0-11.6-4-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+            Continue with Google
+          </button>
+
+          <p class="pt-1 text-center text-sm text-slate-800">
+            Don't have an account? <a href="signup.html" class="font-bold hover:text-brand hover:underline">Sign Up</a>
+          </p>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Where to go after logging in (dashboard page is not built yet).
+    const NEXT_URL = 'dashboard.html';
+
+    const $ = (id) => document.getElementById(id);
+    function showError(id, msg) {
+      const out = $(id);
+      out.querySelector('span').textContent = msg;
+      out.classList.toggle('hidden', !msg);
+    }
+    function readJSON(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (_) { return fallback; }
+    }
+    function writeJSON(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    }
+
+    $('back').addEventListener('click', () => (history.length > 1 ? history.back() : (location.href = 'signup.html')));
+
+    $('toggle-password').addEventListener('click', (e) => {
+      const input = $('password');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      $('eye-on').classList.toggle('hidden', show);
+      $('eye-off').classList.toggle('hidden', !show);
+      e.currentTarget.setAttribute('aria-pressed', String(show));
+      e.currentTarget.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+
+    const rules = {
+      email: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Enter a valid email address'),
+      password: (v) => (v ? '' : 'Enter your password'),
+    };
+
+    function check(id) {
+      const el = $(id);
+      const msg = rules[id](el.value);
+      showError(id + '-error', msg);
+      el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      return !msg;
+    }
+
+    ['email', 'password'].forEach((id) => {
+      $(id).addEventListener('input', () => $(id).getAttribute('aria-invalid') === 'true' && check(id));
+    });
+
+    $('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ok = ['email', 'password'].map(check).every(Boolean);
+      if (!ok) return document.querySelector('[aria-invalid="true"]').focus();
+      // TODO(backend): authenticate here. Until there is an API, any well-formed email + password continues.
+      const user = readJSON('skillbridge:user', {});
+      writeJSON('skillbridge:user', { ...user, email: $('email').value.trim(), provider: 'email' });
+      window.location.assign(NEXT_URL);
+    });
+
+    // TODO(backend): Google OAuth. Placeholder that continues the flow.
+    $('google').addEventListener('click', () => window.location.assign(NEXT_URL));
+  </script>
+</body>
+</html>
