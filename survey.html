@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile survey | SkillBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+  <link href="./src/output.css" rel="stylesheet">
+  <style>
+    .range-thumb { pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; }
+    .range-thumb::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; height: 18px; width: 18px; border-radius: 9999px; background: #fff; border: 3px solid #630ED4; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
+    .range-thumb::-moz-range-thumb { pointer-events: auto; height: 12px; width: 12px; border-radius: 9999px; background: #fff; border: 3px solid #630ED4; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
+    .range-thumb::-webkit-slider-runnable-track { background: transparent; }
+    .range-thumb::-moz-range-track { background: transparent; }
+  </style>
+</head>
+<body class="relative overflow-x-hidden bg-[#FCF8FF] font-['Plus_Jakarta_Sans',sans-serif]">
+  <div class="pointer-events-none absolute -left-24 top-16 h-80 w-80 rounded-full bg-[#EDE1FB] blur-3xl"></div>
+  <div class="pointer-events-none absolute -right-24 top-[640px] h-96 w-96 rounded-full bg-[#F0DFFF] blur-3xl"></div>
+
+  <header class="relative mx-auto flex h-[76px] max-w-[1280px] items-center justify-between gap-4 border-b border-[#F0EAF6] bg-white/70 px-5 sm:px-8 lg:px-12">
+    <a href="index.html" class="flex items-center gap-3">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_636_1374)">
+<rect x="2" y="1" width="36" height="36" rx="8" fill="#731F94" shape-rendering="crispEdges"/>
+<path d="M15 28.5807C14.3056 28.5807 13.7153 28.3377 13.2292 27.8516C12.7431 27.3655 12.5 26.7752 12.5 26.0807C12.5 25.3863 12.7431 24.796 13.2292 24.3099C13.7153 23.8238 14.3056 23.5807 15 23.5807C15.1944 23.5807 15.375 23.6016 15.5417 23.6432C15.7083 23.6849 15.8681 23.7405 16.0208 23.8099L17.2083 22.3307C16.8194 21.9002 16.5486 21.4141 16.3958 20.8724C16.2431 20.3307 16.2083 19.7891 16.2917 19.2474L14.6042 18.6849C14.3681 19.0321 14.0694 19.3099 13.7083 19.5182C13.3472 19.7266 12.9444 19.8307 12.5 19.8307C11.8056 19.8307 11.2153 19.5877 10.7292 19.1016C10.2431 18.6155 10 18.0252 10 17.3307C10 16.6363 10.2431 16.046 10.7292 15.5599C11.2153 15.0738 11.8056 14.8307 12.5 14.8307C13.1944 14.8307 13.7847 15.0738 14.2708 15.5599C14.7569 16.046 15 16.6363 15 17.3307C15 17.3585 15 17.3863 15 17.4141C15 17.4418 15 17.4696 15 17.4974L16.6875 18.0807C16.9653 17.5807 17.3368 17.1571 17.8021 16.8099C18.2674 16.4627 18.7917 16.2405 19.375 16.1432V14.3307C18.8333 14.178 18.3854 13.8828 18.0312 13.4453C17.6771 13.0078 17.5 12.4974 17.5 11.9141C17.5 11.2196 17.7431 10.6293 18.2292 10.1432C18.7153 9.65712 19.3056 9.41406 20 9.41406C20.6944 9.41406 21.2847 9.65712 21.7708 10.1432C22.2569 10.6293 22.5 11.2196 22.5 11.9141C22.5 12.4974 22.3194 13.0078 21.9583 13.4453C21.5972 13.8828 21.1528 14.178 20.625 14.3307V16.1432C21.2083 16.2405 21.7326 16.4627 22.1979 16.8099C22.6632 17.1571 23.0347 17.5807 23.3125 18.0807L25 17.4974C25 17.4696 25 17.4418 25 17.4141C25 17.3863 25 17.3585 25 17.3307C25 16.6363 25.2431 16.046 25.7292 15.5599C26.2153 15.0738 26.8056 14.8307 27.5 14.8307C28.1944 14.8307 28.7847 15.0738 29.2708 15.5599C29.7569 16.046 30 16.6363 30 17.3307C30 18.0252 29.7569 18.6155 29.2708 19.1016C28.7847 19.5877 28.1944 19.8307 27.5 19.8307C27.0556 19.8307 26.6493 19.7266 26.2812 19.5182C25.9132 19.3099 25.6181 19.0321 25.3958 18.6849L23.7083 19.2474C23.7917 19.7891 23.7569 20.3273 23.6042 20.862C23.4514 21.3967 23.1806 21.8863 22.7917 22.3307L23.9792 23.7891C24.1319 23.7196 24.2917 23.6675 24.4583 23.6328C24.625 23.5981 24.8056 23.5807 25 23.5807C25.6944 23.5807 26.2847 23.8238 26.7708 24.3099C27.2569 24.796 27.5 25.3863 27.5 26.0807C27.5 26.7752 27.2569 27.3655 26.7708 27.8516C26.2847 28.3377 25.6944 28.5807 25 28.5807C24.3056 28.5807 23.7153 28.3377 23.2292 27.8516C22.7431 27.3655 22.5 26.7752 22.5 26.0807C22.5 25.8029 22.5451 25.5356 22.6354 25.2786C22.7257 25.0217 22.8472 24.7891 23 24.5807L21.8125 23.1016C21.2431 23.421 20.6354 23.5807 19.9896 23.5807C19.3438 23.5807 18.7361 23.421 18.1667 23.1016L17 24.5807C17.1528 24.7891 17.2743 25.0217 17.3646 25.2786C17.4549 25.5356 17.5 25.8029 17.5 26.0807C17.5 26.7752 17.2569 27.3655 16.7708 27.8516C16.2847 28.3377 15.6944 28.5807 15 28.5807V28.5807M12.5 18.1641C12.7361 18.1641 12.934 18.0842 13.0938 17.9245C13.2535 17.7648 13.3333 17.5668 13.3333 17.3307C13.3333 17.0946 13.2535 16.8967 13.0938 16.737C12.934 16.5773 12.7361 16.4974 12.5 16.4974C12.2639 16.4974 12.066 16.5773 11.9062 16.737C11.7465 16.8967 11.6667 17.0946 11.6667 17.3307C11.6667 17.5668 11.7465 17.7648 11.9062 17.9245C12.066 18.0842 12.2639 18.1641 12.5 18.1641V18.1641M15 26.9141C15.2361 26.9141 15.434 26.8342 15.5938 26.6745C15.7535 26.5148 15.8333 26.3168 15.8333 26.0807C15.8333 25.8446 15.7535 25.6467 15.5938 25.487C15.434 25.3273 15.2361 25.2474 15 25.2474C14.7639 25.2474 14.566 25.3273 14.4062 25.487C14.2465 25.6467 14.1667 25.8446 14.1667 26.0807C14.1667 26.3168 14.2465 26.5148 14.4062 26.6745C14.566 26.8342 14.7639 26.9141 15 26.9141V26.9141M20 12.7474C20.2361 12.7474 20.434 12.6675 20.5938 12.5078C20.7535 12.3481 20.8333 12.1502 20.8333 11.9141C20.8333 11.678 20.7535 11.48 20.5938 11.3203C20.434 11.1606 20.2361 11.0807 20 11.0807C19.7639 11.0807 19.566 11.1606 19.4062 11.3203C19.2465 11.48 19.1667 11.678 19.1667 11.9141C19.1667 12.1502 19.2465 12.3481 19.4062 12.5078C19.566 12.6675 19.7639 12.7474 20 12.7474V12.7474M20 21.9141C20.5833 21.9141 21.0764 21.7127 21.4792 21.3099C21.8819 20.9071 22.0833 20.4141 22.0833 19.8307C22.0833 19.2474 21.8819 18.7543 21.4792 18.3516C21.0764 17.9488 20.5833 17.7474 20 17.7474C19.4167 17.7474 18.9236 17.9488 18.5208 18.3516C18.1181 18.7543 17.9167 19.2474 17.9167 19.8307C17.9167 20.4141 18.1181 20.9071 18.5208 21.3099C18.9236 21.7127 19.4167 21.9141 20 21.9141V21.9141M25 26.9141C25.2361 26.9141 25.434 26.8342 25.5938 26.6745C25.7535 26.5148 25.8333 26.3168 25.8333 26.0807C25.8333 25.8446 25.7535 25.6467 25.5938 25.487C25.434 25.3273 25.2361 25.2474 25 25.2474C24.7639 25.2474 24.566 25.3273 24.4062 25.487C24.2465 25.6467 24.1667 25.8446 24.1667 26.0807C24.1667 26.3168 24.2465 26.5148 24.4062 26.6745C24.566 26.8342 24.7639 26.9141 25 26.9141V26.9141M27.5 18.1641C27.7361 18.1641 27.934 18.0842 28.0938 17.9245C28.2535 17.7648 28.3333 17.5668 28.3333 17.3307C28.3333 17.0946 28.2535 16.8967 28.0938 16.737C27.934 16.5773 27.7361 16.4974 27.5 16.4974C27.2639 16.4974 27.066 16.5773 26.9062 16.737C26.7465 16.8967 26.6667 17.0946 26.6667 17.3307C26.6667 17.5668 26.7465 17.7648 26.9062 17.9245C27.066 18.0842 27.2639 18.1641 27.5 18.1641V18.1641M20 11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141M12.5 17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307M20 19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307M27.5 17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307M15 26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807M25 26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807" fill="white"/>
+</g>
+<defs>
+<filter id="filter0_d_636_1374" x="0" y="0" width="40" height="40" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feGaussianBlur stdDeviation="1"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_636_1374"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_636_1374" result="shape"/>
+</filter>
+</defs>
+</svg>
+      <span class="text-[20px] font-semibold text-[#181445]">SkillBridge</span>
+    </a>
+    <nav aria-label="Application steps" class="hidden min-w-0 flex-1 items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] font-semibold text-[#4A4455] lg:flex">
+      <a href="survey.html" aria-current="step" class="rounded-full bg-[#EFEBFF] px-4 py-2 text-[#630ED4]">1. Profile Survey</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
+      <a href="cv-upload.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">2. CV Upload</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
+      <a href="profile-review.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">3. Skill Extraction</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
+      <a href="career-paths.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">4. Career Paths</a>
+    </nav>
+    <div class="flex shrink-0 items-center gap-3 sm:gap-4">
+      <a href="index.html" class="whitespace-nowrap text-[12px] font-semibold text-[#4A4455] hover:text-[#630ED4]">Save &amp; Exit</a>
+      <span class="h-7 w-px bg-[#E8E1F0]" aria-hidden="true"></span>
+      <a href="profile.html" aria-label="Account" class="flex h-9 w-9 items-center justify-center rounded-full bg-[#81798B] text-white hover:bg-[#630ED4]"><i class="ph ph-user text-lg" aria-hidden="true"></i></a>
+    </div>
+  </header>
+
+  <main class="relative">
+    <form id="survey-form" class="mx-auto flex max-w-[848px] flex-col gap-[25px] px-4 pb-20 pt-4 sm:px-0">
+
+      <section class="rounded-2xl bg-white p-4 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div class="flex items-center gap-2">
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#630ED4] text-[12px] font-bold text-white">1</span>
+            <h2 class="text-[16px] font-semibold text-[#181445]">Step 1: Profile Survey</h2>
+            <span class="rounded-md bg-[#EFEBFF] px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#630ED4]">Active</span>
+          </div>
+          <ol class="flex flex-wrap items-center gap-1 text-[11px] font-semibold tracking-[0.04em] text-[#7B7487]">
+            <li><a href="survey.html" aria-current="step" class="text-[#630ED4] hover:underline">Survey</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="cv-upload.html" class="hover:text-[#630ED4] hover:underline">CV Upload</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="profile-review.html" class="hover:text-[#630ED4] hover:underline">Extraction</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="career-paths.html" class="hover:text-[#630ED4] hover:underline">Career Match</a></li>
+          </ol>
+        </div>
+        <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-[#E9E5FF]"><div class="h-full w-1/4 rounded-full bg-gradient-to-r from-[#630ED4] to-[#C17BFF]"></div></div>
+      </section>
+
+      <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
+        <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#630ED4]"><svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>Candidate Calibration Pipeline</p>
+        <h1 class="mt-[5px] max-w-[560px] text-[28px] font-extrabold leading-[1.25] tracking-[-0.03em] text-[#181445] sm:text-[32px] sm:leading-[40px]">Tell us about your background &amp; ambitions</h1>
+        <p class="mt-[3px] max-w-[610px] text-[14px] leading-[22px] text-[#4A4455]">We calibrate your credentials directly against 140+ active Lagos fintech, payment gateway, and high-growth venture hiring standards.</p>
+      </section>
+
+      <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
+        <div class="flex items-center gap-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">01</span>
+            <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Personal Information</h2><p class="text-[12px] leading-4 text-[#4A4455]">Your primary contact details for interview coordination in Nigeria</p></div>
+          </div>
+        <div class="mt-[17px] grid gap-x-4 gap-y-4 sm:grid-cols-2">
+          <div>
+            <label for="fullName" class="block text-[13px] font-semibold leading-5 text-[#181445]">Full Legal Name</label>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="fullName" name="fullName" type="text" required placeholder="Amaka Okafor" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" autocomplete="name"><i class="ph ph-identification-card text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
+          </div>
+          <div>
+            <label for="phone" class="block text-[13px] font-semibold leading-5 text-[#181445]">Phone Number (WhatsApp-enabled)</label>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><span class="flex h-3.5 w-5 shrink-0 overflow-hidden rounded-[3px] ring-1 ring-black/10" aria-hidden="true"><span class="w-1/3 bg-[#008751]"></span><span class="w-1/3 bg-white"></span><span class="w-1/3 bg-[#008751]"></span></span><input id="phone" name="phone" type="tel" required pattern="^(\+?234|0)[\s\-]?[789]\d{2}[\s\-]?\d{3}[\s\-]?\d{4}$" title="Use a Nigerian number, e.g. +234 814 000 9210" placeholder="+234 814 000 9210" autocomplete="tel" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70"><i class="ph ph-phone text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
+          </div>
+          <div class="sm:col-span-2"><div>
+            <div class="flex items-end justify-between gap-3"><label for="location" class="block text-[13px] font-semibold leading-5 text-[#181445]">Current Location / Commute Zone</label><span class="text-[12px] font-semibold text-[#630ED4]">Key for Lagos Island tech corridors</span></div>
+            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="location" name="location" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>Lagos - Victoria Island / Lekki Corridor</option><option>Lagos - Ikeja / Mainland</option><option>Lagos - Yaba / Surulere</option><option>Abuja - Central Business District</option><option>Port Harcourt</option><option>Ibadan</option><option>Other / Remote</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-caret-down text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
+        <div class="flex items-center gap-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">02</span>
+            <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Education &amp; Academic Background</h2><p class="text-[12px] leading-4 text-[#4A4455]">Validated degree records assist hiring algorithms for early career tiers</p></div>
+          </div>
+        <div class="mt-[17px] grid gap-x-4 gap-y-4 sm:grid-cols-2">
+          <div>
+            <div class="flex items-end justify-between gap-3"><label for="degree" class="block text-[13px] font-semibold leading-5 text-[#181445]">Degree Qualification</label></div>
+            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="degree" name="degree" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>B.Sc / Bachelor of Science</option><option>B.Eng / Bachelor of Engineering</option><option>B.A / Bachelor of Arts</option><option>HND / Higher National Diploma</option><option>M.Sc / Master of Science</option><option>Other</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-graduation-cap text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
+          </div>
+          <div>
+            <label for="field" class="block text-[13px] font-semibold leading-5 text-[#181445]">Field of Study / Major</label>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="field" name="field" type="text" required placeholder="Economics / Econometrics" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" ></div>
+          </div>
+          <div class="sm:col-span-2">
+            <div>
+            <label for="institution" class="block text-[13px] font-semibold leading-5 text-[#181445]">Higher Institution</label>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="institution" name="institution" type="text" required placeholder="University of Lagos (UNILAG)" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" ><i class="ph ph-buildings text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
+          </div>
+            <div class="mt-2 flex flex-wrap items-center gap-2"><span class="text-[12px] font-semibold text-[#4A4455]">Top Suggestions:</span><button type="button" data-institution="Covenant University" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">Covenant University</button><button type="button" data-institution="University of Ibadan (UI)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">Univ of Ibadan (UI)</button><button type="button" data-institution="Obafemi Awolowo University (OAU)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">OAU Ile-Ife</button><button type="button" data-institution="Federal University of Technology Akure (FUTA)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">FUTA</button></div>
+          </div>
+          <div>
+            <label for="gradYear" class="block text-[13px] font-semibold leading-5 text-[#181445]">Graduation Year</label>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="gradYear" name="gradYear" type="number" required placeholder="2023" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" min="1990" max="2035"></div>
+          </div>
+          <div>
+            <div class="flex items-end justify-between gap-3"><label for="classification" class="block text-[13px] font-semibold leading-5 text-[#181445]">Degree Classification</label></div>
+            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="classification" name="classification" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>First Class Honours / Distinction</option><option>Second Class Upper</option><option>Second Class Lower</option><option>Third Class</option><option>Pass</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-caret-down text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
+        <div class="flex items-center gap-2">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">03</span>
+            <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Career Aspirations &amp; Work Preferences</h2><p class="text-[12px] leading-4 text-[#4A4455]">Calibrate track matches against active Fintech and Venture Studio requisitions</p></div>
+          </div>
+
+        <fieldset class="mt-[17px]">
+          <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Primary Target Track</legend>
+          <div class="mt-[3px] grid gap-2 sm:grid-cols-3">
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="track" value="fintech-data" class="peer sr-only" checked>
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-chart-bar text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Fintech Data Analytics</span>
+              <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">BI, SQL, Fraud models &amp; metrics</span>
+            </label>
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="track" value="backend" class="peer sr-only">
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-code text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Backend Engineering</span>
+              <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">Node/Go, microservices &amp; ledger APIs</span>
+            </label>
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="track" value="growth-product" class="peer sr-only">
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-rocket-launch text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Growth Product Mgmt</span>
+              <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">User acquisition, onboarding, loops</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="mt-[27px] rounded-xl bg-[#F6F2FF] px-4 pb-6 pt-4">
+          <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div><p class="text-[13px] font-bold leading-5 text-[#181445]">Target Monthly Remuneration (Entry / Associate)</p><p class="text-[12px] leading-4 text-[#4A4455]">Benchmarked against Tier-1 Lagos tech benchmarks</p></div>
+            <div class="text-right"><p id="pay-range" class="text-[20px] font-extrabold leading-7 text-[#630ED4]">&#8358;200,000 &ndash; &#8358;350,000</p><p class="text-[12px] font-semibold leading-4 text-[#4A4455]">/ month (Gross)</p></div>
+          </div>
+          <div class="relative mt-3 h-[18px]">
+            <div class="absolute inset-x-0 top-1 h-2.5 rounded-full bg-[#E3DFFF]"></div>
+            <div id="pay-fill" class="absolute top-1 h-2.5 rounded-full bg-[#7D39D4]" style="left:calc(9px + (100% - 18px) * .25);width:calc((100% - 18px) * .5)"></div>
+            <input id="pay-min" name="payMin" type="range" min="125000" max="425000" step="5000" value="200000" aria-label="Minimum monthly remuneration" class="range-thumb absolute inset-0 h-[18px] w-full">
+            <input id="pay-max" name="payMax" type="range" min="125000" max="425000" step="5000" value="350000" aria-label="Maximum monthly remuneration" class="range-thumb absolute inset-0 h-[18px] w-full">
+          </div>
+          <div class="mt-0.5 flex items-center justify-between text-[12px] font-semibold leading-4 text-[#4A4455]"><span>&#8358;120k (Intern baseline)</span><span class="text-[#630ED4]">&#8358;275k Median Range</span><span>&#8358;500k+ (Upper Tier)</span></div>
+        </div>
+
+        <fieldset class="mt-6">
+          <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Current Availability Status</legend>
+          <div class="mt-0.5 grid gap-2 sm:grid-cols-3">
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="availability" value="immediate" class="peer h-4 w-4 shrink-0 accent-[#630ED4]" checked>
+              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Immediate Placement</span><span class="block text-[12px] leading-4 text-[#4A4455]">NYSC Completed</span></span>
+            </label>
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="availability" value="serving" class="peer h-4 w-4 shrink-0 accent-[#630ED4]">
+              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Currently Serving</span><span class="block text-[12px] leading-4 text-[#4A4455]">NYSC PPA Ready</span></span>
+            </label>
+            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+              <input type="radio" name="availability" value="final-year" class="peer h-4 w-4 shrink-0 accent-[#630ED4]">
+              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Final Year Student</span><span class="block text-[12px] leading-4 text-[#4A4455]">Available Post-Exams</span></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="mt-6">
+          <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Preferred Work Mode</legend>
+          <div class="mt-[3px] flex flex-wrap gap-2">
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+              <input type="radio" name="workMode" value="hybrid" class="sr-only" checked><i class="ph ph-buildings text-sm" aria-hidden="true"></i>Hybrid Lagos (Island / Mainland)
+            </label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+              <input type="radio" name="workMode" value="remote" class="sr-only"><i class="ph ph-house text-sm" aria-hidden="true"></i>Fully Remote
+            </label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+              <input type="radio" name="workMode" value="onsite" class="sr-only"><i class="ph ph-buildings text-sm" aria-hidden="true"></i>On-Site Victoria Island / Ikoyi
+            </label>
+          </div>
+        </fieldset>
+      </section>
+
+      <div class="mt-1 flex flex-col gap-3 rounded-2xl bg-[#F4F0FF] p-4 sm:flex-row sm:items-center">
+        <span class="text-[#630ED4]"><svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"/></svg></span>
+        <p class="text-[12px] leading-[18px] text-[#4A4455] sm:max-w-[464px] sm:flex-1">Your verified data is strictly matched against direct hiring managers at accredited tech partners.</p>
+        <p class="text-[11px] font-bold uppercase leading-4 tracking-[0.05em] text-[#7B7487] sm:ml-6 sm:w-[106px]">Paystack Match Ready</p>
+        <p class="text-[11px] font-bold uppercase leading-4 tracking-[0.05em] text-[#7B7487] sm:ml-4 sm:w-[106px]">Moniepoint Compatible</p>
+      </div>
+
+      <div class="sticky bottom-4 -mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-[0_8px_30px_rgba(24,20,69,0.10)]">
+        <p class="flex items-center gap-2 text-[12px] text-[#4A4455]"><span class="text-[#630ED4]"><svg class="h-[18px] w-[18px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></span><span id="save-status">Step 1 of 4 &bull; Changes save automatically</span></p>
+        <div class="flex items-center gap-6">
+          <a href="index.html" class="text-[13px] font-semibold text-[#4A4455] hover:text-[#630ED4]">Back to Overview</a>
+          <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#630ED4] px-[38px] py-2 text-[13px] font-semibold leading-[18px] text-white shadow-[0_4px_14px_rgba(99,14,212,0.35)] hover:bg-[#5409B5]">Save &amp; Continue to CV Upload<svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></button>
+        </div>
+      </div>
+
+    </form>
+  </main>
+
+  <script src="js/survey.js" defer></script>
+  <script src="js/site-interactions.js" defer></script>
+</body>
+</html>

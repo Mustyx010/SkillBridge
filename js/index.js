@@ -77,30 +77,3 @@ if (ctaForm) {
     input.removeAttribute('aria-invalid');
   });
 }
-
-// Sign up page: prefill the email sent from the call-to-action
-const signupForm = document.getElementById('signup-form');
-
-if (signupForm) {
-  const emailField = signupForm.querySelector('[name="email"]');
-  const email = new URLSearchParams(location.search).get('email');
-  if (emailField && email) emailField.value = email;
-
-  signupForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(signupForm));
-    localStorage.setItem('skillbridge_user', JSON.stringify({ name: data.name, email: data.email }));
-    window.location.href = 'cv-upload.html';
-  });
-}
-
-// CV upload page: show the chosen file name
-const cvInput = document.getElementById('cv-file');
-const cvStatus = document.getElementById('cv-status');
-
-if (cvInput && cvStatus) {
-  cvInput.addEventListener('change', () => {
-    const file = cvInput.files[0];
-    cvStatus.textContent = file ? `Selected: ${file.name}` : '';
-  });
-}

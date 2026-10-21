@@ -1,13 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth motion-reduce:scroll-auto">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV upload | SkillBridge</title>
+  <title>CV Upload | SkillBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link href="./src/output.css" rel="stylesheet">
 </head>
-<body>
+<body class="min-h-screen bg-[#FCF8FF] font-['Plus_Jakarta_Sans',sans-serif] text-[#181445]">
+  <header class="relative mx-auto flex h-[76px] max-w-[1280px] items-center justify-between gap-4 border-b border-[#F0EAF6] bg-white/70 px-5 sm:px-8 lg:px-12">
+    <a href="index.html" class="flex shrink-0 items-center gap-3">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_636_1374)">
+<rect x="2" y="1" width="36" height="36" rx="8" fill="#731F94" shape-rendering="crispEdges"/>
+<path d="M15 28.5807C14.3056 28.5807 13.7153 28.3377 13.2292 27.8516C12.7431 27.3655 12.5 26.7752 12.5 26.0807C12.5 25.3863 12.7431 24.796 13.2292 24.3099C13.7153 23.8238 14.3056 23.5807 15 23.5807C15.1944 23.5807 15.375 23.6016 15.5417 23.6432C15.7083 23.6849 15.8681 23.7405 16.0208 23.8099L17.2083 22.3307C16.8194 21.9002 16.5486 21.4141 16.3958 20.8724C16.2431 20.3307 16.2083 19.7891 16.2917 19.2474L14.6042 18.6849C14.3681 19.0321 14.0694 19.3099 13.7083 19.5182C13.3472 19.7266 12.9444 19.8307 12.5 19.8307C11.8056 19.8307 11.2153 19.5877 10.7292 19.1016C10.2431 18.6155 10 18.0252 10 17.3307C10 16.6363 10.2431 16.046 10.7292 15.5599C11.2153 15.0738 11.8056 14.8307 12.5 14.8307C13.1944 14.8307 13.7847 15.0738 14.2708 15.5599C14.7569 16.046 15 16.6363 15 17.3307C15 17.3585 15 17.3863 15 17.4141C15 17.4418 15 17.4696 15 17.4974L16.6875 18.0807C16.9653 17.5807 17.3368 17.1571 17.8021 16.8099C18.2674 16.4627 18.7917 16.2405 19.375 16.1432V14.3307C18.8333 14.178 18.3854 13.8828 18.0312 13.4453C17.6771 13.0078 17.5 12.4974 17.5 11.9141C17.5 11.2196 17.7431 10.6293 18.2292 10.1432C18.7153 9.65712 19.3056 9.41406 20 9.41406C20.6944 9.41406 21.2847 9.65712 21.7708 10.1432C22.2569 10.6293 22.5 11.2196 22.5 11.9141C22.5 12.4974 22.3194 13.0078 21.9583 13.4453C21.5972 13.8828 21.1528 14.178 20.625 14.3307V16.1432C21.2083 16.2405 21.7326 16.4627 22.1979 16.8099C22.6632 17.1571 23.0347 17.5807 23.3125 18.0807L25 17.4974C25 17.4696 25 17.4418 25 17.4141C25 17.3863 25 17.3585 25 17.3307C25 16.6363 25.2431 16.046 25.7292 15.5599C26.2153 15.0738 26.8056 14.8307 27.5 14.8307C28.1944 14.8307 28.7847 15.0738 29.2708 15.5599C29.7569 16.046 30 16.6363 30 17.3307C30 18.0252 29.7569 18.6155 29.2708 19.1016C28.7847 19.5877 28.1944 19.8307 27.5 19.8307C27.0556 19.8307 26.6493 19.7266 26.2812 19.5182C25.9132 19.3099 25.6181 19.0321 25.3958 18.6849L23.7083 19.2474C23.7917 19.7891 23.7569 20.3273 23.6042 20.862C23.4514 21.3967 23.1806 21.8863 22.7917 22.3307L23.9792 23.7891C24.1319 23.7196 24.2917 23.6675 24.4583 23.6328C24.625 23.5981 24.8056 23.5807 25 23.5807C25.6944 23.5807 26.2847 23.8238 26.7708 24.3099C27.2569 24.796 27.5 25.3863 27.5 26.0807C27.5 26.7752 27.2569 27.3655 26.7708 27.8516C26.2847 28.3377 25.6944 28.5807 25 28.5807C24.3056 28.5807 23.7153 28.3377 23.2292 27.8516C22.7431 27.3655 22.5 26.7752 22.5 26.0807C22.5 25.8029 22.5451 25.5356 22.6354 25.2786C22.7257 25.0217 22.8472 24.7891 23 24.5807L21.8125 23.1016C21.2431 23.421 20.6354 23.5807 19.9896 23.5807C19.3438 23.5807 18.7361 23.421 18.1667 23.1016L17 24.5807C17.1528 24.7891 17.2743 25.0217 17.3646 25.2786C17.4549 25.5356 17.5 25.8029 17.5 26.0807C17.5 26.7752 17.2569 27.3655 16.7708 27.8516C16.2847 28.3377 15.6944 28.5807 15 28.5807V28.5807M12.5 18.1641C12.7361 18.1641 12.934 18.0842 13.0938 17.9245C13.2535 17.7648 13.3333 17.5668 13.3333 17.3307C13.3333 17.0946 13.2535 16.8967 13.0938 16.737C12.934 16.5773 12.7361 16.4974 12.5 16.4974C12.2639 16.4974 12.066 16.5773 11.9062 16.737C11.7465 16.8967 11.6667 17.0946 11.6667 17.3307C11.6667 17.5668 11.7465 17.7648 11.9062 17.9245C12.066 18.0842 12.2639 18.1641 12.5 18.1641V18.1641M15 26.9141C15.2361 26.9141 15.434 26.8342 15.5938 26.6745C15.7535 26.5148 15.8333 26.3168 15.8333 26.0807C15.8333 25.8446 15.7535 25.6467 15.5938 25.487C15.434 25.3273 15.2361 25.2474 15 25.2474C14.7639 25.2474 14.566 25.3273 14.4062 25.487C14.2465 25.6467 14.1667 25.8446 14.1667 26.0807C14.1667 26.3168 14.2465 26.5148 14.4062 26.6745C14.566 26.8342 14.7639 26.9141 15 26.9141V26.9141M20 12.7474C20.2361 12.7474 20.434 12.6675 20.5938 12.5078C20.7535 12.3481 20.8333 12.1502 20.8333 11.9141C20.8333 11.678 20.7535 11.48 20.5938 11.3203C20.434 11.1606 20.2361 11.0807 20 11.0807C19.7639 11.0807 19.566 11.1606 19.4062 11.3203C19.2465 11.48 19.1667 11.678 19.1667 11.9141C19.1667 12.1502 19.2465 12.3481 19.4062 12.5078C19.566 12.6675 19.7639 12.7474 20 12.7474V12.7474M20 21.9141C20.5833 21.9141 21.0764 21.7127 21.4792 21.3099C21.8819 20.9071 22.0833 20.4141 22.0833 19.8307C22.0833 19.2474 21.8819 18.7543 21.4792 18.3516C21.0764 17.9488 20.5833 17.7474 20 17.7474C19.4167 17.7474 18.9236 17.9488 18.5208 18.3516C18.1181 18.7543 17.9167 19.2474 17.9167 19.8307C17.9167 20.4141 18.1181 20.9071 18.5208 21.3099C18.9236 21.7127 19.4167 21.9141 20 21.9141V21.9141M25 26.9141C25.2361 26.9141 25.434 26.8342 25.5938 26.6745C25.7535 26.5148 25.8333 26.3168 25.8333 26.0807C25.8333 25.8446 25.7535 25.6467 25.5938 25.487C25.434 25.3273 25.2361 25.2474 25 25.2474C24.7639 25.2474 24.566 25.3273 24.4062 25.487C24.2465 25.6467 24.1667 25.8446 24.1667 26.0807C24.1667 26.3168 24.2465 26.5148 24.4062 26.6745C24.566 26.8342 24.7639 26.9141 25 26.9141V26.9141M27.5 18.1641C27.7361 18.1641 27.934 18.0842 28.0938 17.9245C28.2535 17.7648 28.3333 17.5668 28.3333 17.3307C28.3333 17.0946 28.2535 16.8967 28.0938 16.737C27.934 16.5773 27.7361 16.4974 27.5 16.4974C27.2639 16.4974 27.066 16.5773 26.9062 16.737C26.7465 16.8967 26.6667 17.0946 26.6667 17.3307C26.6667 17.5668 26.7465 17.7648 26.9062 17.9245C27.066 18.0842 27.2639 18.1641 27.5 18.1641V18.1641M20 11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141V11.9141M12.5 17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307M20 19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307V19.8307M27.5 17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307V17.3307M15 26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807M25 26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807V26.0807" fill="white"/>
+</g>
+<defs>
+<filter id="filter0_d_636_1374" x="0" y="0" width="40" height="40" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feGaussianBlur stdDeviation="1"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_636_1374"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_636_1374" result="shape"/>
+</filter>
+</defs>
+</svg>
+        <span class="text-[20px] font-semibold text-[#181445]">SkillBridge</span>
+    </a>
+    <nav aria-label="Application steps" class="hidden min-w-0 flex-1 items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] font-semibold text-[#4A4455] lg:flex">
+      <a href="survey.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">1. Profile Survey</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">&rsaquo;</span>
+      <a href="cv-upload.html" aria-current="step" class="rounded-full bg-[#EFEBFF] px-4 py-2 text-[#630ED4]">2. CV Upload</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">&rsaquo;</span>
+      <a href="profile-review.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">3. Skill Extraction</a>
+      <span class="text-[#B7AEC5]" aria-hidden="true">&rsaquo;</span>
+      <a href="career-paths.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">4. Career Paths</a>
+    </nav>
+    <div class="flex shrink-0 items-center gap-3 sm:gap-4">
+      <a href="index.html" class="whitespace-nowrap text-[12px] font-semibold text-[#4A4455] hover:text-[#630ED4]">Save &amp; Exit</a>
+      <span class="h-7 w-px bg-[#E8E1F0]" aria-hidden="true"></span>
+      <a href="profile.html" aria-label="Account" class="flex h-9 w-9 items-center justify-center rounded-full bg-[#81798B] text-white hover:bg-[#630ED4]"><i class="ph ph-user text-lg" aria-hidden="true"></i></a>
+    </div>
+  </header>
 
-  <script src="js/main.js"></script>
+  <main class="mx-auto max-w-[1152px] px-5 pb-8 pt-8 sm:px-8 sm:pt-10">
+    <section aria-label="Onboarding progress" class="mb-8 flex flex-wrap items-center justify-between gap-5 rounded-xl border border-[#F0EAF6] bg-white px-5 py-4 shadow-[0_2px_12px_rgba(24,20,69,0.03)] sm:px-6">
+      <div class="flex min-w-[245px] items-center gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EEE8FF] text-lg text-[#630ED4]"><i class="ph ph-file-text" aria-hidden="true"></i></span>
+        <div><p class="text-[10px] font-bold uppercase tracking-[0.08em] text-[#630ED4]">Onboarding Pipeline • Step 2 of 4</p><p class="mt-0.5 text-sm font-semibold">Candidate Curriculum Vitae Dossier</p></div>
+      </div>
+      <nav aria-label="Onboarding progress steps" class="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto whitespace-nowrap text-[11px] font-semibold sm:gap-1.5 sm:text-xs">
+        <a href="survey.html" class="inline-flex items-center gap-1 rounded-full bg-[#F1EAFE] px-3 py-1.5 text-[#181445]"><i class="ph ph-check-circle text-base text-[#630ED4]" aria-hidden="true"></i><span>1. Profile Survey</span><span class="rounded-full bg-[#E2D6FF] px-1.5 text-[10px] text-[#630ED4]">Done</span></a>
+        <i class="ph ph-caret-right text-[#C4B9D2]" aria-hidden="true"></i>
+        <a href="cv-upload.html" aria-current="step" class="inline-flex items-center gap-1 rounded-full bg-[#630ED4] px-3 py-1.5 text-white"><i class="ph ph-circle text-[10px]" aria-hidden="true"></i><span>2. CV Upload</span><span class="rounded-full bg-white/20 px-1.5 text-[10px]">Active</span></a>
+        <i class="ph ph-caret-right text-[#C4B9D2]" aria-hidden="true"></i>
+        <a href="profile-review.html" class="inline-flex items-center gap-1 px-2 py-1.5 text-[#81798B]"><i class="ph ph-circle text-[10px] text-[#E4DDED]" aria-hidden="true"></i>3. Skill Extraction</a>
+        <i class="ph ph-caret-right text-[#C4B9D2]" aria-hidden="true"></i>
+        <a href="career-paths.html" class="inline-flex items-center gap-1 px-2 py-1.5 text-[#81798B]"><i class="ph ph-circle text-[10px] text-[#E4DDED]" aria-hidden="true"></i>4. Career Paths</a>
+      </nav>
+    </section>
+    <section class="mb-8">
+      <p class="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#EEE8FF] px-3 py-1 text-[11px] font-semibold text-[#630ED4]"><i class="ph ph-sparkle" aria-hidden="true"></i>Deep Curriculum Parser v2.4</p>
+      <h1 class="text-3xl font-extrabold leading-tight tracking-[-0.04em] sm:text-4xl">Upload your CV or Academic Dossier</h1>
+      <p class="mt-2 max-w-[690px] text-sm leading-6 text-[#625B6D] sm:text-base">Our AI parses unstructured Nigerian university coursework, final-year theses, capstone repositories, and SIWES internships into validated industry competencies.</p>
+    </section>
+
+    <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(370px,0.88fr)]">
+      <div class="space-y-5">
+        <section id="upload-zone" class="group relative flex min-h-[260px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#E9DDF8] bg-white px-6 py-8 text-center transition hover:border-[#8E50E8] hover:bg-[#FFFDFF] focus-within:ring-2 focus-within:ring-[#8E50E8]/30">
+          <div class="pointer-events-none absolute -bottom-10 left-[-8%] h-24 w-[116%] -rotate-3 rounded-[50%] border-t-[10px] border-[#F7F1FF]"></div>
+          <input id="cv-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="sr-only">
+          <span class="relative mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#EEE8FF] text-[38px] text-[#630ED4]"><i class="ph ph-file-arrow-up" aria-hidden="true"></i></span>
+          <h2 class="relative text-lg font-bold">Drag and drop your CV here, or <button id="browse-files" type="button" class="text-[#630ED4] hover:underline">browse files</button></h2>
+          <p class="relative mt-1 max-w-[440px] text-sm leading-5 text-[#625B6D]">Supports Nigerian institutional transcripts, SIWES logbooks, and multi-page professional resumes.</p>
+          <div class="relative mt-4 flex flex-wrap justify-center gap-2 text-[11px] font-semibold"><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-3 py-1"><i class="ph ph-file-pdf text-sm text-red-600" aria-hidden="true"></i>PDF (.pdf)</span><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-3 py-1"><i class="ph ph-file-doc text-sm text-[#630ED4]" aria-hidden="true"></i>DOCX (.docx)</span><span class="inline-flex items-center gap-1 rounded-full bg-[#F6F2FD] px-3 py-1 text-[#81798B]"><i class="ph ph-lock-key" aria-hidden="true"></i>Max file size: 5MB</span></div>
+          <p id="upload-error" role="alert" class="relative mt-3 hidden text-xs font-semibold text-red-700"></p>
+        </section>
+
+        <section id="uploaded-file-panel" class="hidden rounded-xl bg-white p-5 shadow-[0_3px_18px_rgba(24,20,69,0.06)] sm:p-6" aria-labelledby="uploaded-file-heading">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3"><span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#EEE8FF] text-2xl text-[#630ED4]"><i class="ph ph-file-text" aria-hidden="true"></i></span><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h2 id="uploaded-file-heading" class="break-all text-sm font-bold sm:text-base">Amaka_Okafor_UNILAG_Economics_2023_CV.pdf</h2><span class="rounded-full bg-[#F0E9FF] px-2 py-0.5 text-[10px] font-semibold text-[#630ED4]">2.4 MB</span></div><p class="mt-1 flex items-center gap-1.5 text-xs text-[#625B6D]"><i class="ph ph-circle text-[8px] text-[#8A39D4]" aria-hidden="true"></i>Processing with Nigerian Academic Entity Classifier • <span id="parse-percent">78%</span> complete</p></div></div>
+            <div class="flex items-center gap-3 text-xl"><button id="retry-parse" type="button" aria-label="Retry parsing" class="text-[#625B6D] hover:text-[#630ED4]"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i></button><button id="remove-file" type="button" aria-label="Remove uploaded file" class="text-red-600 hover:text-red-800"><i class="ph ph-x" aria-hidden="true"></i></button></div>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-[11px] font-semibold"><span>Neural Entity Extraction</span><span id="parse-progress-label" class="text-[#630ED4]">0% Complete</span></div>
+          <div class="mt-1 h-2 overflow-hidden rounded-full bg-[#EEE9FF]"><div id="parse-progress" class="h-full w-[78%] rounded-full bg-gradient-to-r from-[#630ED4] to-[#8E50E8]"></div></div>
+          <div class="mt-4 rounded-lg bg-[#F7F3FE] p-3.5 sm:p-4">
+            <p class="mb-2 text-[10px] font-bold uppercase tracking-wide text-[#81798B]">Live Parsing Pipeline</p>
+            <ul class="space-y-2 text-xs">
+              <li class="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2"><i class="ph ph-check-circle text-lg text-[#630ED4]" aria-hidden="true"></i><span class="min-w-0 flex-1">Extracting academic coursework tokens (Econometrics, Microeconomics)</span><span class="rounded-full bg-[#EEE8FF] px-2 py-0.5 text-[10px] font-semibold text-[#630ED4]">Done</span></li>
+              <li class="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2"><i class="ph ph-spinner-gap animate-spin text-lg text-[#9A55D8]" aria-hidden="true"></i><span class="min-w-0 flex-1 font-semibold">Scanning quantitative projects &amp; SQL capstone (Power BI, Python)</span><span class="rounded-full bg-[#F0E4FF] px-2 py-0.5 text-[10px] font-semibold text-[#8A39D4]">Processing</span></li>
+              <li class="flex items-center gap-2 rounded-lg bg-white/70 px-2.5 py-2 text-[#81798B]"><i class="ph ph-hourglass-medium text-lg" aria-hidden="true"></i><span class="min-w-0 flex-1">Normalizing against Lagos &amp; African tech stack taxonomies</span><span class="rounded-full bg-[#F1ECF8] px-2 py-0.5 text-[10px] font-semibold">Queued</span></li>
+            </ul>
+          </div>
+          <div class="mt-4"><p class="mb-2 text-[10px] font-bold uppercase tracking-wide text-[#81798B]">Identified Metadata Tokens</p><div class="flex flex-wrap gap-1.5 text-[10px] font-semibold"><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-2.5 py-1"><i class="ph ph-graduation-cap text-[#630ED4]" aria-hidden="true"></i>University of Lagos (UNILAG)</span><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-2.5 py-1"><i class="ph ph-medal text-[#630ED4]" aria-hidden="true"></i>B.Sc. Economics (First Class Division)</span><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-2.5 py-1"><i class="ph ph-code text-[#630ED4]" aria-hidden="true"></i>Stata • SQL • Python</span><span class="inline-flex items-center gap-1 rounded-full bg-[#F0E9FF] px-2.5 py-1"><i class="ph ph-map-pin text-[#630ED4]" aria-hidden="true"></i>Victoria Island, Lagos</span></div></div>
+        </section>
+      </div>
+
+      <div class="space-y-5">
+        <section class="rounded-xl bg-white p-5 shadow-[0_3px_18px_rgba(24,20,69,0.06)] sm:p-6" aria-labelledby="diagnostics-title">
+          <div class="flex items-center justify-between gap-3"><h2 id="diagnostics-title" class="flex items-center gap-2 text-base font-bold"><i class="ph ph-seal-check text-xl text-[#630ED4]" aria-hidden="true"></i>Parser Diagnostic Engine</h2><span class="rounded-full bg-[#F0E9FF] px-2.5 py-1 text-[10px] font-semibold text-[#625B6D]">Spec E-01 • E-03</span></div>
+          <p class="mt-3 text-xs leading-5 text-[#625B6D]">Live edge validation detects unsupported encodings, oversize files, or scan degradation before tokenization runs.</p>
+          <div class="mt-4 space-y-2">
+            <article class="rounded-xl bg-[#F6F1FD] p-4"><div class="flex gap-2.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFE1DE] text-lg text-red-700"><i class="ph ph-file-x" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><div class="flex flex-wrap justify-between gap-1 text-[10px] font-bold uppercase tracking-wide text-red-700"><span>Protocol E-01: Format Exception</span><span class="text-[#81798B]">Rejected</span></div><h3 class="mt-1 text-sm font-semibold">Invalid File Type</h3><p class="mt-1 text-[11px] leading-[17px] text-[#625B6D]">Only <strong>PDF</strong> and <strong>DOCX</strong> documents are accepted. Plain text (.txt), markdown, and image snapshots (.png, .jpg) are unsupported for structured semantic indexing.</p></div></div></article>
+            <article class="rounded-xl bg-[#FFF0EF] p-4"><div class="flex gap-2.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-700 text-lg text-white"><i class="ph ph-warning" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><div class="flex flex-wrap justify-between gap-1 text-[10px] font-bold uppercase tracking-wide text-red-700"><span>Protocol E-02: Payload Limit</span><span>8.2 MB / 5.0 MB</span></div><h3 class="mt-1 text-sm font-semibold">File Exceeds 5MB Threshold</h3><p class="mt-1 text-[11px] leading-[17px] text-[#625B6D]">Your file size of 8.2MB exceeds the platform limit. High-res project appendices should be compressed or linked via web portfolio.</p><a href="#compress" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#630ED4]"><i class="ph ph-sliders-horizontal" aria-hidden="true"></i>Launch CV Compressor Tool</a></div></div></article>
+            <article class="rounded-xl bg-[#F0EAFF] p-4"><div class="flex gap-2.5"><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E7D7FF] text-lg text-[#630ED4]"><i class="ph ph-scan" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><div class="flex flex-wrap justify-between gap-1 text-[10px] font-bold uppercase tracking-wide text-[#8A39D4]"><span>Protocol E-03: OCR Degraded</span><span class="rounded bg-[#E6DDF4] px-1.5 text-[#625B6D]">Low Fidelity</span></div><h3 class="mt-1 text-sm font-semibold">Scanned or Photocopied Document</h3><p class="mt-1 text-[11px] leading-[17px] text-[#625B6D]">Scanned image detected with no embedded text layer. Coursework and grades may parse with limited precision.</p><div class="mt-2 flex flex-wrap gap-1"><button id="deep-ocr-button" type="button" class="rounded bg-[#630ED4] px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-[#5409B5]">Proceed with Deep OCR</button><button id="text-native-pdf-button" type="button" class="rounded bg-white px-2.5 py-1 text-[10px] font-semibold text-[#4A4455] hover:bg-[#F9F6FF]">Upload Text-Native PDF</button></div><p id="diagnostic-action-status" class="mt-2 hidden text-[10px] font-semibold text-[#630ED4]" role="status"></p></div></div></article>
+          </div>
+        </section>
+
+        <section class="rounded-xl bg-white p-5 shadow-[0_3px_18px_rgba(24,20,69,0.06)] sm:p-6" aria-labelledby="privacy-title">
+          <div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEE8FF] text-xl text-[#630ED4]"><i class="ph ph-shield-check" aria-hidden="true"></i></span><div><h2 id="privacy-title" class="font-bold">Nigeria Data Protection Regulation</h2><p class="text-xs text-[#625B6D]">NDPR &amp; Tier-4 Sovereign Data Sovereignty</p></div></div>
+          <div class="mt-4 grid gap-2 sm:grid-cols-2"><div class="rounded-lg bg-[#F7F3FE] p-3"><p class="text-xs font-bold text-[#630ED4]"><i class="ph ph-lock-key" aria-hidden="true"></i> 256-Bit AES</p><p class="mt-1 text-[11px] leading-4 text-[#625B6D]">At-rest and in-transit end-to-end cryptographic protection.</p></div><div class="rounded-lg bg-[#F7F3FE] p-3"><p class="text-xs font-bold text-[#630ED4]"><i class="ph ph-eye-slash" aria-hidden="true"></i> Strict Redaction</p><p class="mt-1 text-[11px] leading-4 text-[#625B6D]">NIN, residential address &amp; DOB automatically masked.</p></div></div>
+          <div class="mt-4 flex flex-wrap justify-between gap-2 text-[10px] font-semibold"><span class="text-[#81798B]">Candidate Confidentiality Guarantee</span><span class="text-[#630ED4]"><i class="ph ph-shield-check" aria-hidden="true"></i> Audit Passed 2025</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <section aria-label="Continue onboarding" class="mx-auto mb-8 flex min-h-[100px] max-w-[1152px] flex-wrap items-center justify-between gap-4 rounded-xl bg-white px-5 py-4 shadow-[0_3px_18px_rgba(24,20,69,0.06)] sm:px-8">
+      <a href="survey.html" class="inline-flex items-center gap-2 rounded-lg bg-[#F3EEFC] px-4 py-2.5 text-xs font-semibold text-[#181445] hover:bg-[#EAE1F8]"><i class="ph ph-arrow-left" aria-hidden="true"></i>Back to Profile Survey</a>
+      <p id="upload-status" aria-live="polite" class="flex flex-wrap items-center gap-3 text-[13px] text-[#625B6D]"><span class="h-3 w-3 rounded-full bg-[#81798B]"></span><span>Upload a CV or academic dossier to continue</span></p>
+      <a id="continue-button" href="profile-review.html" aria-disabled="true" class="pointer-events-none inline-flex items-center justify-center gap-2 rounded-xl bg-[#630ED4] px-6 py-3.5 text-[13px] font-bold text-white opacity-50 shadow-[0_4px_14px_rgba(99,14,212,0.25)] sm:px-9">Proceed to Skill Extraction<i class="ph ph-arrow-right text-base" aria-hidden="true"></i></a>
+  </section>
+  <footer class="bg-[#F5F0FB]">
+    <div class="mx-auto flex max-w-[1152px] flex-wrap items-center justify-between gap-3 px-5 py-4 text-[10px] text-[#625B6D] sm:px-8">
+      <p>© 2025 SkillBridge Inc. Precision Candidate Onboarding</p>
+      <nav aria-label="Footer links" class="flex items-center gap-5 font-semibold"><a href="#assistance" class="hover:text-[#630ED4]">Assistance &amp; FAQ</a><a href="#privacy" class="hover:text-[#630ED4]">Data Privacy</a></nav>
+    </div>
+  </footer>
+  <dialog id="compress-dialog" class="w-[min(92vw,440px)] rounded-2xl p-0 shadow-2xl backdrop:bg-[#181445]/30">
+    <div class="p-6"><div class="flex items-start justify-between gap-4"><div><h2 class="text-lg font-bold">Reduce your CV file size</h2><p class="mt-2 text-sm leading-5 text-[#625B6D]">Export or print your document as a compressed PDF, remove full-resolution images, then choose the smaller file here. The upload limit is 5 MB.</p></div><button id="close-compress-dialog" type="button" aria-label="Close" class="text-xl text-[#625B6D]"><i class="ph ph-x" aria-hidden="true"></i></button></div><button id="choose-compressed-file" type="button" class="mt-5 w-full rounded-lg bg-[#630ED4] px-4 py-3 text-sm font-semibold text-white">Choose compressed file</button></div>
+  </dialog>
+  <script src="js/cv-upload.js" defer></script>
+  <script src="js/site-interactions.js" defer></script>
 </body>
 </html>
