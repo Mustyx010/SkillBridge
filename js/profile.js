@@ -14,7 +14,23 @@
   };
   const name = survey.fullName || user.name || 'Candidate';
   const institution = survey.institution || 'Add your institution';
-  const degree = [survey.degree || 'B.Sc', survey.field, survey.classification].filter(Boolean).join(' ');
+  const formatDegree = ({ degree: qualification, field, classification }) => {
+    const rawQualification = String(qualification || 'B.Sc').trim();
+    const normalizedQualification = rawQualification.match(/B\.Sc|B\.Eng|B\.A|HND|M\.Sc/i)?.[0]
+      || rawQualification.split(/[/(]/)[0].trim()
+      || 'B.Sc';
+    const normalizedField = String(field || '').trim();
+    const normalizedClassification = String(classification || '').split('/')[0].trim();
+
+    // Older locally saved profiles may contain a degree that was already
+    // combined with its field and classification. Build one canonical label
+    // from its original survey fields so it cannot grow on each edit/reload.
+    if (normalizedField || normalizedClassification) {
+      return `${normalizedQualification}${normalizedField ? ` ${normalizedField}` : ''}${normalizedClassification ? ` (${normalizedClassification})` : ''}`;
+    }
+    return rawQualification;
+  };
+  const degree = formatDegree(survey);
   const location = survey.location || 'Add your location';
   const role = localStorage.getItem('skillbridgeSelectedCareer') || careers[survey.track] || 'Junior Fintech Data Analyst';
   const availabilityMap = { immediate: ['Immediate Placement', 'NYSC status can be added in your survey profile.'], serving: ['Currently Serving', 'Availability details can be updated in your survey profile.'], 'final-year': ['Final Year Student', 'Available after exams'] };
@@ -102,7 +118,15 @@
     const nextDegree = $('#edit-degree').value.trim();
     const nextLocation = $('#edit-location').value.trim();
     const nextUser = { ...user, name: nextName };
-    const nextSurvey = { ...survey, fullName: nextName, institution: nextInstitution, degree: nextDegree, location: nextLocation };
+    const nextSurvey = {
+      ...survey,
+      fullName: nextName,
+      institution: nextInstitution,
+      degree: nextDegree,
+      field: '',
+      classification: '',
+      location: nextLocation,
+    };
     localStorage.setItem('skillbridge_user', JSON.stringify(nextUser));
     localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: nextSurvey }));
     close('edit-profile-dialog'); window.location.reload();
