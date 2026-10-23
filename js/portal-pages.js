@@ -10,7 +10,7 @@ const readList = (key) => {
 // Candidate dashboard: reflect locally saved onboarding data and provide
 // working preview interactions for the benchmark tools shown on the page.
 const dashboard = document.getElementById('dashboard-search-form');
-if (dashboard) {
+if (dashboard && document.getElementById('welcome-name')) {
   const readObject = (key) => {
     try { return JSON.parse(localStorage.getItem(key) || '{}'); }
     catch { return {}; }
