@@ -2,7 +2,7 @@
 const infoDialog = document.createElement('dialog');
 infoDialog.id = 'site-info-dialog';
 infoDialog.className = 'w-[min(92vw,440px)] rounded-2xl p-0 text-[#181445] shadow-2xl backdrop:bg-[#181445]/30';
-infoDialog.innerHTML = '<div class="p-6"><div class="flex items-start justify-between gap-4"><div><h2 id="site-info-title" class="text-lg font-bold"></h2><p id="site-info-message" class="mt-2 text-sm leading-6 text-[#625B6D]"></p></div><button type="button" aria-label="Close" class="site-info-close rounded-lg px-2 py-1 text-xl text-[#625B6D] hover:bg-[#F0E9FF]">×</button></div><button type="button" class="site-info-close mt-5 w-full rounded-lg bg-[#630ED4] px-4 py-2.5 text-sm font-semibold text-white">Close</button></div>';
+infoDialog.innerHTML = '<div class="p-6"><div class="flex items-start justify-between gap-4"><div><h2 id="site-info-title" class="text-lg font-bold"></h2><p id="site-info-message" class="mt-2 text-sm leading-6 text-[#625B6D]"></p></div><button type="button" aria-label="Close" class="site-info-close rounded-lg px-2 py-1 text-xl text-[#625B6D] hover:bg-[#F0E9FF]">×</button></div><button type="button" class="site-info-close mt-5 w-full rounded-lg bg-[#731F94] px-4 py-2.5 text-sm font-semibold text-white">Close</button></div>';
 document.body.append(infoDialog);
 
 const infoCopy = (label) => {

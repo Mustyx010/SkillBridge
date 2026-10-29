@@ -133,8 +133,8 @@ if (dashboard && document.getElementById('welcome-name')) {
       const done = setup[item.dataset.setup];
       const icon = item.querySelector('.setup-icon');
       if (done) {
-        icon.className = 'setup-icon ph ph-check-circle text-base text-[#630ED4]';
-        item.classList.add('text-[#81798B]'); item.classList.remove('bg-[#F6F0FF]', 'font-semibold', 'text-[#630ED4]');
+        icon.className = 'setup-icon ph ph-check-circle text-base text-[#731F94]';
+        item.classList.add('text-[#81798B]'); item.classList.remove('bg-[#F6F0FF]', 'font-semibold', 'text-[#731F94]');
       } else {
         icon.className = `setup-icon ph ${item.dataset.setup === 'diagnostic' ? 'ph-circle' : 'ph-circle'} text-base text-[#C8BED5]`;
         item.classList.remove('text-[#81798B]');
@@ -147,7 +147,7 @@ if (dashboard && document.getElementById('welcome-name')) {
     const validationCallout = document.getElementById('validate-skills-callout');
     extractedCards.classList.toggle('hidden', !cvPresent);
     if (!cvPresent) {
-      validationCallout.innerHTML = '<p class="text-[9px] text-[#4A4455]"><i class="ph ph-file-arrow-up text-[#630ED4]"></i> Upload your CV to populate your extracted strengths, tools, and track gaps.</p><a href="cv-upload.html" class="shrink-0 text-[10px] font-bold text-[#630ED4]">Upload CV <i class="ph ph-arrow-right"></i></a>';
+      validationCallout.innerHTML = '<p class="text-[9px] text-[#4A4455]"><i class="ph ph-file-arrow-up text-[#731F94]"></i> Upload your CV to populate your extracted strengths, tools, and track gaps.</p><a href="cv-upload.html" class="shrink-0 text-[10px] font-bold text-[#731F94]">Upload CV <i class="ph ph-arrow-right"></i></a>';
     }
     if (setup.diagnostic) {
       document.querySelector('[data-setup="diagnostic"] button').textContent = 'Diagnostic completed';
@@ -159,7 +159,7 @@ if (dashboard && document.getElementById('welcome-name')) {
       document.querySelectorAll('.role-apply').forEach((button) => {
         button.innerHTML = '<i class="ph ph-arrow-up-right"></i> View opportunity';
         button.classList.remove('bg-[#EEE8FF]', 'text-[#81798B]');
-        button.classList.add('bg-[#630ED4]', 'text-white');
+        button.classList.add('bg-[#731F94]', 'text-white');
       });
     }
   };
@@ -167,7 +167,7 @@ if (dashboard && document.getElementById('welcome-name')) {
     document.getElementById('readiness-score').textContent = `${percent}%`;
     const gauge = document.getElementById('readiness-score').parentElement.parentElement;
     const angle = percent * 3.6;
-    gauge.style.background = `conic-gradient(#7D39E8 0deg ${angle}deg,#EEE8FF ${angle}deg 360deg)`;
+    gauge.style.background = `conic-gradient(#BF39E8 0deg ${angle}deg,#FAE8FF ${angle}deg 360deg)`;
   };
   diagnosticForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -280,7 +280,7 @@ if (opportunityForm) {
       const saved = savedRoles.has(role);
       button.textContent = saved ? 'Saved' : 'Save role';
       button.setAttribute('aria-pressed', String(saved));
-      button.classList.toggle('bg-[#630ED4]', saved);
+      button.classList.toggle('bg-[#731F94]', saved);
       button.classList.toggle('text-white', saved);
     });
   };
@@ -332,7 +332,7 @@ if (resourceList) {
       document.querySelectorAll('.resource-filter').forEach((item) => {
         const active = item === button;
         item.setAttribute('aria-pressed', String(active));
-        item.classList.toggle('bg-[#630ED4]', active);
+        item.classList.toggle('bg-[#731F94]', active);
         item.classList.toggle('text-white', active);
         item.classList.toggle('bg-white', !active);
       });

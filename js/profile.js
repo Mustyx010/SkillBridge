@@ -54,7 +54,7 @@
   const fill = $('#salary-fill');
   if (fill) { const start = Math.max(0, Math.min(100, ((low - 150000) / 350000) * 100)); const width = Math.max(3, Math.min(100 - start, ((high - low) / 350000) * 100)); fill.style.marginLeft = `${start}%`; fill.style.width = `${width}%`; }
   const modes = { hybrid: 'Hybrid Lagos (Island / Mainland)', remote: 'Fully Remote', onsite: 'On-Site Victoria Island / Ikoyi' };
-  if (survey.workMode && $('#work-model-chips')) $('#work-model-chips').innerHTML = `<span class="inline-flex items-center gap-1 rounded-full bg-[#EEE8FF] px-3 py-1.5 text-[11px]"><i class="ph ph-buildings text-[#630ED4]"></i>${modes[survey.workMode] || survey.workMode}</span>`;
+  if (survey.workMode && $('#work-model-chips')) $('#work-model-chips').innerHTML = `<span class="inline-flex items-center gap-1 rounded-full bg-[#EEE8FF] px-3 py-1.5 text-[11px]"><i class="ph ph-buildings text-[#731F94]"></i>${modes[survey.workMode] || survey.workMode}</span>`;
 
   const active = localStorage.getItem('skillbridge_candidate_active') !== 'false';
   const statusButton = $('#candidate-status-toggle');
@@ -64,7 +64,7 @@
     const enabled = statusButton.getAttribute('aria-pressed') === 'true';
     setText('candidate-status-label', enabled ? 'Active Candidate • Open to Hybrid & Remote Offers' : 'Not currently accepting offers');
     const knob = statusButton.querySelector('span');
-    if (knob) knob.className = `relative h-5 w-9 rounded-full ${enabled ? 'bg-[#630ED4]' : 'bg-[#B8B1C3]'}`;
+    if (knob) knob.className = `relative h-5 w-9 rounded-full ${enabled ? 'bg-[#731F94]' : 'bg-[#B8B1C3]'}`;
     const dot = knob?.querySelector('span');
     if (dot) dot.className = `absolute top-0.5 h-4 w-4 rounded-full bg-white shadow ${enabled ? 'right-0.5' : 'left-0.5'}`;
   };

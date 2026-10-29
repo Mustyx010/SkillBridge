@@ -106,8 +106,8 @@ const showSearchResults = () => {
       option.textContent = title;
       option.addEventListener('click', () => {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.classList.add('ring-2', 'ring-[#B98AFA]');
-        window.setTimeout(() => element.classList.remove('ring-2', 'ring-[#B98AFA]'), 1400);
+        element.classList.add('ring-2', 'ring-[#E08AFA]');
+        window.setTimeout(() => element.classList.remove('ring-2', 'ring-[#E08AFA]'), 1400);
         searchResults.classList.add('hidden');
         searchInput.value = '';
       });
@@ -139,7 +139,7 @@ const updateSavedRole = (button) => {
   button.setAttribute('aria-pressed', String(saved));
   button.setAttribute('aria-label', `${saved ? 'Remove saved' : 'Save'} ${button.getAttribute('aria-label').replace(/^(Save|Remove saved) /, '')}`);
   button.innerHTML = `<i class="ph ${saved ? 'ph-bookmark-simple-fill' : 'ph-bookmark-simple'}"></i>`;
-  button.classList.toggle('text-[#630ED4]', saved);
+  button.classList.toggle('text-[#731F94]', saved);
 };
 
 document.querySelectorAll('[data-save-role]').forEach((button) => {
@@ -214,7 +214,7 @@ diagnosticForm.addEventListener('submit', (event) => {
   diagnosticResult.classList.remove('hidden');
   readinessScore.textContent = `${readiness}%`;
   readinessScore.parentElement.parentElement.style.background =
-    `conic-gradient(#7D39E8 0deg ${readiness * 3.6}deg,#E9DDFB ${readiness * 3.6}deg 360deg)`;
+    `conic-gradient(#BF39E8 0deg ${readiness * 3.6}deg,#F4DDFB ${readiness * 3.6}deg 360deg)`;
 });
 diagnosticDialog.addEventListener('click', (event) => {
   if (event.target === diagnosticDialog) diagnosticDialog.close();

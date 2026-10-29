@@ -53,7 +53,7 @@ if (signupForm) {
     return [value.length >= 8, /[A-Z]/.test(value), /\d/.test(value), /[^A-Za-z0-9]/.test(value)].filter(Boolean).length;
   }
 
-  const colors = ['#E3DFFF', '#BA1A1A', '#E8A317', '#7B38EC', '#630ED4'];
+  const colors = ['#E3DFFF', '#BA1A1A', '#E8A317', '#C238EC', '#731F94'];
   f.password.addEventListener('input', () => {
     const score = strength(f.password.value);
     bars.forEach((bar, i) => {
@@ -84,7 +84,7 @@ if (signupForm) {
   });
 
   document.querySelectorAll('button').forEach((button) => {
-    const provider = button.textContent.match(/Continue with (Google|LinkedIn)/)?.[1];
+    const provider = button.textContent.match(/Continue with (Google)/)?.[1];
     if (!provider) return;
     button.addEventListener('click', () => {
       let status = document.getElementById('signup-provider-status');
@@ -100,12 +100,7 @@ if (signupForm) {
     });
   });
 
-  // Keep only digits in the phone field and drop a leading 0
-  f.phone.addEventListener('input', () => {
-    f.phone.value = f.phone.value.replace(/\D/g, '').replace(/^0/, '').slice(0, 10);
-  });
-
-  [f.name, f.email, f.phone, f.password].forEach((input) => {
+  [f.name, f.email, f.password].forEach((input) => {
     input.addEventListener('input', () => showError(input, ''));
   });
   f.terms.addEventListener('change', () => showError(f.terms, ''));
@@ -114,11 +109,9 @@ if (signupForm) {
     e.preventDefault();
     const name = f.name.value.trim();
     const email = f.email.value.trim();
-    const phone = f.phone.value.trim();
     const errors = [
       [f.name, name.split(/\s+/).length >= 2 ? '' : 'Enter your full legal name (first and last).'],
       [f.email, isEmail(email) ? '' : 'Enter a valid email address.'],
-      [f.phone, /^[789]\d{9}$/.test(phone) ? '' : 'Enter a valid 10-digit Nigerian number, e.g. 803 123 4567.'],
       [f.password, strength(f.password.value) === 4 ? '' : 'Use 8+ characters with an uppercase letter, a number and a symbol.'],
       [f.terms, f.terms.checked ? '' : 'Please accept the terms to continue.'],
     ];
@@ -129,7 +122,7 @@ if (signupForm) {
       return;
     }
 
-    localStorage.setItem('skillbridge_user', JSON.stringify({ name, email, phone: `+234${phone}` }));
+    localStorage.setItem('skillbridge_user', JSON.stringify({ name, email }));
     window.location.href = 'survey.html';
   });
 }

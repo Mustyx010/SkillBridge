@@ -23,7 +23,7 @@ function setContinueState(ready) {
   continueButton.classList.toggle('pointer-events-none', !ready);
   continueButton.classList.toggle('opacity-50', !ready);
   if (ready) {
-    uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#630ED4]"></span><span class="font-semibold text-[#181445]">File parsed &amp; verified</span><span class="h-2 w-2 rounded-full bg-[#C8BED5]" aria-hidden="true"></span><span>Estimated extraction time: 4 seconds</span>';
+    uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#731F94]"></span><span class="font-semibold text-[#181445]">File parsed &amp; verified</span><span class="h-2 w-2 rounded-full bg-[#C8BED5]" aria-hidden="true"></span><span>Estimated extraction time: 4 seconds</span>';
   } else {
     uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#81798B]"></span><span>Upload a CV or academic dossier to continue</span>';
   }
@@ -85,18 +85,18 @@ fileInput.addEventListener('change', () => showFile(fileInput.files[0]));
 
 uploadZone.addEventListener('dragover', (event) => {
   event.preventDefault();
-  uploadZone.classList.add('border-[#8E50E8]', 'bg-[#FFFDFF]');
+  uploadZone.classList.add('border-[#C550E8]', 'bg-[#FFFDFF]');
 });
 
 uploadZone.addEventListener('dragleave', (event) => {
   if (!uploadZone.contains(event.relatedTarget)) {
-    uploadZone.classList.remove('border-[#8E50E8]', 'bg-[#FFFDFF]');
+    uploadZone.classList.remove('border-[#C550E8]', 'bg-[#FFFDFF]');
   }
 });
 
 uploadZone.addEventListener('drop', (event) => {
   event.preventDefault();
-  uploadZone.classList.remove('border-[#8E50E8]', 'bg-[#FFFDFF]');
+  uploadZone.classList.remove('border-[#C550E8]', 'bg-[#FFFDFF]');
   const [file] = event.dataTransfer.files;
   if (!file) return;
   const transfer = new DataTransfer();

@@ -57,15 +57,15 @@ const selectCard = (card) => {
     const selected = item === card;
     item.setAttribute('aria-selected', String(selected));
     item.classList.toggle('border-l-4', selected);
-    item.classList.toggle('border-[#630ED4]', selected);
+    item.classList.toggle('border-[#731F94]', selected);
     item.classList.toggle('shadow-[0_3px_14px_rgba(24,20,69,0.08)]', selected);
   });
   detail.company.textContent = card.dataset.company;
   detail.role.textContent = card.dataset.role;
   detail.recruitment.textContent = card.dataset.recruitment;
   detail.closing.textContent = card.dataset.close;
-  detail.team.innerHTML = `<i class="ph ph-users-three text-[#630ED4]"></i>${card.dataset.team}`;
-  detail.location.innerHTML = `<i class="ph ph-buildings text-[#630ED4]"></i>${card.dataset.work}`;
+  detail.team.innerHTML = `<i class="ph ph-users-three text-[#731F94]"></i>${card.dataset.team}`;
+  detail.location.innerHTML = `<i class="ph ph-buildings text-[#731F94]"></i>${card.dataset.work}`;
   detail.salary.textContent = card.dataset.salary;
   detail.fit.textContent = `${card.dataset.fit}%`;
   detail.rationale.textContent = card.dataset.rationale;
@@ -85,7 +85,7 @@ const updateSaveState = () => {
   detailSave.innerHTML = saved ? '<i class="ph ph-bookmark-simple-fill"></i>' : '<i class="ph ph-bookmark-simple"></i>';
   footerSave.setAttribute('aria-pressed', String(saved));
   footerSave.innerHTML = saved ? '<i class="ph ph-bookmark-simple-fill"></i>Saved for Later' : '<i class="ph ph-bookmark-simple"></i>Save for Later';
-  footerSave.classList.toggle('bg-[#630ED4]', saved);
+  footerSave.classList.toggle('bg-[#731F94]', saved);
   footerSave.classList.toggle('text-white', saved);
   document.getElementById('saved-count').textContent = String(savedRoles.size);
 };
@@ -132,7 +132,7 @@ document.querySelectorAll('[data-location-chip]').forEach((button) => {
     document.querySelectorAll('[data-location-chip]').forEach((item) => {
       const active = item === button;
       item.setAttribute('aria-pressed', String(active));
-      item.classList.toggle('bg-[#7D39E8]', active);
+      item.classList.toggle('bg-[#BF39E8]', active);
       item.classList.toggle('text-white', active);
       item.classList.toggle('bg-[#F5F0FD]', !active);
     });

@@ -75,7 +75,7 @@ if (signinForm) {
 // OAuth and email-reset services need provider credentials and a backend. Give
 // clear feedback so these controls do not appear to do nothing in this demo.
 document.querySelectorAll('button').forEach((button) => {
-  const provider = button.textContent.match(/Continue with (Google|LinkedIn)/)?.[1];
+  const provider = button.textContent.match(/Continue with (Google)/)?.[1];
   if (!provider) return;
   button.addEventListener('click', () => {
     let status = document.getElementById('signin-provider-status');

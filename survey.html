@@ -11,8 +11,8 @@
   <link href="./src/output.css" rel="stylesheet">
   <style>
     .range-thumb { pointer-events: none; -webkit-appearance: none; appearance: none; background: transparent; }
-    .range-thumb::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; height: 18px; width: 18px; border-radius: 9999px; background: #fff; border: 3px solid #630ED4; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
-    .range-thumb::-moz-range-thumb { pointer-events: auto; height: 12px; width: 12px; border-radius: 9999px; background: #fff; border: 3px solid #630ED4; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
+    .range-thumb::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; height: 18px; width: 18px; border-radius: 9999px; background: #fff; border: 3px solid #731F94; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
+    .range-thumb::-moz-range-thumb { pointer-events: auto; height: 12px; width: 12px; border-radius: 9999px; background: #fff; border: 3px solid #731F94; cursor: grab; box-shadow: 0 1px 4px rgba(24,20,69,.25); }
     .range-thumb::-webkit-slider-runnable-track { background: transparent; }
     .range-thumb::-moz-range-track { background: transparent; }
   </style>
@@ -21,7 +21,7 @@
   <div class="pointer-events-none absolute -left-24 top-16 h-80 w-80 rounded-full bg-[#EDE1FB] blur-3xl"></div>
   <div class="pointer-events-none absolute -right-24 top-[640px] h-96 w-96 rounded-full bg-[#F0DFFF] blur-3xl"></div>
 
-  <header class="relative mx-auto flex h-[76px] max-w-[1280px] items-center justify-between gap-4 border-b border-[#F0EAF6] bg-white/70 px-5 sm:px-8 lg:px-12">
+  <header class="relative mx-auto flex h-[76px] max-w-[1280px] items-center justify-between gap-4 border-b border-[#F3EAF6] bg-white/70 px-5 sm:px-8 lg:px-12">
     <a href="index.html" class="flex items-center gap-3">
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_d_636_1374)">
@@ -44,18 +44,16 @@
       <span class="text-[20px] font-semibold text-[#181445]">SkillBridge</span>
     </a>
     <nav aria-label="Application steps" class="hidden min-w-0 flex-1 items-center justify-center gap-2 overflow-x-auto whitespace-nowrap text-[12px] font-semibold text-[#4A4455] lg:flex">
-      <a href="survey.html" aria-current="step" class="rounded-full bg-[#EFEBFF] px-4 py-2 text-[#630ED4]">1. Profile Survey</a>
+      <a href="survey.html" aria-current="step" class="rounded-full bg-[#EFEBFF] px-4 py-2 text-[#731F94]">1. Profile Survey</a>
       <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
-      <a href="cv-upload.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">2. CV Upload</a>
+      <a href="cv-upload.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#731F94]">2. CV Upload</a>
       <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
-      <a href="profile-review.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">3. Skill Extraction</a>
-      <span class="text-[#B7AEC5]" aria-hidden="true">›</span>
-      <a href="career-paths.html" class="rounded-full px-3 py-2 hover:bg-[#F6F2FD] hover:text-[#630ED4]">4. Career Paths</a>
+      <a href="career-paths.html" class="rounded-full px-3 py-2 hover:bg-[#FAF2FD] hover:text-[#731F94]">3. Career Paths</a>
     </nav>
     <div class="flex shrink-0 items-center gap-3 sm:gap-4">
-      <a href="index.html" class="whitespace-nowrap text-[12px] font-semibold text-[#4A4455] hover:text-[#630ED4]">Save &amp; Exit</a>
+      <a href="index.html" class="whitespace-nowrap text-[12px] font-semibold text-[#4A4455] hover:text-[#731F94]">Save &amp; Exit</a>
       <span class="h-7 w-px bg-[#E8E1F0]" aria-hidden="true"></span>
-      <a href="profile.html" aria-label="Account" class="flex h-9 w-9 items-center justify-center rounded-full bg-[#81798B] text-white hover:bg-[#630ED4]"><i class="ph ph-user text-lg" aria-hidden="true"></i></a>
+      <a href="profile.html" aria-label="Account" class="flex h-9 w-9 items-center justify-center rounded-full bg-[#81798B] text-white hover:bg-[#731F94]"><i class="ph ph-user text-lg" aria-hidden="true"></i></a>
     </div>
   </header>
 
@@ -65,106 +63,85 @@
       <section class="rounded-2xl bg-white p-4 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div class="flex items-center gap-2">
-            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#630ED4] text-[12px] font-bold text-white">1</span>
+            <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#731F94] text-[12px] font-bold text-white">1</span>
             <h2 class="text-[16px] font-semibold text-[#181445]">Step 1: Profile Survey</h2>
-            <span class="rounded-md bg-[#EFEBFF] px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#630ED4]">Active</span>
+            <span class="rounded-md bg-[#EFEBFF] px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#731F94]">Active</span>
           </div>
           <ol class="flex flex-wrap items-center gap-1 text-[11px] font-semibold tracking-[0.04em] text-[#7B7487]">
-            <li><a href="survey.html" aria-current="step" class="text-[#630ED4] hover:underline">Survey</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
-            <li><a href="cv-upload.html" class="hover:text-[#630ED4] hover:underline">CV Upload</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
-            <li><a href="profile-review.html" class="hover:text-[#630ED4] hover:underline">Extraction</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
-            <li><a href="career-paths.html" class="hover:text-[#630ED4] hover:underline">Career Match</a></li>
+            <li><a href="survey.html" aria-current="step" class="text-[#731F94] hover:underline">Survey</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="cv-upload.html" class="hover:text-[#731F94] hover:underline">CV Upload</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="profile-review.html" class="hover:text-[#731F94] hover:underline">Extraction</a></li><li aria-hidden="true"><i class="ph ph-caret-right" aria-hidden="true"></i></li>
+            <li><a href="career-paths.html" class="hover:text-[#731F94] hover:underline">Career Match</a></li>
           </ol>
         </div>
-        <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-[#E9E5FF]"><div class="h-full w-1/4 rounded-full bg-gradient-to-r from-[#630ED4] to-[#C17BFF]"></div></div>
+        <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-[#E9E5FF]"><div class="h-full w-1/4 rounded-full bg-gradient-to-r from-[#731F94] to-[#C17BFF]"></div></div>
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
-        <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#630ED4]"><svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>Candidate Calibration Pipeline</p>
+        <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.05em] text-[#731F94]"><svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg>Candidate Calibration Pipeline</p>
         <h1 class="mt-[5px] max-w-[560px] text-[28px] font-extrabold leading-[1.25] tracking-[-0.03em] text-[#181445] sm:text-[32px] sm:leading-[40px]">Tell us about your background &amp; ambitions</h1>
         <p class="mt-[3px] max-w-[610px] text-[14px] leading-[22px] text-[#4A4455]">We calibrate your credentials directly against 140+ active Lagos fintech, payment gateway, and high-growth venture hiring standards.</p>
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
         <div class="flex items-center gap-2">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">01</span>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#731F94]">01</span>
             <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Personal Information</h2><p class="text-[12px] leading-4 text-[#4A4455]">Your primary contact details for interview coordination in Nigeria</p></div>
           </div>
         <div class="mt-[17px] grid gap-x-4 gap-y-4 sm:grid-cols-2">
           <div>
             <label for="fullName" class="block text-[13px] font-semibold leading-5 text-[#181445]">Full Legal Name</label>
-            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="fullName" name="fullName" type="text" required placeholder="Amaka Okafor" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" autocomplete="name"><i class="ph ph-identification-card text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
+            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="fullName" name="fullName" type="text" required placeholder="Amaka Okafor" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" autocomplete="name"><i class="ph ph-identification-card text-[18px] text-[#731F94]" aria-hidden="true"></i></div>
           </div>
-          <div>
-            <label for="phone" class="block text-[13px] font-semibold leading-5 text-[#181445]">Phone Number (WhatsApp-enabled)</label>
-            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><span class="flex h-3.5 w-5 shrink-0 overflow-hidden rounded-[3px] ring-1 ring-black/10" aria-hidden="true"><span class="w-1/3 bg-[#008751]"></span><span class="w-1/3 bg-white"></span><span class="w-1/3 bg-[#008751]"></span></span><input id="phone" name="phone" type="tel" required pattern="^(\+?234|0)[\s\-]?[789]\d{2}[\s\-]?\d{3}[\s\-]?\d{4}$" title="Use a Nigerian number, e.g. +234 814 000 9210" placeholder="+234 814 000 9210" autocomplete="tel" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70"><i class="ph ph-phone text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
-          </div>
-          <div class="sm:col-span-2"><div>
-            <div class="flex items-end justify-between gap-3"><label for="location" class="block text-[13px] font-semibold leading-5 text-[#181445]">Current Location / Commute Zone</label><span class="text-[12px] font-semibold text-[#630ED4]">Key for Lagos Island tech corridors</span></div>
-            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="location" name="location" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>Lagos - Victoria Island / Lekki Corridor</option><option>Lagos - Ikeja / Mainland</option><option>Lagos - Yaba / Surulere</option><option>Abuja - Central Business District</option><option>Port Harcourt</option><option>Ibadan</option><option>Other / Remote</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-caret-down text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
-          </div></div>
+          
+        </div>
         </div>
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
         <div class="flex items-center gap-2">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">02</span>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#731F94]">02</span>
             <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Education &amp; Academic Background</h2><p class="text-[12px] leading-4 text-[#4A4455]">Validated degree records assist hiring algorithms for early career tiers</p></div>
           </div>
         <div class="mt-[17px] grid gap-x-4 gap-y-4 sm:grid-cols-2">
           <div>
             <div class="flex items-end justify-between gap-3"><label for="degree" class="block text-[13px] font-semibold leading-5 text-[#181445]">Degree Qualification</label></div>
-            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="degree" name="degree" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>B.Sc / Bachelor of Science</option><option>B.Eng / Bachelor of Engineering</option><option>B.A / Bachelor of Arts</option><option>HND / Higher National Diploma</option><option>M.Sc / Master of Science</option><option>Other</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-graduation-cap text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
+            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="degree" name="degree" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>B.Sc / Bachelor of Science</option><option>B.Eng / Bachelor of Engineering</option><option>B.A / Bachelor of Arts</option><option>HND / Higher National Diploma</option><option>M.Sc / Master of Science</option><option>Other</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-graduation-cap text-[18px] text-[#731F94]" aria-hidden="true"></i></span></div>
           </div>
           <div>
             <label for="field" class="block text-[13px] font-semibold leading-5 text-[#181445]">Field of Study / Major</label>
             <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="field" name="field" type="text" required placeholder="Economics / Econometrics" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" ></div>
           </div>
-          <div class="sm:col-span-2">
-            <div>
-            <label for="institution" class="block text-[13px] font-semibold leading-5 text-[#181445]">Higher Institution</label>
-            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="institution" name="institution" type="text" required placeholder="University of Lagos (UNILAG)" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" ><i class="ph ph-buildings text-[18px] text-[#630ED4]" aria-hidden="true"></i></div>
-          </div>
-            <div class="mt-2 flex flex-wrap items-center gap-2"><span class="text-[12px] font-semibold text-[#4A4455]">Top Suggestions:</span><button type="button" data-institution="Covenant University" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">Covenant University</button><button type="button" data-institution="University of Ibadan (UI)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">Univ of Ibadan (UI)</button><button type="button" data-institution="Obafemi Awolowo University (OAU)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">OAU Ile-Ife</button><button type="button" data-institution="Federal University of Technology Akure (FUTA)" class="rounded-full bg-[#EFEBFF] px-2.5 py-0.5 text-[12px] font-semibold leading-4 text-[#181445] hover:bg-[#EADDFF]">FUTA</button></div>
-          </div>
-          <div>
-            <label for="gradYear" class="block text-[13px] font-semibold leading-5 text-[#181445]">Graduation Year</label>
-            <div class="mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><input id="gradYear" name="gradYear" type="number" required placeholder="2023" class="w-full bg-transparent text-[14px] text-[#181445] outline-none placeholder:text-[#4A4455]/70" min="1990" max="2035"></div>
-          </div>
-          <div>
-            <div class="flex items-end justify-between gap-3"><label for="classification" class="block text-[13px] font-semibold leading-5 text-[#181445]">Degree Classification</label></div>
-            <div class="relative mt-0.5 flex h-11 items-center gap-2 rounded-xl bg-[#F6F2FF] px-4"><select id="classification" name="classification" required class="w-full appearance-none bg-transparent pr-7 text-[14px] text-[#181445] outline-none"><option selected>First Class Honours / Distinction</option><option>Second Class Upper</option><option>Second Class Lower</option><option>Third Class</option><option>Pass</option></select><span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2"><i class="ph ph-caret-down text-[18px] text-[#630ED4]" aria-hidden="true"></i></span></div>
-          </div>
-        </div>
+          
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(24,20,69,0.06)]">
         <div class="flex items-center gap-2">
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#630ED4]">03</span>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFEBFF] text-[12px] font-bold text-[#731F94]">03</span>
             <div><h2 class="text-[20px] font-semibold leading-7 text-[#181445]">Career Aspirations &amp; Work Preferences</h2><p class="text-[12px] leading-4 text-[#4A4455]">Calibrate track matches against active Fintech and Venture Studio requisitions</p></div>
           </div>
 
         <fieldset class="mt-[17px]">
           <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Primary Target Track</legend>
           <div class="mt-[3px] grid gap-2 sm:grid-cols-3">
-            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94]">
               <input type="radio" name="track" value="fintech-data" class="peer sr-only" checked>
-              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
-              <i class="ph ph-chart-bar text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#731F94] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-chart-bar text-[18px] text-[#731F94]" aria-hidden="true"></i>
               <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Fintech Data Analytics</span>
               <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">BI, SQL, Fraud models &amp; metrics</span>
             </label>
-            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94]">
               <input type="radio" name="track" value="backend" class="peer sr-only">
-              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
-              <i class="ph ph-code text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#731F94] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-code text-[18px] text-[#731F94]" aria-hidden="true"></i>
               <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Backend Engineering</span>
               <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">Node/Go, microservices &amp; ledger APIs</span>
             </label>
-            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
+            <label class="relative block cursor-pointer rounded-xl bg-[#FCF8FF] p-4 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94]">
               <input type="radio" name="track" value="growth-product" class="peer sr-only">
-              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#630ED4] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
-              <i class="ph ph-rocket-launch text-[18px] text-[#630ED4]" aria-hidden="true"></i>
+              <span class="absolute right-4 top-4 flex h-4 w-4 items-center justify-center rounded-full bg-[#EFEBFF] text-white peer-checked:bg-[#731F94] [&>i]:hidden peer-checked:[&>i]:block"><i class="ph ph-check text-[10px]" aria-hidden="true"></i></span>
+              <i class="ph ph-rocket-launch text-[18px] text-[#731F94]" aria-hidden="true"></i>
               <span class="mt-1 block text-[16px] font-semibold leading-6 text-[#181445]">Growth Product Mgmt</span>
               <span class="mt-[3px] block text-[12px] leading-4 text-[#4A4455]">User acquisition, onboarding, loops</span>
             </label>
@@ -174,45 +151,28 @@
         <div class="mt-[27px] rounded-xl bg-[#F6F2FF] px-4 pb-6 pt-4">
           <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <div><p class="text-[13px] font-bold leading-5 text-[#181445]">Target Monthly Remuneration (Entry / Associate)</p><p class="text-[12px] leading-4 text-[#4A4455]">Benchmarked against Tier-1 Lagos tech benchmarks</p></div>
-            <div class="text-right"><p id="pay-range" class="text-[20px] font-extrabold leading-7 text-[#630ED4]">&#8358;200,000 &ndash; &#8358;350,000</p><p class="text-[12px] font-semibold leading-4 text-[#4A4455]">/ month (Gross)</p></div>
+            <div class="text-right"><p id="pay-range" class="text-[20px] font-extrabold leading-7 text-[#731F94]">&#8358;200,000 &ndash; &#8358;350,000</p><p class="text-[12px] font-semibold leading-4 text-[#4A4455]">/ month (Gross)</p></div>
           </div>
           <div class="relative mt-3 h-[18px]">
             <div class="absolute inset-x-0 top-1 h-2.5 rounded-full bg-[#E3DFFF]"></div>
-            <div id="pay-fill" class="absolute top-1 h-2.5 rounded-full bg-[#7D39D4]" style="left:calc(9px + (100% - 18px) * .25);width:calc((100% - 18px) * .5)"></div>
+            <div id="pay-fill" class="absolute top-1 h-2.5 rounded-full bg-[#B039D4]" style="left:calc(9px + (100% - 18px) * .25);width:calc((100% - 18px) * .5)"></div>
             <input id="pay-min" name="payMin" type="range" min="125000" max="425000" step="5000" value="200000" aria-label="Minimum monthly remuneration" class="range-thumb absolute inset-0 h-[18px] w-full">
             <input id="pay-max" name="payMax" type="range" min="125000" max="425000" step="5000" value="350000" aria-label="Maximum monthly remuneration" class="range-thumb absolute inset-0 h-[18px] w-full">
           </div>
-          <div class="mt-0.5 flex items-center justify-between text-[12px] font-semibold leading-4 text-[#4A4455]"><span>&#8358;120k (Intern baseline)</span><span class="text-[#630ED4]">&#8358;275k Median Range</span><span>&#8358;500k+ (Upper Tier)</span></div>
+          <div class="mt-0.5 flex items-center justify-between text-[12px] font-semibold leading-4 text-[#4A4455]"><span>&#8358;120k (Intern baseline)</span><span class="text-[#731F94]">&#8358;275k Median Range</span><span>&#8358;500k+ (Upper Tier)</span></div>
         </div>
 
-        <fieldset class="mt-6">
-          <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Current Availability Status</legend>
-          <div class="mt-0.5 grid gap-2 sm:grid-cols-3">
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
-              <input type="radio" name="availability" value="immediate" class="peer h-4 w-4 shrink-0 accent-[#630ED4]" checked>
-              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Immediate Placement</span><span class="block text-[12px] leading-4 text-[#4A4455]">NYSC Completed</span></span>
-            </label>
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
-              <input type="radio" name="availability" value="serving" class="peer h-4 w-4 shrink-0 accent-[#630ED4]">
-              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Currently Serving</span><span class="block text-[12px] leading-4 text-[#4A4455]">NYSC PPA Ready</span></span>
-            </label>
-            <label class="flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF8FF] px-2 py-2 has-[:checked]:bg-[#F6F2FF] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4]">
-              <input type="radio" name="availability" value="final-year" class="peer h-4 w-4 shrink-0 accent-[#630ED4]">
-              <span><span class="block text-[13px] font-semibold leading-5 text-[#181445]">Final Year Student</span><span class="block text-[12px] leading-4 text-[#4A4455]">Available Post-Exams</span></span>
-            </label>
-          </div>
-        </fieldset>
 
         <fieldset class="mt-6">
           <legend class="block text-[13px] font-semibold leading-5 text-[#181445]">Preferred Work Mode</legend>
           <div class="mt-[3px] flex flex-wrap gap-2">
-            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#731F94] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94] has-[:focus-visible]:ring-offset-2">
               <input type="radio" name="workMode" value="hybrid" class="sr-only" checked><i class="ph ph-buildings text-sm" aria-hidden="true"></i>Hybrid Lagos (Island / Mainland)
             </label>
-            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#731F94] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94] has-[:focus-visible]:ring-offset-2">
               <input type="radio" name="workMode" value="remote" class="sr-only"><i class="ph ph-house text-sm" aria-hidden="true"></i>Fully Remote
             </label>
-            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#630ED4] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#630ED4] has-[:focus-visible]:ring-offset-2">
+            <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#EFEBFF] px-4 py-[3px] text-[13px] font-semibold leading-5 text-[#181445] has-[:checked]:bg-[#731F94] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#731F94] has-[:focus-visible]:ring-offset-2">
               <input type="radio" name="workMode" value="onsite" class="sr-only"><i class="ph ph-buildings text-sm" aria-hidden="true"></i>On-Site Victoria Island / Ikoyi
             </label>
           </div>
@@ -220,17 +180,17 @@
       </section>
 
       <div class="mt-1 flex flex-col gap-3 rounded-2xl bg-[#F4F0FF] p-4 sm:flex-row sm:items-center">
-        <span class="text-[#630ED4]"><svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"/></svg></span>
+        <span class="text-[#731F94]"><svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"/></svg></span>
         <p class="text-[12px] leading-[18px] text-[#4A4455] sm:max-w-[464px] sm:flex-1">Your verified data is strictly matched against direct hiring managers at accredited tech partners.</p>
         <p class="text-[11px] font-bold uppercase leading-4 tracking-[0.05em] text-[#7B7487] sm:ml-6 sm:w-[106px]">Paystack Match Ready</p>
         <p class="text-[11px] font-bold uppercase leading-4 tracking-[0.05em] text-[#7B7487] sm:ml-4 sm:w-[106px]">Moniepoint Compatible</p>
       </div>
 
       <div class="sticky bottom-4 -mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-[0_8px_30px_rgba(24,20,69,0.10)]">
-        <p class="flex items-center gap-2 text-[12px] text-[#4A4455]"><span class="text-[#630ED4]"><svg class="h-[18px] w-[18px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></span><span id="save-status">Step 1 of 4 &bull; Changes save automatically</span></p>
+        <p class="flex items-center gap-2 text-[12px] text-[#4A4455]"><span class="text-[#731F94]"><svg class="h-[18px] w-[18px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></span><span id="save-status">Step 1 of 4 &bull; Changes save automatically</span></p>
         <div class="flex items-center gap-6">
-          <a href="index.html" class="text-[13px] font-semibold text-[#4A4455] hover:text-[#630ED4]">Back to Overview</a>
-          <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#630ED4] px-[38px] py-2 text-[13px] font-semibold leading-[18px] text-white shadow-[0_4px_14px_rgba(99,14,212,0.35)] hover:bg-[#5409B5]">Save &amp; Continue to CV Upload<svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></button>
+          <a href="index.html" class="text-[13px] font-semibold text-[#4A4455] hover:text-[#731F94]">Back to Overview</a>
+          <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#731F94] px-[38px] py-2 text-[13px] font-semibold leading-[18px] text-white shadow-[0_4px_14px_rgba(115,31,148,0.35)] hover:bg-[#8D09B5]">Save &amp; Continue to CV Upload<svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></button>
         </div>
       </div>
 

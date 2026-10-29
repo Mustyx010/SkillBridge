@@ -20,7 +20,7 @@ function drawDots(card) {
   dots.replaceChildren();
   for (let index = 1; index <= 5; index += 1) {
     const dot = document.createElement('span');
-    dot.className = `h-2.5 w-2.5 rounded-full ${index <= level ? 'bg-[#630ED4]' : 'bg-[#E3DDF1]'}`;
+    dot.className = `h-2.5 w-2.5 rounded-full ${index <= level ? 'bg-[#731F94]' : 'bg-[#E3DDF1]'}`;
     dots.append(dot);
   }
   card.querySelector('.level-chip').textContent = `Level ${level}`;
@@ -101,7 +101,7 @@ document.getElementById('save-custom-skill').addEventListener('click', (event) =
   title.className = 'text-sm font-bold';
   title.textContent = name;
   const chip = document.createElement('span');
-  chip.className = 'level-chip rounded-full bg-[#E9D8FF] px-2.5 py-1 text-[10px] font-semibold text-[#630ED4]';
+  chip.className = 'level-chip rounded-full bg-[#E9D8FF] px-2.5 py-1 text-[10px] font-semibold text-[#731F94]';
   header.append(title, chip);
 
   const description = document.createElement('p');
@@ -120,7 +120,7 @@ document.getElementById('save-custom-skill').addEventListener('click', (event) =
   const actions = document.createElement('div');
   actions.className = 'flex items-center gap-2 text-[10px]';
   const edit = document.createElement('button');
-  edit.className = 'edit-skill font-semibold text-[#630ED4] underline';
+  edit.className = 'edit-skill font-semibold text-[#731F94] underline';
   edit.type = 'button';
   edit.textContent = 'Edit';
   const separator = document.createElement('span');

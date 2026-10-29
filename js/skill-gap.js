@@ -48,11 +48,11 @@ const setView = (hierarchy) => {
   grid.classList.toggle('lg:grid-cols-3', !hierarchy);
   grid.classList.toggle('lg:grid-cols-1', hierarchy);
   cardView.classList.toggle('bg-white', !hierarchy);
-  cardView.classList.toggle('text-[#630ED4]', !hierarchy);
+  cardView.classList.toggle('text-[#731F94]', !hierarchy);
   cardView.classList.toggle('shadow-sm', !hierarchy);
   cardView.classList.toggle('text-[#625B6D]', hierarchy);
   hierarchyView.classList.toggle('bg-white', hierarchy);
-  hierarchyView.classList.toggle('text-[#630ED4]', hierarchy);
+  hierarchyView.classList.toggle('text-[#731F94]', hierarchy);
   hierarchyView.classList.toggle('shadow-sm', hierarchy);
   hierarchyView.classList.toggle('text-[#625B6D]', !hierarchy);
   cardView.setAttribute('aria-pressed', String(!hierarchy));
@@ -103,7 +103,7 @@ document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
   const skill = button.dataset.addRoadmap;
   if (roadmapPriorities.includes(skill)) {
     button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
-    button.classList.remove('bg-[#630ED4]');
+    button.classList.remove('bg-[#731F94]');
     button.classList.add('bg-[#397B65]');
   }
   button.addEventListener('click', () => {
@@ -111,7 +111,7 @@ document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
     localStorage.setItem(roadmapKey, JSON.stringify(roadmapPriorities));
     localStorage.setItem('skillbridgeRoadmapActivated', 'true');
     button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
-    button.classList.remove('bg-[#630ED4]');
+    button.classList.remove('bg-[#731F94]');
     button.classList.add('bg-[#397B65]');
     showDialog('Added to your roadmap', `${skill} has been saved to your 60-Day Roadmap priorities.`);
   });

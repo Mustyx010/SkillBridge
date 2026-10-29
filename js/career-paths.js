@@ -18,8 +18,8 @@ pathSearch.addEventListener('input', () => {
 document.querySelectorAll('.select-path').forEach((button) => {
   button.addEventListener('click', () => {
     const card = button.closest('.career-card');
-    pathCards.forEach((item) => item.classList.remove('ring-2', 'ring-[#8127A1]'));
-    card.classList.add('ring-2', 'ring-[#8127A1]');
+    pathCards.forEach((item) => item.classList.remove('ring-2', 'ring-[#8527A1]'));
+    card.classList.add('ring-2', 'ring-[#8527A1]');
     localStorage.setItem('skillbridgeSelectedCareer', card.dataset.role);
     dashboardCta.setAttribute('aria-disabled', 'false');
     dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
@@ -35,7 +35,7 @@ document.querySelectorAll('.compare-path').forEach((button) => {
     const active = button.getAttribute('aria-pressed') !== 'true';
     button.setAttribute('aria-pressed', String(active));
     button.classList.toggle('ring-2', active);
-    button.classList.toggle('ring-[#8127A1]', active);
+    button.classList.toggle('ring-[#8527A1]', active);
   });
 });
 
@@ -43,7 +43,7 @@ const selectedCareer = localStorage.getItem('skillbridgeSelectedCareer');
 if (selectedCareer) {
   const selectedCard = pathCards.find((card) => card.dataset.role === selectedCareer);
   if (selectedCard) {
-    selectedCard.classList.add('ring-2', 'ring-[#8127A1]');
+    selectedCard.classList.add('ring-2', 'ring-[#8527A1]');
     dashboardCta.setAttribute('aria-disabled', 'false');
     dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
   }
