@@ -106,7 +106,6 @@
     if (query) window.location.href = `opportunities.html?q=${encodeURIComponent(query)}`;
   });
   $('#profile-notifications')?.addEventListener('click', () => announce('Notifications', 'You’re all caught up. Assessment and recruiter updates will appear here.'));
-  $('#profile-upgrade')?.addEventListener('click', () => announce('Pro Upgrade', 'Subscription checkout is not connected in this prototype.'));
   $('#edit-profile-button')?.addEventListener('click', () => {
     setField('edit-name', name); setField('edit-institution', survey.institution); setField('edit-degree', degree); setField('edit-location', location); open('edit-profile-dialog');
   });
@@ -152,7 +151,6 @@
   document.querySelectorAll('[data-connection]').forEach((button) => button.addEventListener('click', () => announce(`${button.dataset.connection} connection`, 'Account linking requires a secure authentication provider and is not connected in this prototype.')));
   document.querySelectorAll('[data-close-two-factor]').forEach((button) => button.addEventListener('click', () => close('two-factor-dialog')));
   $('#configure-two-factor')?.addEventListener('click', () => open('two-factor-dialog'));
-  $('#manage-subscription')?.addEventListener('click', () => announce('Subscription management', 'Subscription billing is not connected in this prototype.'));
   $('#logout-devices')?.addEventListener('click', () => {
     if (!window.confirm('Sign out of this browser?')) return;
     localStorage.removeItem('skillbridge_session'); sessionStorage.removeItem('skillbridge_session'); window.location.href = 'signin.html';

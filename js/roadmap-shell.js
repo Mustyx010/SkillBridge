@@ -67,6 +67,7 @@ for (const [id, value] of [['roadmap-repo-url', savedCapstone.repo], ['roadmap-d
 for (const id of ['roadmap-repo-url', 'roadmap-dataset-url', 'roadmap-project-notes']) {
   document.getElementById(id).addEventListener('input', () => {
     const capstone = {
+      ...savedCapstone,
       repo: document.getElementById('roadmap-repo-url').value,
       dataset: document.getElementById('roadmap-dataset-url').value,
       notes: document.getElementById('roadmap-project-notes').value,
@@ -112,8 +113,8 @@ document.querySelectorAll('[data-roadmap-action]').forEach((button) => button.ad
       roadmapNotice('Complete all three capstone fields before requesting review.');
       return;
     }
-    status.textContent = 'Capstone submitted. Mentor AI review is queued.';
-    roadmapNotice('Capstone submitted for mentor AI review.');
+    status.textContent = 'Project details saved locally. Mentor review is not connected in this preview.';
+    roadmapNotice('Project details saved in this browser. No review request was sent.');
     return;
   }
   roadmapNotice(messages[action] || 'This roadmap action is ready.');

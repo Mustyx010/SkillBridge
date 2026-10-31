@@ -193,29 +193,5 @@ messageDialog.addEventListener('click', (event) => {
   if (event.target === messageDialog) messageDialog.close();
 });
 document.getElementById('notifications-button').addEventListener('click', () => {
-  showMessage('Notifications', 'You’re all caught up. Interview, cohort, and assessment updates will appear here.');
-});
-
-const diagnosticDialog = document.getElementById('diagnostic-dialog');
-const diagnosticForm = document.getElementById('diagnostic-form');
-const diagnosticResult = document.getElementById('diagnostic-result');
-const readinessScore = document.getElementById('readiness-score');
-document.getElementById('close-diagnostic').addEventListener('click', () => diagnosticDialog.close());
-document.getElementById('cancel-diagnostic').addEventListener('click', () => diagnosticDialog.close());
-diagnosticForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const answers = new FormData(diagnosticForm);
-  const score = Number(answers.get('q1') === 'having')
-    + Number(answers.get('q2') === 'loc')
-    + Number(answers.get('q3') === 'success');
-  const readiness = Math.min(98, 60 + score * 13);
-  localStorage.setItem('skillbridgeDiagnosticScore', String(score));
-  diagnosticResult.textContent = `Baseline complete: ${score} of 3 correct. Your readiness score has been updated.`;
-  diagnosticResult.classList.remove('hidden');
-  readinessScore.textContent = `${readiness}%`;
-  readinessScore.parentElement.parentElement.style.background =
-    `conic-gradient(#BF39E8 0deg ${readiness * 3.6}deg,#F4DDFB ${readiness * 3.6}deg 360deg)`;
-});
-diagnosticDialog.addEventListener('click', (event) => {
-  if (event.target === diagnosticDialog) diagnosticDialog.close();
+  showMessage('Notifications', 'You’re all caught up. Interview and cohort updates will appear here.');
 });

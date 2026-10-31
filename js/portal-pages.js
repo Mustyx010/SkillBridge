@@ -37,7 +37,11 @@ if (dashboard && document.getElementById('welcome-name')) {
   document.getElementById('target-salary').textContent = `₦${Math.round(salaryMin / 1000)}k–₦${Math.round(salaryMax / 1000)}k/mo target range`;
   const verifiedInstitution = surveyData.institution || '';
   if (verifiedInstitution) {
-    document.getElementById('verification-badge').innerHTML = `<i class="ph ph-seal-check"></i> ${verifiedInstitution} Verified`;
+    const verificationBadge = document.getElementById('verification-badge');
+    const icon = document.createElement('i');
+    icon.className = 'ph ph-seal-check';
+    icon.setAttribute('aria-hidden', 'true');
+    verificationBadge.replaceChildren(icon, document.createTextNode(` ${verifiedInstitution} Verified`));
   } else {
     document.getElementById('verification-badge').textContent = 'Profile verification pending';
   }
@@ -109,26 +113,17 @@ if (dashboard && document.getElementById('welcome-name')) {
   document.querySelectorAll('[data-close-message]').forEach((button) => button.addEventListener('click', () => infoDialog.close()));
   infoDialog.addEventListener('click', (event) => { if (event.target === infoDialog) infoDialog.close(); });
 
-  const diagnosticDialog = document.getElementById('diagnostic-dialog');
-  const openDiagnostic = () => diagnosticDialog.showModal();
-  document.querySelectorAll('#open-diagnostic, [data-open-diagnostic]').forEach((button) => button.addEventListener('click', openDiagnostic));
-  if (window.location.hash === '#diagnostic') openDiagnostic();
-  document.getElementById('close-diagnostic').addEventListener('click', () => diagnosticDialog.close());
-  document.getElementById('cancel-diagnostic').addEventListener('click', () => diagnosticDialog.close());
-  const diagnosticForm = document.getElementById('diagnostic-form');
-  const diagnosticResult = document.getElementById('diagnostic-result');
   const updateDashboardSetup = () => {
     const setup = {
       profile: Boolean(survey.completed),
       cv: Boolean(localStorage.getItem('skillbridgeUploadedCvName')),
-      diagnostic: localStorage.getItem('skillbridgeDiagnosticScore') !== null,
       roadmap: Boolean(localStorage.getItem('skillbridgeRoadmapActivated')),
       portfolio: Boolean(localStorage.getItem('skillbridgePortfolioConnected')),
     };
     const completed = Object.values(setup).filter(Boolean).length;
-    document.getElementById('setup-count').textContent = `(${completed} of 5)`;
-    document.getElementById('setup-percent').textContent = `${Math.round(completed / 5 * 100)}%`;
-    document.getElementById('setup-progress').style.width = `${completed / 5 * 100}%`;
+    document.getElementById('setup-count').textContent = `(${completed} of 4)`;
+    document.getElementById('setup-percent').textContent = `${Math.round(completed / 4 * 100)}%`;
+    document.getElementById('setup-progress').style.width = `${completed / 4 * 100}%`;
     document.querySelectorAll('.setup-item').forEach((item) => {
       const done = setup[item.dataset.setup];
       const icon = item.querySelector('.setup-icon');
@@ -136,7 +131,7 @@ if (dashboard && document.getElementById('welcome-name')) {
         icon.className = 'setup-icon ph ph-check-circle text-base text-[#731F94]';
         item.classList.add('text-[#81798B]'); item.classList.remove('bg-[#F6F0FF]', 'font-semibold', 'text-[#731F94]');
       } else {
-        icon.className = `setup-icon ph ${item.dataset.setup === 'diagnostic' ? 'ph-circle' : 'ph-circle'} text-base text-[#C8BED5]`;
+        icon.className = 'setup-icon ph ph-circle text-base text-[#C8BED5]';
         item.classList.remove('text-[#81798B]');
       }
     });
@@ -146,46 +141,17 @@ if (dashboard && document.getElementById('welcome-name')) {
     const extractedCards = document.getElementById('extracted-skill-cards');
     const validationCallout = document.getElementById('validate-skills-callout');
     extractedCards.classList.toggle('hidden', !cvPresent);
+    validationCallout.classList.toggle('hidden', cvPresent);
     if (!cvPresent) {
       validationCallout.innerHTML = '<p class="text-[9px] text-[#4A4455]"><i class="ph ph-file-arrow-up text-[#731F94]"></i> Upload your CV to populate your extracted strengths, tools, and track gaps.</p><a href="cv-upload.html" class="shrink-0 text-[10px] font-bold text-[#731F94]">Upload CV <i class="ph ph-arrow-right"></i></a>';
     }
-    if (setup.diagnostic) {
-      document.querySelector('[data-setup="diagnostic"] button').textContent = 'Diagnostic completed';
-      document.querySelector('[data-setup="diagnostic"] span:last-child').textContent = 'Done';
-      document.getElementById('test-score-hint').textContent = 'Diagnostic score saved';
-      document.getElementById('badge-number').textContent = '3';
-      document.getElementById('badge-count').textContent = '3 / 6 Earned';
-      updateReadinessGauge(Math.min(98, 60 + Number(localStorage.getItem('skillbridgeDiagnosticScore')) * 13));
-      document.querySelectorAll('.role-apply').forEach((button) => {
-        button.innerHTML = '<i class="ph ph-arrow-up-right"></i> View opportunity';
-        button.classList.remove('bg-[#EEE8FF]', 'text-[#81798B]');
-        button.classList.add('bg-[#731F94]', 'text-white');
-      });
-    }
   };
-  const updateReadinessGauge = (percent) => {
-    document.getElementById('readiness-score').textContent = `${percent}%`;
-    const gauge = document.getElementById('readiness-score').parentElement.parentElement;
-    const angle = percent * 3.6;
-    gauge.style.background = `conic-gradient(#BF39E8 0deg ${angle}deg,#FAE8FF ${angle}deg 360deg)`;
-  };
-  diagnosticForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const answers = new FormData(diagnosticForm);
-    const score = Number(answers.get('q1') === 'having') + Number(answers.get('q2') === 'loc') + Number(answers.get('q3') === 'success');
-    localStorage.setItem('skillbridgeDiagnosticScore', String(score));
-    diagnosticResult.textContent = `Baseline complete: ${score} of 3 answers correct. Your verified benchmark is now reflected on the dashboard.`;
-    diagnosticResult.classList.remove('hidden');
-    updateDashboardSetup();
-    updateReadinessGauge(Math.min(98, 60 + score * 13));
-  });
-  diagnosticDialog.addEventListener('click', (event) => { if (event.target === diagnosticDialog) diagnosticDialog.close(); });
   updateDashboardSetup();
 
-  document.getElementById('notifications-button').addEventListener('click', () => showMessage('You’re all caught up. We’ll show interview, cohort, and assessment updates here.', 'Notifications'));
+  document.getElementById('notifications-button').addEventListener('click', () => showMessage('You’re all caught up. We’ll show interview and cohort updates here.', 'Notifications'));
   document.querySelectorAll('[data-coach-question]').forEach((button) => button.addEventListener('click', () => {
     const responses = {
-      'skill-gaps': 'Your strongest base is econometrics and financial modeling. Validate SQL and Python with the diagnostic, then focus your capstone on dbt and payment data.',
+      'skill-gaps': 'Your strongest base is econometrics and financial modeling. Focus your capstone on dbt and payment data to demonstrate those skills.',
       capstone: 'The accelerated capstone is planned across 60 days, with the first SQL sprint taking about 15 days at roughly 10 hours per week.',
       salary: 'Your selected entry-level fintech analyst target is ₦250k–₦350k gross per month. Compare current roles before setting a final expectation.',
     };
@@ -207,10 +173,6 @@ if (dashboard && document.getElementById('welcome-name')) {
   renderJoinState();
 
   document.querySelectorAll('.role-apply').forEach((button) => button.addEventListener('click', () => {
-    if (localStorage.getItem('skillbridgeDiagnosticScore') === null) {
-      showMessage('Complete the skill diagnostic first to validate your profile before applying.', 'Applications locked');
-      return;
-    }
     showMessage(`The ${button.dataset.role} preview is ready. Recruiter applications are not connected in this prototype.`, 'Opportunity preview');
   }));
 
@@ -320,6 +282,21 @@ if (resourceList) {
   const resources = [...resourceList.querySelectorAll('.learning-resource')];
   const completed = new Set(readList('skillbridgeCompletedResources'));
   const status = document.getElementById('resource-status');
+  const search = document.getElementById('resource-search');
+  let activeFilter = 'all';
+  const filterResources = () => {
+    const query = search?.value.trim().toLowerCase() || '';
+    let visibleCount = 0;
+    resources.forEach((resource) => {
+      const matchesCategory = activeFilter === 'all' || resource.dataset.category === activeFilter;
+      const matchesQuery = !query || resource.textContent.toLowerCase().includes(query);
+      resource.hidden = !matchesCategory || !matchesQuery;
+      if (!resource.hidden) visibleCount += 1;
+    });
+    if (status && query && visibleCount === 0) status.textContent = 'No learning opportunities match your search.';
+    else if (status && query) status.textContent = `${visibleCount} ${visibleCount === 1 ? 'opportunity' : 'opportunities'} found.`;
+    else if (status) status.textContent = completed.size ? `${completed.size} learning ${completed.size === 1 ? 'resource' : 'resources'} marked complete.` : '';
+  };
   const updateResourceButtons = () => {
     document.querySelectorAll('.resource-complete').forEach((button) => {
       const done = completed.has(button.dataset.resource);
@@ -329,6 +306,7 @@ if (resourceList) {
   };
   document.querySelectorAll('.resource-filter').forEach((button) => {
     button.addEventListener('click', () => {
+      activeFilter = button.dataset.resourceFilter || 'all';
       document.querySelectorAll('.resource-filter').forEach((item) => {
         const active = item === button;
         item.setAttribute('aria-pressed', String(active));
@@ -336,17 +314,80 @@ if (resourceList) {
         item.classList.toggle('text-white', active);
         item.classList.toggle('bg-white', !active);
       });
-      resources.forEach((resource) => { resource.hidden = button.dataset.resourceFilter !== 'all' && resource.dataset.category !== button.dataset.resourceFilter; });
+      filterResources();
     });
   });
+  search?.addEventListener('input', filterResources);
+  document.getElementById('development-search-form')?.addEventListener('submit', (event) => event.preventDefault());
   document.querySelectorAll('.resource-complete').forEach((button) => {
     button.addEventListener('click', () => {
       if (completed.has(button.dataset.resource)) completed.delete(button.dataset.resource);
       else completed.add(button.dataset.resource);
       localStorage.setItem('skillbridgeCompletedResources', JSON.stringify([...completed]));
       updateResourceButtons();
-      status.textContent = `${completed.size} learning ${completed.size === 1 ? 'resource' : 'resources'} marked complete.`;
+      if (status && !search?.value.trim()) status.textContent = `${completed.size} learning ${completed.size === 1 ? 'resource' : 'resources'} marked complete.`;
     });
   });
   updateResourceButtons();
+  filterResources();
+}
+
+const sharedSidebar = document.getElementById('dashboard-sidebar');
+if (sharedSidebar && !document.getElementById('welcome-name')) {
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebarToggle = document.getElementById('dashboard-menu-button');
+  if (sidebarBackdrop && sidebarToggle) {
+    const toggleSidebar = (open) => {
+      sharedSidebar.classList.toggle('-translate-x-full', !open);
+      sidebarBackdrop.classList.toggle('hidden', !open);
+      sidebarToggle.setAttribute('aria-expanded', String(open));
+      sidebarToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    };
+    sidebarToggle.addEventListener('click', () => toggleSidebar(sidebarToggle.getAttribute('aria-expanded') !== 'true'));
+    sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+    sharedSidebar.addEventListener('click', (event) => { if (event.target.closest('a')) toggleSidebar(false); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') toggleSidebar(false); });
+  }
+  const account = (() => {
+    try { return JSON.parse(localStorage.getItem('skillbridge_user') || '{}'); }
+    catch { return {}; }
+  })();
+  const survey = (() => {
+    try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}'); }
+    catch { return {}; }
+  })();
+  const fullName = survey?.data?.fullName || account?.name || 'Candidate';
+  const nameParts = fullName.trim().split(/\s+/);
+  const trackName = document.getElementById('track-user-name') || document.getElementById('topbar-user-name');
+  if (trackName) trackName.textContent = `${nameParts[0]} ${nameParts.length > 1 ? `${nameParts[nameParts.length - 1][0]}.` : ''}`.trim();
+}
+
+const capstoneFilter = document.getElementById('capstone-filter');
+if (capstoneFilter) {
+  const projects = [...document.querySelectorAll('.capstone-project')];
+  const emptyState = document.getElementById('capstone-empty');
+  capstoneFilter.addEventListener('change', () => {
+    let visible = 0;
+    projects.forEach((project) => {
+      project.hidden = capstoneFilter.value !== 'all' && project.dataset.track !== capstoneFilter.value;
+      if (!project.hidden) visible += 1;
+    });
+    emptyState.classList.toggle('hidden', visible > 0);
+  });
+}
+
+const sandboxRunButton = document.getElementById('run-sandbox-query');
+if (sandboxRunButton) {
+  sandboxRunButton.addEventListener('click', () => {
+    const results = document.getElementById('sandbox-result');
+    results.replaceChildren();
+    const notice = document.createElement('p');
+    notice.className = 'mb-3 text-[10px] font-semibold text-[#81798B]';
+    notice.textContent = 'Preview rows only — this prototype does not execute SQL.';
+    const table = document.createElement('table');
+    table.className = 'w-full text-left text-[10px]';
+    table.innerHTML = '<thead class="text-[#81798B]"><tr><th class="px-2 py-1">route_id</th><th class="px-2 py-1">trips</th></tr></thead><tbody><tr class="border-t border-[#EEE7F7]"><td class="px-2 py-2">BRT-03</td><td class="px-2 py-2">12,480</td></tr><tr class="border-t border-[#EEE7F7]"><td class="px-2 py-2">BRT-01</td><td class="px-2 py-2">10,216</td></tr><tr class="border-t border-[#EEE7F7]"><td class="px-2 py-2">BRT-07</td><td class="px-2 py-2">8,904</td></tr></tbody>';
+    results.append(notice, table);
+    results.classList.remove('hidden');
+  });
 }
