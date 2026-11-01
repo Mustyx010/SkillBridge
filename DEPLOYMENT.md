@@ -1,27 +1,22 @@
 # Deployment
 
-The site is a static HTML app with a Vercel serverless API proxy. Browser requests
-stay on the site's origin; the proxy forwards them to the SkillBridge API, so the
-browser does not need cross-origin CORS access to the API.
+The frontend calls the SkillBridge API directly from the browser. The default
+API URL is `https://skillbridge-api.tb-skillbridge-backend.workers.dev`; set
+`window.SKILLBRIDGE_API_BASE_URL` before loading `js/api-client.js` only when
+using a different API.
 
-## Vercel
+Deploy the static site to your hosting provider as usual. Before browser API
+requests can succeed, the backend must allow the deployed site's exact origin
+through CORS. Ask the backend maintainer to:
 
-1. Import this repository into Vercel and keep the project root at the repository
-   root. No frontend build command or output directory is required; the HTML,
-   JavaScript, CSS, and assets are served directly.
-2. Deploy the project. The proxy uses
-   `https://skillbridge-api.tb-skillbridge-backend.workers.dev` by default.
-   Optionally set `SKILLBRIDGE_API_ORIGIN` in Vercel's environment variables to
-   another backend origin, with no trailing path.
-3. Use a valid backend account to sign in. The browser stores the API's
-   short-lived bearer token and the proxy forwards it to protected API routes.
+- Allow the production site origin (scheme and hostname, with no page path),
+  such as `https://your-site.example`.
+- Allow `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS`.
+- Allow the `Authorization` and `Content-Type` request headers.
+- Return the appropriate `Access-Control-Allow-Origin` header on API responses.
 
-For local development with the same proxy, install/use the Vercel CLI and run
-`npx vercel dev` from the repository root. Opening HTML files directly or using
-a plain static Live Server does not run the proxy functions.
+If using separate preview and production domains, each origin must be allowed.
+The frontend sends bearer tokens in the `Authorization` header and does not
+require cross-origin cookies.
 
-## CV upload limit
-
-The web upload limit is 4 MiB to stay below Vercel Functions' request body limit.
-The backend API may accept larger CV files from other clients, but this web
-deployment must keep uploads within the proxy limit.
+CV uploads are limited to 10 MB by the frontend.

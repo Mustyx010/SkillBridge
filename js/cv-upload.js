@@ -9,7 +9,7 @@ const parseProgress = document.getElementById('parse-progress');
 const parseProgressLabel = document.getElementById('parse-progress-label');
 const uploadStatus = document.getElementById('upload-status');
 const continueButton = document.getElementById('continue-button');
-const MAX_FILE_BYTES = 4 * 1024 * 1024;
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const compressorDialog = document.getElementById('compress-dialog');
 const diagnosticStatus = document.getElementById('diagnostic-action-status');
 let uploadedCvId = localStorage.getItem('skillbridgeUploadedCvId');
@@ -71,7 +71,7 @@ function showFile(file) {
     localStorage.removeItem('skillbridgeUploadedCvName');
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
-    uploadError.textContent = 'This file exceeds the 4 MB upload limit. Compress it and try again.';
+    uploadError.textContent = 'This file exceeds the 10 MB upload limit. Compress it and try again.';
     uploadError.classList.remove('hidden');
     return;
   }
@@ -234,7 +234,7 @@ document.getElementById('text-native-pdf-button').addEventListener('click', () =
   fileInput.dataset.pdfOnly = 'true';
   fileInput.accept = '.pdf,application/pdf';
   fileInput.click();
-  announceDiagnostic('Choose a text-native PDF (maximum 4 MB).');
+  announceDiagnostic('Choose a text-native PDF (maximum 10 MB).');
 });
 
 continueButton.addEventListener('click', async (event) => {

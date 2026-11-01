@@ -1,6 +1,6 @@
 (() => {
-  const baseUrl = (window.SKILLBRIDGE_API_BASE_URL || '').replace(/\/+$/, '');
-  const apiLabel = baseUrl || 'the same-origin API proxy';
+  const baseUrl = (window.SKILLBRIDGE_API_BASE_URL || 'https://skillbridge-api.tb-skillbridge-backend.workers.dev').replace(/\/+$/, '');
+  const apiLabel = baseUrl;
 
   const readSession = () => {
     for (const storage of [sessionStorage, localStorage]) {
@@ -85,7 +85,7 @@
       if (error.name === 'AbortError') {
         throw makeUnavailableError(`The SkillBridge API request timed out at ${apiLabel}.`);
       }
-      throw makeUnavailableError(`Could not reach SkillBridge API at ${apiLabel}. Check the deployed API proxy and backend availability.`);
+      throw makeUnavailableError(`Could not reach SkillBridge API at ${apiLabel}. Check that the backend is available and allows this site's origin through CORS.`);
     } finally {
       clearTimeout(timeout);
     }
