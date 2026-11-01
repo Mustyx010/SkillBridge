@@ -44,6 +44,68 @@ const cards = [...document.querySelectorAll('.matrix-card')];
 const grid = document.getElementById('matrix-grid');
 const cardView = document.getElementById('card-view-button');
 const hierarchyView = document.getElementById('hierarchy-view-button');
+const gapPanel = document.createElement('section');
+gapPanel.className = 'rounded-2xl bg-white p-5 shadow-sm sm:p-6';
+gapPanel.setAttribute('aria-labelledby', 'api-skill-gap-title');
+const gapTitle = document.createElement('h2');
+gapTitle.id = 'api-skill-gap-title';
+gapTitle.className = 'text-lg font-bold text-[#731F94]';
+gapTitle.textContent = 'Your API skill-gap analysis';
+const gapStatus = document.createElement('p');
+gapStatus.className = 'mt-2 text-sm text-[#625B6D]';
+gapStatus.setAttribute('role', 'status');
+const gapDetails = document.createElement('div');
+gapDetails.className = 'mt-4 grid gap-4 md:grid-cols-3';
+gapPanel.append(gapTitle, gapStatus, gapDetails);
+grid.before(gapPanel);
+
+const renderGapList = (label, skills) => {
+  const section = document.createElement('div');
+  section.className = 'rounded-xl bg-[#F8F4FF] p-4';
+  const heading = document.createElement('h3');
+  heading.className = 'text-xs font-bold uppercase text-[#731F94]';
+  heading.textContent = label;
+  const list = document.createElement('ul');
+  list.className = 'mt-2 space-y-1 text-xs text-[#4A4455]';
+  (Array.isArray(skills) && skills.length ? skills : ['None listed']).forEach((skill) => {
+    const item = document.createElement('li');
+    item.textContent = skill;
+    list.append(item);
+  });
+  section.append(heading, list);
+  return section;
+};
+
+const loadApiSkillGap = async () => {
+  if (!window.SkillBridgeApi.session()) {
+    gapStatus.textContent = 'Sign in to load your saved skill-gap analysis.';
+    return;
+  }
+  gapStatus.textContent = 'Loading your skill-gap analysis…';
+  try {
+    const response = await window.SkillBridgeApi.get('/api/v1/skill-gaps');
+    const gaps = window.SkillBridgeApi.unwrap(response);
+    if (!Array.isArray(gaps)) throw new Error('The API returned an invalid skill-gap list.');
+    const storedId = localStorage.getItem('skillbridgeSkillGapId');
+    const gap = gaps.find((item) => item.id === storedId) || gaps[0];
+    if (!gap) {
+      gapStatus.textContent = 'No skill-gap analysis is saved yet. Upload and analyze a CV to create one.';
+      return;
+    }
+    localStorage.setItem('skillbridgeSkillGapId', gap.id);
+    gapStatus.textContent = `${gap.targetJobTitle || 'Career target'} • ${gap.status || 'analysis'} • The benchmark cards below are prototype content.`;
+    gapDetails.replaceChildren(
+      renderGapList('Current skills', gap.currentSkills),
+      renderGapList('Required skills', gap.requiredSkills),
+      renderGapList('Skills to develop', gap.missingSkills),
+    );
+  } catch (error) {
+    gapStatus.classList.add('text-red-700');
+    gapStatus.textContent = `Skill-gap data could not be loaded: ${error.message}`;
+  }
+};
+loadApiSkillGap();
+
 const setView = (hierarchy) => {
   grid.classList.toggle('lg:grid-cols-3', !hierarchy);
   grid.classList.toggle('lg:grid-cols-1', hierarchy);
@@ -105,15 +167,49 @@ document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
     button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
     button.classList.remove('bg-[#731F94]');
     button.classList.add('bg-[#397B65]');
+    button.disabled = true;
   }
-  button.addEventListener('click', () => {
-    if (!roadmapPriorities.includes(skill)) roadmapPriorities.push(skill);
-    localStorage.setItem(roadmapKey, JSON.stringify(roadmapPriorities));
-    localStorage.setItem('skillbridgeRoadmapActivated', 'true');
-    button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
-    button.classList.remove('bg-[#731F94]');
-    button.classList.add('bg-[#397B65]');
-    showDialog('Added to your roadmap', `${skill} has been saved to your 60-Day Roadmap priorities.`);
+  button.addEventListener('click', async () => {
+    if (roadmapPriorities.includes(skill)) return;
+    button.disabled = true;
+    try {
+      if (window.SkillBridgeApi.session()) {
+        let response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
+        let data = window.SkillBridgeApi.unwrap(response);
+        let roadmaps = Array.isArray(data) ? data : data?.items || [];
+        if (!roadmaps.length) {
+          const skillGapId = localStorage.getItem('skillbridgeSkillGapId');
+          if (!skillGapId) throw new Error('Analyze your CV before adding a skill to an API roadmap.');
+          await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
+          response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
+          data = window.SkillBridgeApi.unwrap(response);
+          roadmaps = Array.isArray(data) ? data : data?.items || [];
+        }
+        const roadmap = roadmaps[0];
+        if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
+        await window.SkillBridgeApi.post(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}/tasks`, {
+          phase: 60,
+          title: `Develop ${skill}`,
+          description: `Practice and demonstrate ${skill} for your target career.`,
+          taskType: 'learn',
+          skill: skill.toLowerCase(),
+          status: 'todo',
+        });
+      } else {
+        gapStatus.textContent = 'No API session found; this priority will only be saved in this browser.';
+      }
+      if (!roadmapPriorities.includes(skill)) roadmapPriorities.push(skill);
+      localStorage.setItem(roadmapKey, JSON.stringify(roadmapPriorities));
+      localStorage.setItem('skillbridgeRoadmapActivated', 'true');
+      button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
+      button.classList.remove('bg-[#731F94]');
+      button.classList.add('bg-[#397B65]');
+      showDialog('Added to your roadmap', `${skill} has been saved to your ${window.SkillBridgeApi.session() ? 'API roadmap and local priorities' : 'local 60-Day Roadmap priorities'}.`);
+    } catch (error) {
+      showDialog('Could not update your roadmap', error.message);
+    } finally {
+      button.disabled = false;
+    }
   });
 });
 

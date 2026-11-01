@@ -96,10 +96,30 @@ form.addEventListener('change', () => save());
 setInterval(showStatus, 30000);
 
 // Continue to the next step
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
   save(true);
-  window.location.href = 'cv-upload.html';
+  const data = readForm();
+  const trackNames = {
+    'fintech-data': 'Junior Fintech Data Analyst',
+    backend: 'Associate Backend Engineer',
+    'growth-product': 'Growth Product Associate',
+  };
+  const education = [data.degree, data.field, data.institution].filter(Boolean).join(' - ');
+  const submitButton = form.querySelector('[type="submit"]');
+  submitButton.disabled = true;
+  try {
+    await window.SkillBridgeApi.put('/api/v1/profiles/me', {
+      location: data.location || null,
+      education: education || null,
+      careerGoal: trackNames[data.track] || data.track || null,
+    });
+    window.location.href = 'cv-upload.html';
+  } catch (error) {
+    window.SkillBridgeApi.showStatus(form, `Your answers are saved in this browser, but could not be synced to your profile: ${error.message}`, true);
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 restore();

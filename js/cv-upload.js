@@ -12,6 +12,9 @@ const continueButton = document.getElementById('continue-button');
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const compressorDialog = document.getElementById('compress-dialog');
 const diagnosticStatus = document.getElementById('diagnostic-action-status');
+let uploadedCvId = localStorage.getItem('skillbridgeUploadedCvId');
+let currentUpload = null;
+let uploadPromise = null;
 
 function announceDiagnostic(message) {
   diagnosticStatus.textContent = message;
@@ -23,7 +26,7 @@ function setContinueState(ready) {
   continueButton.classList.toggle('pointer-events-none', !ready);
   continueButton.classList.toggle('opacity-50', !ready);
   if (ready) {
-    uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#731F94]"></span><span class="font-semibold text-[#181445]">File parsed &amp; verified</span><span class="h-2 w-2 rounded-full bg-[#C8BED5]" aria-hidden="true"></span><span>Estimated extraction time: 4 seconds</span>';
+    uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#731F94]"></span><span class="font-semibold text-[#181445]">CV uploaded and ready for analysis</span>';
   } else {
     uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#81798B]"></span><span>Upload a CV or academic dossier to continue</span>';
   }
@@ -37,6 +40,12 @@ function showFile(file) {
   const extension = file.name.split('.').pop().toLowerCase();
   if (fileInput.dataset.pdfOnly === 'true' && extension !== 'pdf') {
     fileInput.value = '';
+    currentUpload = null;
+    uploadedCvId = null;
+    localStorage.removeItem('skillbridgeUploadedCvId');
+    localStorage.removeItem('skillbridgeUploadedCvName');
+    uploadedPanel.classList.add('hidden');
+    setContinueState(false);
     uploadError.textContent = 'Choose a PDF file for the text-native document check.';
     uploadError.classList.remove('hidden');
     announceDiagnostic('That file is not a PDF. Choose a text-native PDF to continue.');
@@ -44,6 +53,9 @@ function showFile(file) {
   }
   if (!['pdf', 'docx'].includes(extension)) {
     fileInput.value = '';
+    currentUpload = null;
+    uploadedCvId = null;
+    localStorage.removeItem('skillbridgeUploadedCvId');
     localStorage.removeItem('skillbridgeUploadedCvName');
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
@@ -53,6 +65,9 @@ function showFile(file) {
   }
   if (file.size > MAX_FILE_BYTES) {
     fileInput.value = '';
+    currentUpload = null;
+    uploadedCvId = null;
+    localStorage.removeItem('skillbridgeUploadedCvId');
     localStorage.removeItem('skillbridgeUploadedCvName');
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
@@ -63,13 +78,40 @@ function showFile(file) {
 
   fileName.textContent = file.name;
   uploadedPanel.classList.remove('hidden');
-  setContinueState(true);
   localStorage.setItem('skillbridgeUploadedCvName', file.name);
   const sizeLabel = fileName.parentElement.querySelector('span');
   if (sizeLabel) sizeLabel.textContent = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
   parsePercent.textContent = '78%';
   parseProgressLabel.textContent = '78% Complete';
   parseProgress.style.width = '78%';
+
+  if (currentUpload === file && uploadedCvId) {
+    setContinueState(true);
+    return;
+  }
+  currentUpload = file;
+  uploadedCvId = null;
+  localStorage.removeItem('skillbridgeUploadedCvId');
+  setContinueState(false);
+  uploadStatus.textContent = 'Uploading CV to your account…';
+  uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
+    const formData = new FormData();
+    formData.append('cv', file);
+    return formData;
+  })())
+    .then((response) => {
+      const cv = window.SkillBridgeApi.unwrap(response);
+      if (!cv?.id) throw new Error('The API response did not include the uploaded CV ID.');
+      uploadedCvId = cv.id;
+      localStorage.setItem('skillbridgeUploadedCvId', cv.id);
+      setContinueState(true);
+    })
+    .catch((error) => {
+      uploadError.textContent = error.message;
+      uploadError.classList.remove('hidden');
+      setContinueState(false);
+      uploadStatus.textContent = 'CV upload failed. Retry after checking your connection.';
+    });
 }
 
 browseButton.addEventListener('click', (event) => {
@@ -105,14 +147,30 @@ uploadZone.addEventListener('drop', (event) => {
   showFile(file);
 });
 
-document.getElementById('remove-file').addEventListener('click', () => {
+document.getElementById('remove-file').addEventListener('click', async () => {
+  const removeButton = document.getElementById('remove-file');
+  removeButton.disabled = true;
+  try {
+    if (uploadedCvId && window.SkillBridgeApi.session()) {
+      await window.SkillBridgeApi.delete(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}`);
+    }
+  } catch (error) {
+    uploadError.textContent = `The uploaded CV could not be removed from your account: ${error.message}`;
+    uploadError.classList.remove('hidden');
+    removeButton.disabled = false;
+    return;
+  }
   fileInput.value = '';
+  currentUpload = null;
+  uploadedCvId = null;
+  localStorage.removeItem('skillbridgeUploadedCvId');
   localStorage.removeItem('skillbridgeUploadedCvName');
   uploadedPanel.classList.add('hidden');
   setContinueState(false);
   parsePercent.textContent = '0%';
   parseProgressLabel.textContent = '0% Complete';
   parseProgress.style.width = '0%';
+  removeButton.disabled = false;
 });
 
 document.getElementById('retry-parse').addEventListener('click', () => {
@@ -121,8 +179,8 @@ document.getElementById('retry-parse').addEventListener('click', () => {
     uploadError.classList.remove('hidden');
     return;
   }
+  currentUpload = null;
   showFile(fileInput.files[0]);
-  announceDiagnostic('File checks passed. Parsing preview refreshed.');
 });
 
 document.querySelector('a[href="#compress"]')?.addEventListener('click', (event) => {
@@ -161,9 +219,49 @@ document.getElementById('text-native-pdf-button').addEventListener('click', () =
   announceDiagnostic('Choose a text-native PDF (maximum 5 MB).');
 });
 
-continueButton.addEventListener('click', (event) => {
-  if (!fileInput.files.length) {
+continueButton.addEventListener('click', async (event) => {
+  event.preventDefault();
+  if (!fileInput.files.length || !uploadedCvId) {
     event.preventDefault();
-    setContinueState(false);
+    if (uploadPromise) await uploadPromise;
+    if (!uploadedCvId) {
+      uploadError.textContent = fileInput.files.length
+        ? 'Upload your CV successfully before continuing.'
+        : 'Choose a CV file before continuing.';
+      uploadError.classList.remove('hidden');
+      setContinueState(false);
+      return;
+    }
+  }
+  const survey = (() => {
+    try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
+    catch { return {}; }
+  })();
+  const careers = {
+    'fintech-data': 'Junior Fintech Data Analyst',
+    backend: 'Associate Backend Engineer',
+    'growth-product': 'Growth Product Associate',
+  };
+  const role = localStorage.getItem('skillbridgeSelectedCareer') || careers[survey.track] || 'Junior Fintech Data Analyst';
+  const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
+  continueButton.setAttribute('aria-disabled', 'true');
+  continueButton.classList.add('pointer-events-none', 'opacity-50');
+  uploadStatus.textContent = 'Analyzing your CV…';
+  try {
+    const response = await window.SkillBridgeApi.post(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}/analyze`, {
+      targetJobTitle: role,
+      industryFocus: survey.track === 'fintech-data' ? 'Financial Technology' : 'Technology',
+      careerStage,
+      primaryGoal: 'Gap Analysis',
+    });
+    const analysis = window.SkillBridgeApi.unwrap(response);
+    if (!analysis?.skillGapId) throw new Error('The API response did not include a skill-gap analysis ID.');
+    localStorage.setItem('skillbridgeSkillGapId', analysis.skillGapId);
+    window.location.href = 'career-paths.html';
+  } catch (error) {
+    uploadError.textContent = error.message;
+    uploadError.classList.remove('hidden');
+    uploadStatus.textContent = 'CV analysis could not be completed.';
+    setContinueState(true);
   }
 });

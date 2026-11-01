@@ -110,12 +110,15 @@
     setField('edit-name', name); setField('edit-institution', survey.institution); setField('edit-degree', degree); setField('edit-location', location); open('edit-profile-dialog');
   });
   document.querySelectorAll('[data-close-edit]').forEach((button) => button.addEventListener('click', () => close('edit-profile-dialog')));
-  $('#edit-profile-form')?.addEventListener('submit', (event) => {
+  $('#edit-profile-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const nextName = $('#edit-name').value.trim();
     const nextInstitution = $('#edit-institution').value.trim();
     const nextDegree = $('#edit-degree').value.trim();
     const nextLocation = $('#edit-location').value.trim();
+    const form = $('#edit-profile-form');
+    const status = $('#edit-profile-status');
+    const submitButton = form.querySelector('[type="submit"]');
     const nextUser = { ...user, name: nextName };
     const nextSurvey = {
       ...survey,
@@ -126,9 +129,25 @@
       classification: '',
       location: nextLocation,
     };
-    localStorage.setItem('skillbridge_user', JSON.stringify(nextUser));
-    localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: nextSurvey }));
-    close('edit-profile-dialog'); window.location.reload();
+    submitButton.disabled = true;
+    status.classList.remove('hidden', 'text-red-700');
+    status.textContent = 'Saving your profile…';
+    try {
+      await window.SkillBridgeApi.put('/api/v1/profiles/me', {
+        location: nextLocation || null,
+        education: [nextDegree, nextInstitution].filter(Boolean).join(' - ') || null,
+      });
+      await window.SkillBridgeApi.put('/api/v1/users/me', { fullName: nextName });
+      localStorage.setItem('skillbridge_user', JSON.stringify(nextUser));
+      localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: nextSurvey }));
+      close('edit-profile-dialog');
+      window.location.reload();
+    } catch (error) {
+      status.classList.add('text-red-700');
+      status.textContent = `Profile could not be fully saved: ${error.message}`;
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 
   $('#edit-criteria-button')?.addEventListener('click', () => {
@@ -136,14 +155,24 @@
     setField('criteria-min-salary', low); setField('criteria-max-salary', high); open('edit-criteria-dialog');
   });
   document.querySelectorAll('[data-close-criteria]').forEach((button) => button.addEventListener('click', () => close('edit-criteria-dialog')));
-  $('#edit-criteria-form')?.addEventListener('submit', (event) => {
+  $('#edit-criteria-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const min = Number($('#criteria-min-salary').value); const max = Number($('#criteria-max-salary').value);
     if (!min || !max || max <= min) return announce('Check your salary range', 'Maximum salary must be greater than minimum salary.');
-    const updated = { ...survey, availability: ({ 'Immediate Placement': 'immediate', 'Currently Serving': 'serving', 'Final Year Student': 'final-year' })[$('#criteria-availability').value], payMin: String(min), payMax: String(max) };
-    localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: updated }));
-    localStorage.setItem('skillbridgeSelectedCareer', $('#criteria-role').value);
-    close('edit-criteria-dialog'); window.location.reload();
+    const form = $('#edit-criteria-form');
+    const submitButton = form.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal: $('#criteria-role').value });
+      const updated = { ...survey, availability: ({ 'Immediate Placement': 'immediate', 'Currently Serving': 'serving', 'Final Year Student': 'final-year' })[$('#criteria-availability').value], payMin: String(min), payMax: String(max) };
+      localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: updated }));
+      localStorage.setItem('skillbridgeSelectedCareer', $('#criteria-role').value);
+      close('edit-criteria-dialog'); window.location.reload();
+    } catch (error) {
+      announce('Preferences could not be saved', error.message);
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 
   $('#share-profile-button')?.addEventListener('click', () => announce('Public profile link', 'A public share URL is not available in this local prototype. Your profile details remain in this browser.'));
@@ -153,11 +182,49 @@
   $('#configure-two-factor')?.addEventListener('click', () => open('two-factor-dialog'));
   $('#logout-devices')?.addEventListener('click', () => {
     if (!window.confirm('Sign out of this browser?')) return;
-    localStorage.removeItem('skillbridge_session'); sessionStorage.removeItem('skillbridge_session'); window.location.href = 'signin.html';
+    window.SkillBridgeApi.clearSession(); window.location.href = 'signin.html';
   });
   $('#request-deletion')?.addEventListener('click', () => announce('Account deletion', 'Account deletion requests need a secure account service. No profile data was removed.'));
   document.querySelectorAll('dialog').forEach((dialog) => dialog.addEventListener('click', (event) => {
     const rect = dialog.getBoundingClientRect();
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   }));
+
+  if (window.SkillBridgeApi.session()) {
+    window.SkillBridgeApi.get('/api/v1/profiles/me')
+      .then(async (response) => {
+        const account = window.SkillBridgeApi.unwrap(response);
+        const remoteProfile = account?.profile;
+        if (account?.fullName) {
+          user.name = account.fullName;
+          user.email = account.email || user.email;
+          localStorage.setItem('skillbridge_user', JSON.stringify(user));
+          const remoteFirst = account.fullName.trim().split(/\s+/)[0] || 'Candidate';
+          const remoteLast = account.fullName.trim().split(/\s+/).slice(-1)[0] || '';
+          setText('profile-name', account.fullName);
+          setText('profile-name-mobile', account.fullName);
+          setText('profile-initials', account.fullName.trim().split(/\s+/).slice(0, 2).map((part) => part[0].toUpperCase()).join(''));
+          setText('profile-topbar-name', `${remoteFirst} ${remoteLast && remoteLast !== remoteFirst ? `${remoteLast[0]}.` : ''}`.trim());
+        }
+        if (remoteProfile?.location) setText('profile-location', remoteProfile.location);
+        if (remoteProfile?.careerGoal) setText('target-role', remoteProfile.careerGoal);
+        try {
+          const result = await window.SkillBridgeApi.get('/api/v1/cvs/my-cvs');
+          const cvs = window.SkillBridgeApi.unwrap(result);
+          const items = Array.isArray(cvs) ? cvs : cvs?.items || [];
+          const latest = items[0];
+          if (latest?.fileName) {
+            setText('active-cv-name', latest.fileName);
+            $('#cv-uploaded-state')?.classList.remove('hidden');
+            $('#cv-empty-state')?.classList.add('hidden');
+            $('#verified-competencies')?.classList.remove('hidden');
+          }
+        } catch (error) {
+          window.SkillBridgeApi.showStatus('active-cv-name', `CV records could not be refreshed: ${error.message}`, true);
+        }
+      })
+      .catch((error) => {
+        window.SkillBridgeApi.showStatus('profile-name', `Profile data could not be refreshed: ${error.message}`, true);
+      });
+  }
 })();

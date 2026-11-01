@@ -195,3 +195,37 @@ messageDialog.addEventListener('click', (event) => {
 document.getElementById('notifications-button').addEventListener('click', () => {
   showMessage('Notifications', 'You’re all caught up. Interview and cohort updates will appear here.');
 });
+
+const apiStatus = document.createElement('p');
+apiStatus.className = 'mx-auto mt-3 max-w-[1400px] px-5 text-xs text-[#625B6D]';
+apiStatus.setAttribute('role', 'status');
+document.querySelector('main')?.before(apiStatus);
+const loadApiDashboard = async () => {
+  if (!window.SkillBridgeApi.session()) {
+    apiStatus.textContent = 'Sign in to sync dashboard data from the SkillBridge API.';
+    return;
+  }
+  const results = await Promise.allSettled([
+    window.SkillBridgeApi.get('/api/v1/users/me'),
+    window.SkillBridgeApi.get('/api/v1/roadmaps'),
+    window.SkillBridgeApi.get('/api/v1/skill-gaps'),
+    window.SkillBridgeApi.get('/api/v1/progress'),
+  ]);
+  const data = results.map((result) => result.status === 'fulfilled'
+    ? window.SkillBridgeApi.unwrap(result.value)
+    : null);
+  const account = data[0];
+  if (account?.fullName) {
+    document.querySelectorAll('[data-candidate-name]').forEach((element) => { element.textContent = account.fullName; });
+    const first = account.fullName.trim().split(/\s+/)[0] || 'Candidate';
+    const last = account.fullName.trim().split(/\s+/).slice(-1)[0] || '';
+    document.getElementById('dashboard-user-name').textContent = `${first} ${last ? `${last[0]}.` : ''}`.trim();
+  }
+  const roadmaps = Array.isArray(data[1]) ? data[1] : data[1]?.items || [];
+  const gaps = Array.isArray(data[2]) ? data[2] : [];
+  const progress = Array.isArray(data[3]) ? data[3] : [];
+  const failures = results.filter((result) => result.status === 'rejected').map((result) => result.reason.message);
+  apiStatus.textContent = `${roadmaps.length} roadmaps, ${gaps.length} skill-gap analyses, and ${progress.length} learning records loaded from the API.${failures.length ? ` Some data could not be refreshed: ${failures.join(' ')}` : ''}`;
+  apiStatus.classList.toggle('text-red-700', failures.length > 0);
+};
+loadApiDashboard();

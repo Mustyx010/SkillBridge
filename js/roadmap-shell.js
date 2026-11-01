@@ -119,3 +119,111 @@ document.querySelectorAll('[data-roadmap-action]').forEach((button) => button.ad
   }
   roadmapNotice(messages[action] || 'This roadmap action is ready.');
 }));
+
+const roadmapMain = document.querySelector('main[aria-label="Personalized career roadmap"]');
+const roadmapApiPanel = document.createElement('section');
+roadmapApiPanel.className = 'hidden rounded-2xl bg-white p-5 shadow-sm sm:p-6';
+roadmapApiPanel.setAttribute('aria-labelledby', 'api-roadmap-title');
+const staticWeekNav = roadmapMain.querySelector('[aria-label="Roadmap weeks"]');
+const staticRoadmapContent = staticWeekNav?.nextElementSibling;
+roadmapMain.firstElementChild?.after(roadmapApiPanel);
+
+const roadmapsFrom = (response) => {
+  const data = window.SkillBridgeApi.unwrap(response);
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  return data?.id ? [data] : [];
+};
+
+const loadApiRoadmap = async () => {
+  try {
+    let roadmaps = roadmapsFrom(await window.SkillBridgeApi.get('/api/v1/roadmaps'));
+    if (!roadmaps.length) {
+      let skillGapId = localStorage.getItem('skillbridgeSkillGapId');
+      if (!skillGapId) {
+        const gaps = window.SkillBridgeApi.unwrap(await window.SkillBridgeApi.get('/api/v1/skill-gaps'));
+        const gapList = Array.isArray(gaps) ? gaps : gaps?.items || [];
+        skillGapId = gapList[0]?.id;
+      }
+      if (!skillGapId) {
+        window.SkillBridgeApi.showStatus(roadmapApiPanel, 'No API roadmap is available yet. Complete CV analysis to create a skill gap, then generate your roadmap.');
+        roadmapApiPanel.classList.remove('hidden');
+        return;
+      }
+      localStorage.setItem('skillbridgeSkillGapId', skillGapId);
+      await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
+      roadmaps = roadmapsFrom(await window.SkillBridgeApi.get('/api/v1/roadmaps'));
+    }
+
+    const roadmap = roadmaps[0];
+    if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
+    const response = await window.SkillBridgeApi.get(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}`);
+    const data = window.SkillBridgeApi.unwrap(response);
+    const tasksByPhase = data?.tasksByPhase || {};
+    const tasks = [30, 60, 90].flatMap((phase) => (tasksByPhase[String(phase)] || []).map((task) => ({ ...task, phase })));
+    if (!tasks.length) {
+      window.SkillBridgeApi.showStatus(roadmapApiPanel, 'Your API roadmap has no tasks yet.');
+      roadmapApiPanel.classList.remove('hidden');
+      return;
+    }
+
+    roadmapApiPanel.replaceChildren();
+    const title = document.createElement('h2');
+    title.id = 'api-roadmap-title';
+    title.className = 'text-lg font-bold';
+    title.textContent = data.title || roadmap.title || 'Your generated roadmap';
+    const subtitle = document.createElement('p');
+    subtitle.className = 'mt-1 text-sm text-[#625B6D]';
+    subtitle.textContent = `${tasks.length} tasks from your API roadmap. Mark tasks done to sync progress.`;
+    const taskList = document.createElement('div');
+    taskList.className = 'mt-4 grid gap-3 md:grid-cols-2';
+    tasks.forEach((task) => {
+      const item = document.createElement('article');
+      item.className = 'rounded-xl bg-[#F8F4FF] p-4';
+      const phase = document.createElement('p');
+      phase.className = 'text-[10px] font-bold uppercase text-[#731F94]';
+      phase.textContent = `Phase ${task.phase} days • ${task.taskType || 'task'}`;
+      const taskTitle = document.createElement('h3');
+      taskTitle.className = 'mt-1 text-sm font-semibold';
+      taskTitle.textContent = task.title || 'Untitled task';
+      const description = document.createElement('p');
+      description.className = 'mt-1 text-xs leading-5 text-[#625B6D]';
+      description.textContent = task.description || '';
+      const status = document.createElement('p');
+      status.className = 'mt-2 text-[10px] font-semibold text-[#625B6D]';
+      status.textContent = `Status: ${task.status || 'todo'}`;
+      const updateButton = document.createElement('button');
+      updateButton.type = 'button';
+      updateButton.className = 'mt-3 rounded-lg bg-[#731F94] px-3 py-2 text-xs font-semibold text-white';
+      updateButton.textContent = task.status === 'done' ? 'Reopen task' : 'Mark complete';
+      updateButton.addEventListener('click', async () => {
+        updateButton.disabled = true;
+        try {
+          const nextStatus = task.status === 'done' ? 'todo' : 'done';
+          await window.SkillBridgeApi.patch(
+            `/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}/tasks/${encodeURIComponent(task.id)}`,
+            { status: nextStatus },
+          );
+          task.status = nextStatus;
+          status.textContent = `Status: ${nextStatus}`;
+          updateButton.textContent = nextStatus === 'done' ? 'Reopen task' : 'Mark complete';
+        } catch (error) {
+          roadmapNotice(`Could not update task: ${error.message}`);
+        } finally {
+          updateButton.disabled = false;
+        }
+      });
+      item.append(phase, taskTitle, description, status, updateButton);
+      taskList.append(item);
+    });
+    roadmapApiPanel.append(title, subtitle, taskList);
+    roadmapApiPanel.classList.remove('hidden');
+    staticWeekNav?.classList.add('hidden');
+    staticRoadmapContent?.classList.add('hidden');
+  } catch (error) {
+    roadmapApiPanel.classList.remove('hidden');
+    window.SkillBridgeApi.showStatus(roadmapApiPanel, `Your roadmap could not be loaded: ${error.message}`, true);
+  }
+};
+
+loadApiRoadmap();

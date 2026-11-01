@@ -66,7 +66,7 @@ dialog.addEventListener('click', (event) => {
 
 const actionContent = {
   notes: ['Sprint 2 Review Notes', 'Practice multi-table joins, common table expressions, and window functions. The capstone milestone applies these patterns to anonymized Lagos commute data.', 'Continue Sprint', 'roadmap.html'],
-  diagnostic: ['Retake Diagnostic', 'Your saved assessment score remains available while you retake the sample diagnostic. Open the assessment page to start a fresh benchmark.', 'Open Diagnostic', 'profile-review.html'],
+  diagnostic: ['Your Skill Gap Analysis', 'Review the latest skill-gap analysis saved to your account, including current skills and areas to develop.', 'Review Skill Gaps', 'skill-gap.html'],
   mentor: ['Mentor Office Hours', 'Mentor office hours are scheduled for Thursday at 4:00 PM West Africa Time. Add a reminder to your calendar and prepare one question about your current sprint.', '', ''],
   pro: ['SkillBridge Pro Advantage', 'Pro includes AI resume tools and direct recruiter introductions. Subscription checkout is not connected in this preview.', '', ''],
 };
@@ -139,3 +139,52 @@ joinButton.addEventListener('click', () => {
   openDialog(joined ? 'You left the study room' : 'You joined the study room', joined ? 'You can rejoin the Lekki-Yaba Analyst Peer Squad any time.' : 'You are on the peer squad list. Study room access is shown here as a prototype interaction.');
 });
 updateJoinButton();
+
+const dashboardApiStatus = document.createElement('p');
+dashboardApiStatus.className = 'text-xs text-[#625B6D]';
+dashboardApiStatus.setAttribute('role', 'status');
+document.querySelector('main > section')?.after(dashboardApiStatus);
+
+const loadDashboardApiSummary = async () => {
+  if (!window.SkillBridgeApi.session()) {
+    dashboardApiStatus.textContent = 'Sign in to sync your account, roadmap, skill gaps, and opportunity data.';
+    return;
+  }
+  const results = await Promise.allSettled([
+    window.SkillBridgeApi.get('/api/v1/users/me'),
+    window.SkillBridgeApi.get('/api/v1/profiles/me'),
+    window.SkillBridgeApi.get('/api/v1/roadmaps'),
+    window.SkillBridgeApi.get('/api/v1/skill-gaps'),
+    window.SkillBridgeApi.get('/api/v1/opportunities'),
+    window.SkillBridgeApi.get('/api/v1/progress'),
+  ]);
+  const unwrap = (result) => result.status === 'fulfilled' ? window.SkillBridgeApi.unwrap(result.value) : null;
+  const account = unwrap(results[0]);
+  const profile = unwrap(results[1])?.profile;
+  const roadmapData = unwrap(results[2]);
+  const gapData = unwrap(results[3]);
+  const opportunityData = unwrap(results[4]);
+  const progressData = unwrap(results[5]);
+  if (account?.fullName) {
+    const first = account.fullName.trim().split(/\s+/)[0] || 'Candidate';
+    const last = account.fullName.trim().split(/\s+/).slice(-1)[0] || '';
+    document.querySelectorAll('[data-candidate-name]').forEach((element) => { element.textContent = first; });
+    document.getElementById('topbar-user-name').textContent = `${first} ${last ? `${last[0]}.` : ''}`.trim();
+  }
+  if (profile?.careerGoal) {
+    document.querySelectorAll('[data-track-name]').forEach((element) => { element.textContent = profile.careerGoal; });
+    document.getElementById('topbar-user-track').textContent = profile.careerGoal;
+  }
+  const roadmaps = Array.isArray(roadmapData) ? roadmapData : roadmapData?.items || [];
+  const gaps = Array.isArray(gapData) ? gapData : [];
+  const opportunities = Array.isArray(opportunityData?.items) ? opportunityData.items : [];
+  const progress = Array.isArray(progressData) ? progressData : [];
+  const failures = results.filter((result) => result.status === 'rejected').map((result) => result.reason.message);
+  const summary = `${roadmaps.length} roadmaps, ${gaps.length} skill-gap analyses, ${opportunities.length} opportunities, and ${progress.length} learning progress records loaded from the API.`;
+  dashboardApiStatus.classList.toggle('text-red-700', failures.length > 0);
+  dashboardApiStatus.textContent = failures.length
+    ? `${summary} Some data could not be refreshed: ${failures.join(' ')}`
+    : summary;
+};
+
+loadDashboardApiSummary();

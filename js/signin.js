@@ -54,7 +54,7 @@ if (signinForm) {
     input.addEventListener('input', () => showError(input, ''));
   });
 
-  signinForm.addEventListener('submit', (e) => {
+  signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
     const emailOk = isEmail(email);
@@ -65,10 +65,22 @@ if (signinForm) {
     if (!emailOk) return emailInput.focus();
     if (!passwordOk) return passwordInput.focus();
 
-    // No backend yet: remember the session in the browser only
-    const store = signinForm.elements['remember'].checked ? localStorage : sessionStorage;
-    store.setItem('skillbridge_session', JSON.stringify({ email }));
-    window.location.href = 'dashboard.html';
+    const submitButton = signinForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      const response = await window.SkillBridgeApi.post('/api/auth/login', {
+        email,
+        password: passwordInput.value,
+      }, { auth: false });
+      const { user, token } = response?.data || {};
+      if (!user || !token) throw new Error('The API response did not include a user and access token.');
+      window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
+      window.location.href = 'dashboard.html';
+    } catch (error) {
+      window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 }
 
@@ -107,6 +119,13 @@ forgotPassword?.addEventListener('click', (event) => {
     status.textContent = 'Enter your email address above to request a password reset.';
     email.focus();
   } else {
-    status.textContent = 'Password reset email delivery is not connected in this demo yet.';
+    status.textContent = 'Sending password reset request…';
+    window.SkillBridgeApi.post('/api/auth/forgot-password', { email: email.value.trim() }, { auth: false })
+      .then((response) => {
+        status.textContent = response?.message || 'If an account exists for this address, password reset instructions will be sent.';
+      })
+      .catch((error) => {
+        status.textContent = error.message;
+      });
   }
 });

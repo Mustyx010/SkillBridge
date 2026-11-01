@@ -105,7 +105,7 @@ if (signupForm) {
   });
   f.terms.addEventListener('change', () => showError(f.terms, ''));
 
-  signupForm.addEventListener('submit', (e) => {
+  signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = f.name.value.trim();
     const email = f.email.value.trim();
@@ -122,7 +122,36 @@ if (signupForm) {
       return;
     }
 
-    localStorage.setItem('skillbridge_user', JSON.stringify({ name, email }));
-    window.location.href = 'survey.html';
+    const submitButton = signupForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      const registration = await window.SkillBridgeApi.post('/api/auth/register', {
+        fullName: name,
+        email,
+        password: f.password.value,
+      }, { auth: false });
+      const registeredUser = registration?.data;
+      localStorage.setItem('skillbridge_user', JSON.stringify({
+        name: registeredUser?.fullName || name,
+        email: registeredUser?.email || email,
+        id: registeredUser?.id,
+      }));
+      try {
+        const login = await window.SkillBridgeApi.post('/api/auth/login', {
+          email,
+          password: f.password.value,
+        }, { auth: false });
+        const { user, token } = login?.data || {};
+        if (!user || !token) throw new Error('The API response did not include a user and access token.');
+        window.SkillBridgeApi.setSession(user, token);
+        window.location.href = 'survey.html';
+      } catch (error) {
+        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Sign in to continue.`, true);
+      }
+    } catch (error) {
+      window.SkillBridgeApi.showStatus(signupForm, error.message, true);
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 }

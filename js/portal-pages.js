@@ -68,7 +68,7 @@ if (dashboard && document.getElementById('welcome-name')) {
     ['Associate Analytics Engineer', 'Python, Pandas, data, Moniepoint'],
     ['Growth Analytics Associate', 'cohort, growth, analytics, PiggyVest'],
     ['60-Day Accelerated Roadmap', 'capstone, sprint, SQL'],
-    ['Extracted Skills & Parser Log', 'skills, CV, profile'],
+    ['Skill Gap Analysis', 'skills, benchmark, CV, profile'],
   ];
   const goToSearch = (query) => { window.location.href = `opportunities.html?q=${encodeURIComponent(query)}`; };
   const renderSuggestions = () => {
@@ -91,7 +91,7 @@ if (dashboard && document.getElementById('welcome-name')) {
         button.append(label, hint);
         button.addEventListener('click', () => {
           if (title.includes('Roadmap')) window.location.href = 'roadmap.html';
-          else if (title.includes('Skills')) window.location.href = 'profile-review.html';
+          else if (title.includes('Skill Gap')) window.location.href = 'skill-gap.html';
           else goToSearch(title);
         });
         results.append(button);
@@ -225,7 +225,7 @@ if (roadmapChecks.length) {
 
 // Opportunities: filter by role text/location and persist saved openings.
 const opportunityForm = document.getElementById('opportunity-filters');
-if (opportunityForm) {
+if (opportunityForm && !document.getElementById('opportunity-list')) {
   const cards = [...document.querySelectorAll('.opportunity-card')];
   const search = document.getElementById('opportunity-search');
   const location = document.getElementById('location-filter');
@@ -284,6 +284,23 @@ if (resourceList) {
   const status = document.getElementById('resource-status');
   const search = document.getElementById('resource-search');
   let activeFilter = 'all';
+  const apiSection = document.createElement('section');
+  apiSection.className = 'rounded-2xl bg-white p-5 shadow-sm sm:p-6';
+  apiSection.setAttribute('aria-labelledby', 'api-recommendations-title');
+  const apiTitle = document.createElement('h2');
+  apiTitle.id = 'api-recommendations-title';
+  apiTitle.className = 'text-lg font-bold text-[#731F94]';
+  apiTitle.textContent = 'Recommended learning from your profile';
+  const apiStatus = document.createElement('p');
+  apiStatus.className = 'mt-2 text-xs text-[#625B6D]';
+  apiStatus.setAttribute('role', 'status');
+  const apiCards = document.createElement('div');
+  apiCards.className = 'mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3';
+  apiSection.append(apiTitle, apiStatus, apiCards);
+  status?.after(apiSection);
+  let apiRecommendationCards = [];
+  let progressByRecommendation = new Map();
+
   const filterResources = () => {
     const query = search?.value.trim().toLowerCase() || '';
     let visibleCount = 0;
@@ -292,6 +309,12 @@ if (resourceList) {
       const matchesQuery = !query || resource.textContent.toLowerCase().includes(query);
       resource.hidden = !matchesCategory || !matchesQuery;
       if (!resource.hidden) visibleCount += 1;
+    });
+    apiRecommendationCards.forEach((card) => {
+      const matchesCategory = activeFilter === 'all' || card.dataset.category === activeFilter;
+      const matchesQuery = !query || card.textContent.toLowerCase().includes(query);
+      card.hidden = !matchesCategory || !matchesQuery;
+      if (!card.hidden) visibleCount += 1;
     });
     if (status && query && visibleCount === 0) status.textContent = 'No learning opportunities match your search.';
     else if (status && query) status.textContent = `${visibleCount} ${visibleCount === 1 ? 'opportunity' : 'opportunities'} found.`;
@@ -330,6 +353,129 @@ if (resourceList) {
   });
   updateResourceButtons();
   filterResources();
+
+  const renderApiRecommendations = (recommendations) => {
+    apiCards.replaceChildren();
+    apiRecommendationCards = [];
+    recommendations.forEach((recommendation) => {
+      const categoryText = `${recommendation.skill?.category || ''} ${recommendation.skill?.name || ''}`.toLowerCase();
+      const category = categoryText.includes('backend') || categoryText.includes('engineering')
+        ? 'backend'
+        : categoryText.includes('product') || categoryText.includes('growth')
+          ? 'product'
+          : 'data';
+      const card = document.createElement('article');
+      card.className = 'api-recommendation rounded-xl bg-[#F8F4FF] p-4';
+      card.dataset.category = category;
+      const type = document.createElement('p');
+      type.className = 'text-[10px] font-bold uppercase tracking-wide text-[#731F94]';
+      type.textContent = `${recommendation.type === 'project' ? 'Project' : 'Learning resource'}${recommendation.difficulty ? ` • ${recommendation.difficulty}` : ''}`;
+      const title = document.createElement('h3');
+      title.className = 'mt-2 text-sm font-bold';
+      title.textContent = recommendation.title || 'Recommended resource';
+      const description = document.createElement('p');
+      description.className = 'mt-1 text-xs leading-5 text-[#625B6D]';
+      description.textContent = recommendation.description || '';
+      const actions = document.createElement('div');
+      actions.className = 'mt-3 flex flex-wrap items-center gap-2';
+      if (recommendation.url) {
+        try {
+          const resourceUrl = new URL(recommendation.url);
+          if (['http:', 'https:'].includes(resourceUrl.protocol)) {
+            const link = document.createElement('a');
+            link.className = 'rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#731F94]';
+            link.href = resourceUrl.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = 'Open resource';
+            actions.append(link);
+          }
+        } catch {
+          apiStatus.textContent = 'One recommended resource has an invalid URL and was not linked.';
+        }
+      }
+      const progressButton = document.createElement('button');
+      progressButton.type = 'button';
+      progressButton.className = 'rounded-lg bg-[#731F94] px-3 py-2 text-xs font-semibold text-white';
+      actions.append(progressButton);
+      card.append(type, title, description, actions);
+      apiCards.append(card);
+      apiRecommendationCards.push(card);
+
+      const updateProgressButton = () => {
+        const progress = progressByRecommendation.get(recommendation.id);
+        progressButton.textContent = !progress
+          ? 'Start learning'
+          : progress.status === 'completed'
+            ? 'Reopen learning'
+            : 'Mark complete';
+      };
+      progressButton.addEventListener('click', async () => {
+        progressButton.disabled = true;
+        try {
+          const progress = progressByRecommendation.get(recommendation.id);
+          let response;
+          if (!progress) {
+            response = await window.SkillBridgeApi.post('/api/v1/progress', { recommendationId: recommendation.id });
+          } else {
+            const completed = progress.status !== 'completed';
+            response = await window.SkillBridgeApi.patch(`/api/v1/progress/${encodeURIComponent(progress.id)}`, {
+              status: completed ? 'completed' : 'in_progress',
+              progressPercentage: completed ? 100 : 0,
+            });
+          }
+          const record = window.SkillBridgeApi.unwrap(response);
+          const nextProgress = record?.id ? record : record?.progress || record;
+          if (!nextProgress?.id) throw new Error('The API did not return a progress record.');
+          progressByRecommendation.set(recommendation.id, nextProgress);
+          updateProgressButton();
+          const completedCount = [...progressByRecommendation.values()].filter((item) => item.status === 'completed').length;
+          const count = document.getElementById('completed-module-count');
+          if (count) count.textContent = `${completedCount} of ${progressByRecommendation.size} recommendations`;
+          apiStatus.textContent = 'Learning progress saved to your account.';
+        } catch (error) {
+          apiStatus.textContent = `Progress could not be saved: ${error.message}`;
+        } finally {
+          progressButton.disabled = false;
+        }
+      });
+      updateProgressButton();
+    });
+    filterResources();
+  };
+
+  const loadApiRecommendations = async () => {
+    if (!window.SkillBridgeApi.session()) {
+      apiStatus.textContent = 'Sign in to load personalized recommendations and sync learning progress.';
+      return;
+    }
+    apiStatus.textContent = 'Loading recommendations…';
+    const [recommendationsResult, progressResult] = await Promise.allSettled([
+      window.SkillBridgeApi.get('/api/v1/recommendations/personalized'),
+      window.SkillBridgeApi.get('/api/v1/progress'),
+    ]);
+    if (recommendationsResult.status === 'rejected') {
+      apiStatus.textContent = `Recommendations could not be loaded: ${recommendationsResult.reason.message}`;
+      return;
+    }
+    const recommendations = window.SkillBridgeApi.unwrap(recommendationsResult.value);
+    if (!Array.isArray(recommendations)) {
+      apiStatus.textContent = 'The API returned an invalid recommendations list.';
+      return;
+    }
+    if (progressResult.status === 'fulfilled') {
+      const records = window.SkillBridgeApi.unwrap(progressResult.value);
+      progressByRecommendation = new Map((Array.isArray(records) ? records : []).map((record) => [record.recommendationId, record]));
+    } else {
+      apiStatus.textContent = `Recommendations loaded, but progress could not be fetched: ${progressResult.reason.message}`;
+    }
+    renderApiRecommendations(recommendations);
+    if (progressResult.status === 'fulfilled') apiStatus.textContent = `${recommendations.length} personalized recommendations loaded.`;
+    const completedCount = [...progressByRecommendation.values()].filter((item) => item.status === 'completed').length;
+    const count = document.getElementById('completed-module-count');
+    if (count && progressByRecommendation.size) count.textContent = `${completedCount} of ${progressByRecommendation.size} recommendations`;
+  };
+  loadApiRecommendations();
 }
 
 const sharedSidebar = document.getElementById('dashboard-sidebar');

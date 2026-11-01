@@ -15,8 +15,13 @@ pathSearch.addEventListener('input', () => {
   if (!pathSearch.value.trim()) pathCards.forEach((card) => { card.hidden = false; });
 });
 
+const pathStatus = document.createElement('p');
+pathStatus.className = 'mt-3 text-xs text-[#625B6D]';
+pathStatus.setAttribute('role', 'status');
+document.getElementById('career-path-list')?.before(pathStatus);
+
 document.querySelectorAll('.select-path').forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
     const card = button.closest('.career-card');
     pathCards.forEach((item) => item.classList.remove('ring-2', 'ring-[#8527A1]'));
     card.classList.add('ring-2', 'ring-[#8527A1]');
@@ -26,6 +31,16 @@ document.querySelectorAll('.select-path').forEach((button) => {
     document.querySelectorAll('.select-path').forEach((item) => {
       item.setAttribute('aria-pressed', String(item === button));
     });
+    button.disabled = true;
+    try {
+      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal: card.dataset.role });
+      pathStatus.textContent = `${card.dataset.role} saved as your profile career goal.`;
+    } catch (error) {
+      pathStatus.classList.add('text-red-700');
+      pathStatus.textContent = `The career path was selected locally, but could not be saved to your profile: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
   });
 });
 
