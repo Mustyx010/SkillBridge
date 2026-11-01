@@ -190,7 +190,21 @@
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   }));
 
-  if (window.SkillBridgeApi.session()) {
+  const activeSession = window.SkillBridgeApi.session();
+  if (activeSession?.offline) {
+    window.SkillBridgeApi.clearSession();
+    const profileHeading = document.getElementById('profile-name');
+    const signInNotice = document.createElement('p');
+    signInNotice.className = 'mt-3 text-sm text-[#625B6D]';
+    signInNotice.setAttribute('role', 'status');
+    signInNotice.append('Your previous local preview session has ended. ');
+    const signInLink = document.createElement('a');
+    signInLink.href = 'signin.html';
+    signInLink.className = 'font-semibold text-[#731F94] underline';
+    signInLink.textContent = 'Sign in to sync your profile';
+    signInNotice.append(signInLink, '.');
+    profileHeading?.insertAdjacentElement('afterend', signInNotice);
+  } else if (activeSession?.token) {
     window.SkillBridgeApi.get('/api/v1/profiles/me')
       .then(async (response) => {
         const account = window.SkillBridgeApi.unwrap(response);

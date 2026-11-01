@@ -146,8 +146,11 @@ dashboardApiStatus.setAttribute('role', 'status');
 document.querySelector('main > section')?.after(dashboardApiStatus);
 
 const loadDashboardApiSummary = async () => {
-  if (!window.SkillBridgeApi.session()) {
-    dashboardApiStatus.textContent = 'Sign in to sync your account, roadmap, skill gaps, and opportunity data.';
+  const session = window.SkillBridgeApi.session();
+  if (!session || session.offline) {
+    dashboardApiStatus.textContent = session?.offline
+      ? 'Local preview mode is active. You can navigate the app, but changes will not sync to the backend.'
+      : 'Sign in to sync your account, roadmap, skill gaps, and opportunity data.';
     return;
   }
   const results = await Promise.allSettled([

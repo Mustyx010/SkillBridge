@@ -1,15 +1,12 @@
 (() => {
-  const defaultBaseUrl = 'http://localhost:3000';
-  const configuredBaseUrl = window.SKILLBRIDGE_API_BASE_URL
-    || localStorage.getItem('skillbridge_api_base_url')
-    || defaultBaseUrl;
-  const baseUrl = configuredBaseUrl.replace(/\/+$/, '');
+  const baseUrl = (window.SKILLBRIDGE_API_BASE_URL || '').replace(/\/+$/, '');
+  const apiLabel = baseUrl || 'the same-origin API proxy';
 
   const readSession = () => {
     for (const storage of [sessionStorage, localStorage]) {
       try {
         const session = JSON.parse(storage.getItem('skillbridge_session') || 'null');
-        if (session?.token) return session;
+        if (session?.token || session?.offline) return session;
       } catch {
         storage.removeItem('skillbridge_session');
       }
@@ -31,6 +28,26 @@
     }
   };
 
+  const setOfflineSession = (user, remember = false) => {
+    const storage = remember ? localStorage : sessionStorage;
+    const otherStorage = remember ? sessionStorage : localStorage;
+    otherStorage.removeItem('skillbridge_session');
+    storage.setItem('skillbridge_session', JSON.stringify({ user, offline: true }));
+    if (user?.fullName || user?.name) {
+      localStorage.setItem('skillbridge_user', JSON.stringify({
+        name: user.fullName || user.name,
+        email: user.email,
+        id: user.id,
+      }));
+    }
+  };
+
+  const makeUnavailableError = (message) => {
+    const error = new Error(message);
+    error.code = 'API_UNAVAILABLE';
+    return error;
+  };
+
   const clearSession = () => {
     localStorage.removeItem('skillbridge_session');
     sessionStorage.removeItem('skillbridge_session');
@@ -39,7 +56,11 @@
   const request = async (path, options = {}) => {
     const { auth = true, body, headers = {}, ...requestOptions } = options;
     const requestHeaders = new Headers(headers);
-    const token = auth ? readSession()?.token : null;
+    const session = readSession();
+    if (session?.offline) {
+      throw makeUnavailableError('You are browsing in local preview mode. This action is not synced to the API.');
+    }
+    const token = auth ? session?.token : null;
     if (token) requestHeaders.set('Authorization', `Bearer ${token}`);
 
     let requestBody = body;
@@ -51,7 +72,7 @@
     let response;
     let responseText;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 55_000);
     try {
       response = await fetch(`${baseUrl}${path}`, {
         ...requestOptions,
@@ -62,9 +83,9 @@
       responseText = await response.text();
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw new Error(`The SkillBridge API request timed out at ${baseUrl}. Check that the backend is running.`);
+        throw makeUnavailableError(`The SkillBridge API request timed out at ${apiLabel}.`);
       }
-      throw new Error(`Could not reach SkillBridge API at ${baseUrl}. Check that the backend is running and allows this site through CORS.`);
+      throw makeUnavailableError(`Could not reach SkillBridge API at ${apiLabel}. Check the deployed API proxy and backend availability.`);
     } finally {
       clearTimeout(timeout);
     }
@@ -82,7 +103,9 @@
         || payload?.error
         || `The API request failed with status ${response.status}.`;
       if (response.status === 401 && auth) clearSession();
-      throw new Error(message);
+      const error = new Error(message);
+      if ([502, 503, 504].includes(response.status)) error.code = 'API_UNAVAILABLE';
+      throw error;
     }
     return payload;
   };
@@ -114,6 +137,8 @@
     delete: (path, options = {}) => request(path, { ...options, method: 'DELETE' }),
     session: readSession,
     setSession,
+    setOfflineSession,
+    isUnavailable: (error) => error?.code === 'API_UNAVAILABLE',
     clearSession,
     showStatus,
     unwrap: (response) => response?.data ?? response,

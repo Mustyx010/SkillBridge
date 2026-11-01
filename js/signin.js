@@ -77,7 +77,21 @@ if (signinForm) {
       window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
       window.location.href = 'dashboard.html';
     } catch (error) {
-      window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+      if (!window.SkillBridgeApi.isUnavailable(error)) {
+        window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+        return;
+      }
+      const localUser = { fullName: email.split('@')[0], email };
+      localStorage.setItem('skillbridge_user', JSON.stringify({
+        name: localUser.fullName,
+        email,
+      }));
+      window.SkillBridgeApi.setOfflineSession(localUser, signinForm.elements['remember'].checked);
+      window.SkillBridgeApi.showStatus(
+        signinForm,
+        'Backend unavailable. Signed in locally for preview; your data will not sync.',
+      );
+      window.location.href = 'dashboard.html';
     } finally {
       submitButton.disabled = false;
     }

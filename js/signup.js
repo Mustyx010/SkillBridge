@@ -146,10 +146,30 @@ if (signupForm) {
         window.SkillBridgeApi.setSession(user, token);
         window.location.href = 'survey.html';
       } catch (error) {
-        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Sign in to continue.`, true);
+        if (!window.SkillBridgeApi.isUnavailable(error)) {
+          window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Sign in to continue.`, true);
+          return;
+        }
+        window.SkillBridgeApi.setOfflineSession({
+          fullName: registeredUser?.fullName || name,
+          email: registeredUser?.email || email,
+          id: registeredUser?.id,
+        });
+        window.location.href = 'survey.html';
       }
     } catch (error) {
-      window.SkillBridgeApi.showStatus(signupForm, error.message, true);
+      if (!window.SkillBridgeApi.isUnavailable(error)) {
+        window.SkillBridgeApi.showStatus(signupForm, error.message, true);
+        return;
+      }
+      const localUser = { fullName: name, email };
+      localStorage.setItem('skillbridge_user', JSON.stringify({ name, email }));
+      window.SkillBridgeApi.setOfflineSession(localUser);
+      window.SkillBridgeApi.showStatus(
+        signupForm,
+        'Backend unavailable. Your account is saved locally for preview; it was not registered with the server.',
+      );
+      window.location.href = 'survey.html';
     } finally {
       submitButton.disabled = false;
     }

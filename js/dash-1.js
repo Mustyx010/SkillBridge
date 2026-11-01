@@ -201,8 +201,11 @@ apiStatus.className = 'mx-auto mt-3 max-w-[1400px] px-5 text-xs text-[#625B6D]';
 apiStatus.setAttribute('role', 'status');
 document.querySelector('main')?.before(apiStatus);
 const loadApiDashboard = async () => {
-  if (!window.SkillBridgeApi.session()) {
-    apiStatus.textContent = 'Sign in to sync dashboard data from the SkillBridge API.';
+  const session = window.SkillBridgeApi.session();
+  if (!session || session.offline) {
+    apiStatus.textContent = session?.offline
+      ? 'Local preview mode is active. Dashboard changes will not sync to the backend.'
+      : 'Sign in to sync dashboard data from the SkillBridge API.';
     return;
   }
   const results = await Promise.allSettled([

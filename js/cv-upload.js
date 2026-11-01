@@ -9,7 +9,7 @@ const parseProgress = document.getElementById('parse-progress');
 const parseProgressLabel = document.getElementById('parse-progress-label');
 const uploadStatus = document.getElementById('upload-status');
 const continueButton = document.getElementById('continue-button');
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_FILE_BYTES = 4 * 1024 * 1024;
 const compressorDialog = document.getElementById('compress-dialog');
 const diagnosticStatus = document.getElementById('diagnostic-action-status');
 let uploadedCvId = localStorage.getItem('skillbridgeUploadedCvId');
@@ -71,7 +71,7 @@ function showFile(file) {
     localStorage.removeItem('skillbridgeUploadedCvName');
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
-    uploadError.textContent = 'This file exceeds the 5 MB upload limit. Compress it and try again.';
+    uploadError.textContent = 'This file exceeds the 4 MB upload limit. Compress it and try again.';
     uploadError.classList.remove('hidden');
     return;
   }
@@ -92,6 +92,11 @@ function showFile(file) {
   currentUpload = file;
   uploadedCvId = null;
   localStorage.removeItem('skillbridgeUploadedCvId');
+  if (window.SkillBridgeApi.session()?.offline) {
+    setContinueState(true);
+    uploadStatus.textContent = 'Local preview mode. Your CV was not uploaded to the backend.';
+    return;
+  }
   setContinueState(false);
   uploadStatus.textContent = 'Uploading CV to your account…';
   uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
@@ -107,10 +112,23 @@ function showFile(file) {
       setContinueState(true);
     })
     .catch((error) => {
-      uploadError.textContent = error.message;
+      const session = window.SkillBridgeApi.session();
+      let storedUser = {};
+      try {
+        storedUser = JSON.parse(localStorage.getItem('skillbridge_user') || '{}');
+      } catch {
+        storedUser = {};
+      }
+      const user = session?.user || storedUser;
+      window.SkillBridgeApi.setOfflineSession({
+        fullName: user.fullName || user.name || 'Candidate',
+        email: user.email || '',
+        id: user.id,
+      });
+      uploadError.textContent = `${error.message} Continuing with a local preview; the CV was not uploaded.`;
       uploadError.classList.remove('hidden');
-      setContinueState(false);
-      uploadStatus.textContent = 'CV upload failed. Retry after checking your connection.';
+      setContinueState(true);
+      uploadStatus.textContent = 'Local preview mode. Your CV was not uploaded to the backend.';
     });
 }
 
@@ -216,22 +234,30 @@ document.getElementById('text-native-pdf-button').addEventListener('click', () =
   fileInput.dataset.pdfOnly = 'true';
   fileInput.accept = '.pdf,application/pdf';
   fileInput.click();
-  announceDiagnostic('Choose a text-native PDF (maximum 5 MB).');
+  announceDiagnostic('Choose a text-native PDF (maximum 4 MB).');
 });
 
 continueButton.addEventListener('click', async (event) => {
   event.preventDefault();
-  if (!fileInput.files.length || !uploadedCvId) {
-    event.preventDefault();
+  if (!fileInput.files.length) {
+    uploadError.textContent = 'Choose a CV file before continuing.';
+    uploadError.classList.remove('hidden');
+    setContinueState(false);
+    return;
+  }
+  if (!uploadedCvId && !window.SkillBridgeApi.session()?.offline) {
     if (uploadPromise) await uploadPromise;
     if (!uploadedCvId) {
-      uploadError.textContent = fileInput.files.length
-        ? 'Upload your CV successfully before continuing.'
-        : 'Choose a CV file before continuing.';
+      uploadError.textContent = 'Upload your CV successfully before continuing.';
       uploadError.classList.remove('hidden');
       setContinueState(false);
       return;
     }
+  }
+  if (window.SkillBridgeApi.session()?.offline) {
+    uploadStatus.textContent = 'Continuing in local preview. CV analysis was not sent to the backend.';
+    window.location.href = 'career-paths.html';
+    return;
   }
   const survey = (() => {
     try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
