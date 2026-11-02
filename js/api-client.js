@@ -57,7 +57,7 @@
     const { auth = true, body, headers = {}, ...requestOptions } = options;
     const requestHeaders = new Headers(headers);
     const session = readSession();
-    if (session?.offline) {
+    if (session?.offline && auth) {
       throw makeUnavailableError('You are browsing in local preview mode. This action is not synced to the API.');
     }
     const token = auth ? session?.token : null;
