@@ -68,7 +68,7 @@ if (signinForm) {
     const submitButton = signinForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      const response = await window.SkillBridgeApi.post('/api/auth/login', {
+      const response = await window.SkillBridgeApi.post('/api/v1/auth/login', {
         email,
         password: passwordInput.value,
       }, { auth: false });
@@ -134,7 +134,7 @@ forgotPassword?.addEventListener('click', (event) => {
     email.focus();
   } else {
     status.textContent = 'Sending password reset request…';
-    window.SkillBridgeApi.post('/api/auth/forgot-password', { email: email.value.trim() }, { auth: false })
+    window.SkillBridgeApi.post('/api/v1/auth/forgot-password', { email: email.value.trim() }, { auth: false })
       .then((response) => {
         status.textContent = response?.message || 'If an account exists for this address, password reset instructions will be sent.';
       })

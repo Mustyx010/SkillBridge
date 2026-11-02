@@ -125,7 +125,7 @@ if (signupForm) {
     const submitButton = signupForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      const registration = await window.SkillBridgeApi.post('/api/auth/register', {
+      const registration = await window.SkillBridgeApi.post('/api/v1/auth/register', {
         fullName: name,
         email,
         password: f.password.value,
@@ -137,7 +137,7 @@ if (signupForm) {
         id: registeredUser?.id,
       }));
       try {
-        const login = await window.SkillBridgeApi.post('/api/auth/login', {
+        const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
           email,
           password: f.password.value,
         }, { auth: false });
