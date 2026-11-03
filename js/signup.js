@@ -105,6 +105,34 @@ if (signupForm) {
   });
   f.terms.addEventListener('change', () => showError(f.terms, ''));
 
+  const verificationSection = document.getElementById('signup-verification-section');
+  const verificationForm = document.getElementById('signup-verification-form');
+  const verificationCode = verificationForm.elements['code'];
+  const verificationSuccess = document.getElementById('signup-verification-success');
+  const verificationAddress = document.getElementById('signup-verification-address');
+  let pendingVerificationEmail = '';
+
+  verificationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = verificationCode.value.trim();
+    if (!code) {
+      verificationCode.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the verification code from your email.', true);
+    }
+
+    const submitButton = verificationForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email: pendingVerificationEmail, code }, { auth: false });
+      verificationForm.classList.add('hidden');
+      verificationSuccess.classList.remove('hidden');
+    } catch (error) {
+      window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = f.name.value.trim();
@@ -136,11 +164,12 @@ if (signupForm) {
         email: registeredUser?.email || email,
         id: registeredUser?.id,
       }));
-      if (registeredUser?.isVerified === false) {
-        window.SkillBridgeApi.showStatus(
-          signupForm,
-          `Your account was created and a verification code was sent to ${email}, but the documented API does not provide an account email-verification endpoint. Ask the backend team how to verify your account.`,
-        );
+      if (registeredUser?.isVerified !== true) {
+        pendingVerificationEmail = email;
+        verificationAddress.textContent = email;
+        signupForm.classList.add('hidden');
+        verificationSection.classList.remove('hidden');
+        verificationCode.focus();
         return;
       }
       try {

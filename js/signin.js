@@ -54,6 +54,49 @@ if (signinForm) {
     input.addEventListener('input', () => showError(input, ''));
   });
 
+  const verificationForm = document.getElementById('signin-verification-form');
+  const verificationEmail = verificationForm.elements['email'];
+  const verificationCode = verificationForm.elements['code'];
+  const showVerificationButton = document.getElementById('show-signin-verification');
+  const verificationPanel = document.getElementById('signin-verification-panel');
+  showVerificationButton.addEventListener('click', () => {
+    const isOpen = showVerificationButton.getAttribute('aria-expanded') === 'true';
+    showVerificationButton.setAttribute('aria-expanded', String(!isOpen));
+    verificationPanel.classList.toggle('hidden', isOpen);
+    if (!isOpen) {
+      verificationEmail.value = emailInput.value.trim();
+      verificationEmail.focus();
+    }
+  });
+
+  verificationForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = verificationEmail.value.trim();
+    const code = verificationCode.value.trim();
+    if (!isEmail(email)) {
+      verificationEmail.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter a valid email address.', true);
+    }
+    if (!code) {
+      verificationCode.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the verification code from your email.', true);
+    }
+
+    const submitButton = verificationForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email, code }, { auth: false });
+      verificationCode.value = '';
+      emailInput.value = email;
+      window.SkillBridgeApi.showStatus(verificationForm, 'Email verified. You can now sign in with your password.');
+      passwordInput.focus();
+    } catch (error) {
+      window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
   signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();

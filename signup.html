@@ -103,6 +103,19 @@
             <p class="flex items-center justify-center gap-1.5 pt-1 text-[11px] text-[#625B6D]"><i class="ph ph-seal-check text-[#731F94]" aria-hidden="true"></i>100% Free for Nigerian Graduates • No Hidden Recruitment Deductions</p>
             <p class="pt-1 text-center text-[11px] text-[#625B6D]">Already registered? <a href="signin.html" class="font-semibold text-[#731F94] hover:underline">Sign In here</a></p>
           </form>
+
+          <section id="signup-verification-section" class="hidden" aria-labelledby="signup-verification-title">
+            <h2 id="signup-verification-title" class="text-lg font-bold">Check your email</h2>
+            <p class="mt-1 text-sm text-[#625B6D]">Enter the code sent to <span id="signup-verification-address"></span>.</p>
+            <form id="signup-verification-form" class="mt-4 space-y-3">
+              <label for="signup-verification-code" class="block text-sm font-semibold">Verification code</label>
+              <input id="signup-verification-code" name="code" type="text" autocomplete="one-time-code" required class="h-11 w-full rounded-lg border border-[#E8DDEE] px-4 text-sm outline-none focus:border-[#BD39E5] focus:ring-2 focus:ring-[#BD39E5]/20">
+              <button type="submit" class="flex h-11 w-full items-center justify-center rounded-lg bg-[#731F94] px-5 text-sm font-semibold text-white hover:bg-[#8D09B5]">Verify email</button>
+            </form>
+            <p id="signup-verification-success" class="hidden mt-3 text-sm text-[#397B65]" role="status">
+              Email verified. <a href="signin.html" class="font-semibold text-[#731F94] underline">Sign in</a>.
+            </p>
+          </section>
         </section>
 
         <aside class="space-y-5">
