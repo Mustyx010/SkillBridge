@@ -92,11 +92,6 @@ function showFile(file) {
   currentUpload = file;
   uploadedCvId = null;
   localStorage.removeItem('skillbridgeUploadedCvId');
-  if (window.SkillBridgeApi.session()?.offline) {
-    setContinueState(true);
-    uploadStatus.textContent = 'Local preview mode. Your CV was not uploaded to the backend.';
-    return;
-  }
   setContinueState(false);
   uploadStatus.textContent = 'Uploading CV to your account…';
   uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
@@ -112,23 +107,10 @@ function showFile(file) {
       setContinueState(true);
     })
     .catch((error) => {
-      const session = window.SkillBridgeApi.session();
-      let storedUser = {};
-      try {
-        storedUser = JSON.parse(localStorage.getItem('skillbridge_user') || '{}');
-      } catch {
-        storedUser = {};
-      }
-      const user = session?.user || storedUser;
-      window.SkillBridgeApi.setOfflineSession({
-        fullName: user.fullName || user.name || 'Candidate',
-        email: user.email || '',
-        id: user.id,
-      });
-      uploadError.textContent = `${error.message} Continuing with a local preview; the CV was not uploaded.`;
+      uploadError.textContent = `CV upload failed: ${error.message}`;
       uploadError.classList.remove('hidden');
-      setContinueState(true);
-      uploadStatus.textContent = 'Local preview mode. Your CV was not uploaded to the backend.';
+      setContinueState(false);
+      uploadStatus.textContent = 'CV upload failed. Try again after resolving the error.';
     });
 }
 
@@ -245,7 +227,7 @@ continueButton.addEventListener('click', async (event) => {
     setContinueState(false);
     return;
   }
-  if (!uploadedCvId && !window.SkillBridgeApi.session()?.offline) {
+  if (!uploadedCvId) {
     if (uploadPromise) await uploadPromise;
     if (!uploadedCvId) {
       uploadError.textContent = 'Upload your CV successfully before continuing.';
@@ -253,11 +235,6 @@ continueButton.addEventListener('click', async (event) => {
       setContinueState(false);
       return;
     }
-  }
-  if (window.SkillBridgeApi.session()?.offline) {
-    uploadStatus.textContent = 'Continuing in local preview. CV analysis was not sent to the backend.';
-    window.location.href = 'career-paths.html';
-    return;
   }
   const survey = (() => {
     try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }

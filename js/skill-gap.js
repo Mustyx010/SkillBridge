@@ -173,38 +173,34 @@ document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
     if (roadmapPriorities.includes(skill)) return;
     button.disabled = true;
     try {
-      if (window.SkillBridgeApi.session()) {
-        let response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
-        let data = window.SkillBridgeApi.unwrap(response);
-        let roadmaps = Array.isArray(data) ? data : data?.items || [];
-        if (!roadmaps.length) {
-          const skillGapId = localStorage.getItem('skillbridgeSkillGapId');
-          if (!skillGapId) throw new Error('Analyze your CV before adding a skill to an API roadmap.');
-          await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
-          response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
-          data = window.SkillBridgeApi.unwrap(response);
-          roadmaps = Array.isArray(data) ? data : data?.items || [];
-        }
-        const roadmap = roadmaps[0];
-        if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
-        await window.SkillBridgeApi.post(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}/tasks`, {
-          phase: 60,
-          title: `Develop ${skill}`,
-          description: `Practice and demonstrate ${skill} for your target career.`,
-          taskType: 'learn',
-          skill: skill.toLowerCase(),
-          status: 'todo',
-        });
-      } else {
-        gapStatus.textContent = 'No API session found; this priority will only be saved in this browser.';
+      let response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
+      let data = window.SkillBridgeApi.unwrap(response);
+      let roadmaps = Array.isArray(data) ? data : data?.items || [];
+      if (!roadmaps.length) {
+        const skillGapId = localStorage.getItem('skillbridgeSkillGapId');
+        if (!skillGapId) throw new Error('Analyze your CV before adding a skill to your roadmap.');
+        await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
+        response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
+        data = window.SkillBridgeApi.unwrap(response);
+        roadmaps = Array.isArray(data) ? data : data?.items || [];
       }
+      const roadmap = roadmaps[0];
+      if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
+      await window.SkillBridgeApi.post(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}/tasks`, {
+        phase: 60,
+        title: `Develop ${skill}`,
+        description: `Practice and demonstrate ${skill} for your target career.`,
+        taskType: 'learn',
+        skill: skill.toLowerCase(),
+        status: 'todo',
+      });
       if (!roadmapPriorities.includes(skill)) roadmapPriorities.push(skill);
       localStorage.setItem(roadmapKey, JSON.stringify(roadmapPriorities));
       localStorage.setItem('skillbridgeRoadmapActivated', 'true');
       button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
       button.classList.remove('bg-[#731F94]');
       button.classList.add('bg-[#397B65]');
-      showDialog('Added to your roadmap', `${skill} has been saved to your ${window.SkillBridgeApi.session() ? 'API roadmap and local priorities' : 'local 60-Day Roadmap priorities'}.`);
+      showDialog('Added to your roadmap', `${skill} has been saved to your API roadmap.`);
     } catch (error) {
       showDialog('Could not update your roadmap', error.message);
     } finally {

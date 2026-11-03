@@ -191,13 +191,12 @@
   }));
 
   const activeSession = window.SkillBridgeApi.session();
-  if (activeSession?.offline) {
-    window.SkillBridgeApi.clearSession();
+  if (!activeSession?.token) {
     const profileHeading = document.getElementById('profile-name');
     const signInNotice = document.createElement('p');
     signInNotice.className = 'mt-3 text-sm text-[#625B6D]';
     signInNotice.setAttribute('role', 'status');
-    signInNotice.append('Your previous local preview session has ended. ');
+    signInNotice.append('Sign in to load and sync your profile. ');
     const signInLink = document.createElement('a');
     signInLink.href = 'signin.html';
     signInLink.className = 'font-semibold text-[#731F94] underline';

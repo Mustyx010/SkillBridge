@@ -118,25 +118,9 @@ form.addEventListener('submit', async (e) => {
   } catch (error) {
     window.SkillBridgeApi.showStatus(
       form,
-      `Your answers are saved in this browser. ${error.message} Continuing in local preview mode.`,
-      !window.SkillBridgeApi.isUnavailable(error),
+      `Could not save your answers to your account: ${error.message}`,
+      true,
     );
-    if (window.SkillBridgeApi.isUnavailable(error)) {
-      const session = window.SkillBridgeApi.session();
-      let storedUser = {};
-      try {
-        storedUser = JSON.parse(localStorage.getItem('skillbridge_user') || '{}');
-      } catch {
-        storedUser = {};
-      }
-      const user = session?.user || storedUser;
-      window.SkillBridgeApi.setOfflineSession({
-        fullName: user.fullName || user.name || data.fullName || 'Candidate',
-        email: user.email || data.email || '',
-        id: user.id,
-      });
-    }
-    window.location.href = 'cv-upload.html';
   } finally {
     submitButton.disabled = false;
   }
