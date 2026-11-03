@@ -77,7 +77,12 @@ if (signinForm) {
       window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
       window.location.href = 'dashboard.html';
     } catch (error) {
-      window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+      if (error.status === 403 || /verif/i.test(error.message)) {
+        window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+        showSigninVerification(email, passwordInput.value, signinForm.elements['remember'].checked);
+      } else {
+        window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+      }
     } finally {
       submitButton.disabled = false;
     }
@@ -167,4 +172,53 @@ function showResetForm(emailValue, anchor) {
 
 function passwordInput_focus() {
   document.getElementById('password')?.focus();
+}
+
+// Email verification section, shown when sign-in is rejected because the account is unverified.
+function showSigninVerification(email, password, remember) {
+  document.getElementById('verification-section')?.remove();
+  const form = document.getElementById('signin-form');
+  const section = document.createElement('section');
+  section.id = 'verification-section';
+  section.setAttribute('aria-labelledby', 'verification-title');
+  section.className = 'mt-6 rounded-xl border border-[#E3DFFF] bg-[#F8F6FF] p-4';
+  section.innerHTML = `
+    <h2 id="verification-title" class="text-base font-bold text-[#1C1B1F]">Verify your email to sign in</h2>
+    <p class="mt-1 text-xs text-[#625B6D]">Enter the 6-digit code sent to <strong></strong>.</p>
+    <form id="verification-form" novalidate class="mt-3 space-y-2">
+      <label for="verification-code" class="sr-only">Verification code</label>
+      <input id="verification-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" class="w-full rounded-lg border border-[#CFC7DB] px-3 py-2 text-sm tracking-widest">
+      <button type="submit" class="w-full rounded-lg bg-[#731F94] px-4 py-2 text-sm font-semibold text-white">Verify and sign in</button>
+      <p data-verify-status class="text-xs" role="status"></p>
+    </form>`;
+  section.querySelector('strong').textContent = email;
+  form.insertAdjacentElement('afterend', section);
+  const vForm = section.querySelector('#verification-form');
+  const note = section.querySelector('[data-verify-status]');
+  vForm.elements.code.focus();
+  vForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = vForm.elements.code.value.trim();
+    note.classList.remove('text-red-700');
+    if (!/^\d{6}$/.test(code)) {
+      note.classList.add('text-red-700');
+      note.textContent = 'Enter the 6-digit code from your email.';
+      return;
+    }
+    const button = vForm.querySelector('button');
+    button.disabled = true;
+    try {
+      await window.SkillBridgeApi.post('/api/auth/verify-email', { email, code }, { auth: false });
+      note.textContent = 'Email verified. Signing you in…';
+      const response = await window.SkillBridgeApi.post('/api/auth/login', { email, password }, { auth: false });
+      const { user, token } = response?.data || {};
+      if (!user || !token) throw new Error('The API response did not include a user and access token.');
+      window.SkillBridgeApi.setSession(user, token, remember);
+      window.location.href = 'dashboard.html';
+    } catch (error) {
+      note.classList.add('text-red-700');
+      note.textContent = error.message;
+      button.disabled = false;
+    }
+  });
 }

@@ -136,22 +136,76 @@ if (signupForm) {
         email: registeredUser?.email || email,
         id: registeredUser?.id,
       }));
+      if (registeredUser?.isVerified === false) {
+        showVerification(email, f.password.value);
+        return;
+      }
       try {
-        const login = await window.SkillBridgeApi.post('/api/auth/login', {
-          email,
-          password: f.password.value,
-        }, { auth: false });
-        const { user, token } = login?.data || {};
-        if (!user || !token) throw new Error('The API response did not include a user and access token.');
-        window.SkillBridgeApi.setSession(user, token);
-        window.location.href = 'survey.html';
+        await loginAndContinue(email, f.password.value);
       } catch (error) {
-        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} If your account needs verification, check ${email} for a code, then sign in on the sign-in page.`, true);
+        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Please sign in to continue.`, true);
       }
     } catch (error) {
       window.SkillBridgeApi.showStatus(signupForm, error.message, true);
     } finally {
       submitButton.disabled = false;
+    }
+  });
+}
+
+async function loginAndContinue(email, password) {
+  const login = await window.SkillBridgeApi.post('/api/auth/login', { email, password }, { auth: false });
+  const { user, token } = login?.data || {};
+  if (!user || !token) throw new Error('The API response did not include a user and access token.');
+  window.SkillBridgeApi.setSession(user, token);
+  window.location.href = 'survey.html';
+}
+
+// Email verification section, shown after registration when the account is unverified.
+function showVerification(email, password) {
+  document.getElementById('verification-section')?.remove();
+  const form = document.getElementById('signup-form');
+  const section = document.createElement('section');
+  section.id = 'verification-section';
+  section.setAttribute('aria-labelledby', 'verification-title');
+  section.className = 'mt-6 rounded-xl border border-[#E3DFFF] bg-[#F8F6FF] p-4';
+  section.innerHTML = `
+    <h2 id="verification-title" class="text-base font-bold text-[#1C1B1F]">Verify your email</h2>
+    <p class="mt-1 text-xs text-[#625B6D]">We sent a 6-digit code to <strong></strong>. Enter it below to activate your account.</p>
+    <form id="verification-form" novalidate class="mt-3 space-y-2">
+      <label for="verification-code" class="sr-only">Verification code</label>
+      <input id="verification-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" class="w-full rounded-lg border border-[#CFC7DB] px-3 py-2 text-sm tracking-widest">
+      <button type="submit" class="w-full rounded-lg bg-[#731F94] px-4 py-2 text-sm font-semibold text-white">Verify and continue</button>
+      <p data-verify-status class="text-xs" role="status"></p>
+    </form>
+    <p class="mt-2 text-xs text-[#625B6D]">Already verified? <a href="signin.html" class="font-semibold text-[#731F94] underline">Sign in</a></p>`;
+  section.querySelector('strong').textContent = email;
+  form.insertAdjacentElement('afterend', section);
+  form.querySelectorAll('input, button').forEach((el) => { el.disabled = true; });
+  const vForm = section.querySelector('#verification-form');
+  const note = section.querySelector('[data-verify-status]');
+  vForm.elements.code.focus();
+  vForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = vForm.elements.code.value.trim();
+    note.classList.remove('text-red-700');
+    if (!/^\d{6}$/.test(code)) {
+      note.classList.add('text-red-700');
+      note.textContent = 'Enter the 6-digit code from your email.';
+      return;
+    }
+    const button = vForm.querySelector('button');
+    button.disabled = true;
+    try {
+      await window.SkillBridgeApi.post('/api/auth/verify-email', { email, code }, { auth: false });
+      note.textContent = 'Email verified. Signing you in…';
+      await loginAndContinue(email, password);
+    } catch (error) {
+      note.classList.add('text-red-700');
+      note.textContent = error.status === 404
+        ? 'Email verification is not available on the server yet. Try signing in instead.'
+        : error.message;
+      button.disabled = false;
     }
   });
 }
