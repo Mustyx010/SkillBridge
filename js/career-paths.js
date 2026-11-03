@@ -23,21 +23,21 @@ document.getElementById('career-path-list')?.before(pathStatus);
 document.querySelectorAll('.select-path').forEach((button) => {
   button.addEventListener('click', async () => {
     const card = button.closest('.career-card');
-    pathCards.forEach((item) => item.classList.remove('ring-2', 'ring-[#8527A1]'));
-    card.classList.add('ring-2', 'ring-[#8527A1]');
-    localStorage.setItem('skillbridgeSelectedCareer', card.dataset.role);
-    dashboardCta.setAttribute('aria-disabled', 'false');
-    dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
-    document.querySelectorAll('.select-path').forEach((item) => {
-      item.setAttribute('aria-pressed', String(item === button));
-    });
     button.disabled = true;
     try {
       await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal: card.dataset.role });
+      pathCards.forEach((item) => item.classList.remove('ring-2', 'ring-[#8527A1]'));
+      card.classList.add('ring-2', 'ring-[#8527A1]');
+      localStorage.setItem('skillbridgeSelectedCareer', card.dataset.role);
+      dashboardCta.setAttribute('aria-disabled', 'false');
+      dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
+      document.querySelectorAll('.select-path').forEach((item) => {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
       pathStatus.textContent = `${card.dataset.role} saved as your profile career goal.`;
     } catch (error) {
       pathStatus.classList.add('text-red-700');
-      pathStatus.textContent = `The career path was selected locally, but could not be saved to your profile: ${error.message}`;
+      pathStatus.textContent = `The career path could not be saved to your profile: ${error.message}`;
     } finally {
       button.disabled = false;
     }

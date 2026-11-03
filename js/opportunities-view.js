@@ -134,6 +134,8 @@ const toggleSaved = () => {
   else savedRoles.add(role);
   localStorage.setItem('skillbridgeSavedRoles', JSON.stringify([...savedRoles]));
   updateSaveState();
+  opportunityStatus.classList.remove('sr-only');
+  opportunityStatus.textContent = 'Saved opportunities are stored in this browser only; the API does not document a saved-opportunities endpoint.';
 };
 document.getElementById('detail-save').addEventListener('click', toggleSaved);
 document.getElementById('save-selected-role').addEventListener('click', toggleSaved);

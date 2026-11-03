@@ -87,7 +87,11 @@
         || payload?.error
         || `The API request failed with status ${response.status}.`;
       if (response.status === 401 && auth) clearSession();
-      throw new Error(message);
+      const error = new Error(
+        response.status >= 500 ? `${message} (HTTP ${response.status})` : message,
+      );
+      error.status = response.status;
+      throw error;
     }
     return payload;
   };

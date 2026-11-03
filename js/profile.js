@@ -163,11 +163,12 @@
     const submitButton = form.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal: $('#criteria-role').value });
-      const updated = { ...survey, availability: ({ 'Immediate Placement': 'immediate', 'Currently Serving': 'serving', 'Final Year Student': 'final-year' })[$('#criteria-availability').value], payMin: String(min), payMax: String(max) };
-      localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: updated }));
-      localStorage.setItem('skillbridgeSelectedCareer', $('#criteria-role').value);
-      close('edit-criteria-dialog'); window.location.reload();
+      const careerGoal = $('#criteria-role').value;
+      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal });
+      localStorage.setItem('skillbridgeSelectedCareer', careerGoal);
+      setText('target-role', careerGoal);
+      close('edit-criteria-dialog');
+      announce('Career goal saved', 'The career goal synced to your account. Availability and salary changes were not saved because the documented profile API does not include those fields.');
     } catch (error) {
       announce('Preferences could not be saved', error.message);
     } finally {

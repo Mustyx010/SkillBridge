@@ -155,22 +155,27 @@ dialog.addEventListener('click', (event) => {
   if (event.target === dialog) dialog.close();
 });
 
-const roadmapKey = 'skillbridgeRoadmapPriorities';
-let roadmapPriorities = [];
-try {
-  const saved = JSON.parse(localStorage.getItem(roadmapKey) || '[]');
-  if (Array.isArray(saved)) roadmapPriorities = saved;
-} catch { roadmapPriorities = []; }
+const roadmapUserId = window.SkillBridgeApi.session()?.user?.id;
+const roadmapKey = roadmapUserId ? `skillbridgeRoadmapPriorities:${roadmapUserId}` : null;
+let roadmapPriorities = new Set();
+if (roadmapKey) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(roadmapKey) || '[]');
+    if (Array.isArray(saved)) roadmapPriorities = new Set(saved);
+  } catch {
+    roadmapPriorities = new Set();
+  }
+}
 document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
   const skill = button.dataset.addRoadmap;
-  if (roadmapPriorities.includes(skill)) {
+  if (roadmapPriorities.has(skill)) {
     button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
     button.classList.remove('bg-[#731F94]');
     button.classList.add('bg-[#397B65]');
     button.disabled = true;
   }
   button.addEventListener('click', async () => {
-    if (roadmapPriorities.includes(skill)) return;
+    if (roadmapPriorities.has(skill)) return;
     button.disabled = true;
     try {
       let response = await window.SkillBridgeApi.get('/api/v1/roadmaps');
@@ -194,8 +199,8 @@ document.querySelectorAll('[data-add-roadmap]').forEach((button) => {
         skill: skill.toLowerCase(),
         status: 'todo',
       });
-      if (!roadmapPriorities.includes(skill)) roadmapPriorities.push(skill);
-      localStorage.setItem(roadmapKey, JSON.stringify(roadmapPriorities));
+      roadmapPriorities.add(skill);
+      if (roadmapKey) localStorage.setItem(roadmapKey, JSON.stringify([...roadmapPriorities]));
       localStorage.setItem('skillbridgeRoadmapActivated', 'true');
       button.innerHTML = '<i class="ph ph-check-circle"></i>Added to 60-Day Roadmap';
       button.classList.remove('bg-[#731F94]');

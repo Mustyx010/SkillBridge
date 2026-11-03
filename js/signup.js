@@ -136,6 +136,13 @@ if (signupForm) {
         email: registeredUser?.email || email,
         id: registeredUser?.id,
       }));
+      if (registeredUser?.isVerified === false) {
+        window.SkillBridgeApi.showStatus(
+          signupForm,
+          `Your account was created and a verification code was sent to ${email}, but the documented API does not provide an account email-verification endpoint. Ask the backend team how to verify your account.`,
+        );
+        return;
+      }
       try {
         const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
           email,

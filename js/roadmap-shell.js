@@ -162,8 +162,23 @@ const loadApiRoadmap = async () => {
     const tasksByPhase = data?.tasksByPhase || {};
     const tasks = [30, 60, 90].flatMap((phase) => (tasksByPhase[String(phase)] || []).map((task) => ({ ...task, phase })));
     if (!tasks.length) {
-      window.SkillBridgeApi.showStatus(roadmapApiPanel, 'Your API roadmap has no tasks yet.');
+      roadmapApiPanel.replaceChildren();
+      const title = document.createElement('h2');
+      title.id = 'api-roadmap-title';
+      title.className = 'text-lg font-bold';
+      title.textContent = data.title || roadmap.title || 'Your generated roadmap';
+      const summary = document.createElement('p');
+      summary.className = 'mt-2 text-sm text-[#625B6D]';
+      summary.textContent = data.summary || `${data.targetRole || roadmap.targetRole || 'Career'} • ${data.status || roadmap.status || 'Roadmap'}`;
+      roadmapApiPanel.append(title, summary);
+      window.SkillBridgeApi.showStatus(
+        roadmapApiPanel,
+        'The roadmap loaded, but the documented roadmap response does not include task data. Ask the backend team to include tasks in this response before task progress can sync.',
+        true,
+      );
       roadmapApiPanel.classList.remove('hidden');
+      staticWeekNav?.classList.add('hidden');
+      staticRoadmapContent?.classList.add('hidden');
       return;
     }
 
