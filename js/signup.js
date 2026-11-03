@@ -125,7 +125,7 @@ if (signupForm) {
     const submitButton = signupForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      const registration = await window.SkillBridgeApi.post('/api/v1/auth/register', {
+      const registration = await window.SkillBridgeApi.post('/api/auth/register', {
         fullName: name,
         email,
         password: f.password.value,
@@ -136,15 +136,8 @@ if (signupForm) {
         email: registeredUser?.email || email,
         id: registeredUser?.id,
       }));
-      if (registeredUser?.isVerified === false) {
-        window.SkillBridgeApi.showStatus(
-          signupForm,
-          `Your account was created and a verification code was sent to ${email}, but the documented API does not provide an account email-verification endpoint. Ask the backend team how to verify your account.`,
-        );
-        return;
-      }
       try {
-        const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
+        const login = await window.SkillBridgeApi.post('/api/auth/login', {
           email,
           password: f.password.value,
         }, { auth: false });
@@ -153,7 +146,7 @@ if (signupForm) {
         window.SkillBridgeApi.setSession(user, token);
         window.location.href = 'survey.html';
       } catch (error) {
-        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Please sign in to continue.`, true);
+        window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} If your account needs verification, check ${email} for a code, then sign in on the sign-in page.`, true);
       }
     } catch (error) {
       window.SkillBridgeApi.showStatus(signupForm, error.message, true);

@@ -68,7 +68,7 @@ if (signinForm) {
     const submitButton = signinForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      const response = await window.SkillBridgeApi.post('/api/v1/auth/login', {
+      const response = await window.SkillBridgeApi.post('/api/auth/login', {
         email,
         password: passwordInput.value,
       }, { auth: false });
@@ -120,12 +120,51 @@ forgotPassword?.addEventListener('click', (event) => {
     email.focus();
   } else {
     status.textContent = 'Sending password reset request…';
-    window.SkillBridgeApi.post('/api/v1/auth/forgot-password', { email: email.value.trim() }, { auth: false })
+    window.SkillBridgeApi.post('/api/auth/forgot-password', { email: email.value.trim() }, { auth: false })
       .then((response) => {
-        status.textContent = response?.message || 'If an account exists for this address, password reset instructions will be sent.';
+        status.textContent = response?.message || 'If an account exists for this address, a reset code will be sent.';
+        showResetForm(email.value.trim(), status);
       })
       .catch((error) => {
         status.textContent = error.message;
       });
   }
 });
+
+function showResetForm(emailValue, anchor) {
+  document.getElementById('reset-form')?.remove();
+  const form = document.createElement('form');
+  form.id = 'reset-form';
+  form.className = 'mt-3 space-y-2';
+  form.innerHTML = `
+    <input name="code" inputmode="numeric" maxlength="6" pattern="\\d{6}" required placeholder="6-digit reset code" aria-label="Reset code" class="w-full rounded-lg border border-[#CFC7DB] px-3 py-2 text-sm">
+    <input name="newPassword" type="password" minlength="8" required placeholder="New password (8+ characters)" aria-label="New password" class="w-full rounded-lg border border-[#CFC7DB] px-3 py-2 text-sm">
+    <button type="submit" class="rounded-lg bg-[#731F94] px-4 py-2 text-sm font-semibold text-white">Reset password</button>
+    <p data-reset-status class="text-xs" role="status"></p>`;
+  anchor.insertAdjacentElement('afterend', form);
+  const note = form.querySelector('[data-reset-status]');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = form.elements.code.value.trim();
+    const newPassword = form.elements.newPassword.value;
+    const button = form.querySelector('button');
+    button.disabled = true;
+    note.classList.remove('text-red-700');
+    try {
+      await window.SkillBridgeApi.post('/api/auth/verify-reset-code', { email: emailValue, code }, { auth: false });
+      const done = await window.SkillBridgeApi.post('/api/auth/reset-password', { email: emailValue, code, newPassword }, { auth: false });
+      note.textContent = done?.message || 'Password reset. You can now sign in.';
+      form.querySelectorAll('input').forEach((el) => { el.value = ''; });
+      passwordInput_focus();
+    } catch (error) {
+      note.classList.add('text-red-700');
+      note.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+function passwordInput_focus() {
+  document.getElementById('password')?.focus();
+}

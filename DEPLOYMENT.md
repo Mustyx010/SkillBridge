@@ -20,3 +20,7 @@ The frontend sends bearer tokens in the `Authorization` header and does not
 require cross-origin cookies.
 
 CV uploads are limited to 10 MB by the frontend.
+
+## Backend requirements
+
+Auth endpoints are `/api/auth/*` (not `/api/v1/auth/*`). CORS must allow the site origin. `POST /api/v1/roadmaps/generate` returns 503 until the backend has an AI provider configured; `POST /api/v1/cvs/{id}/analyze` returns 502 if the AI step fails.
