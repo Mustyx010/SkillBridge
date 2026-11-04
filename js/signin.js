@@ -54,46 +54,6 @@ if (signinForm) {
     input.addEventListener('input', () => showError(input, ''));
   });
 
-  const verificationForm = document.getElementById('signin-verification-form');
-  const verificationEmail = verificationForm.elements['email'];
-  const verificationCode = verificationForm.elements['code'];
-  const verificationPanel = document.getElementById('signin-verification-panel');
-  const showVerification = (email) => {
-    verificationEmail.value = email;
-    verificationPanel.classList.remove('hidden');
-    verificationCode.focus();
-  };
-  const needsEmailVerification = (error) =>
-    /email.{0,40}(verify|verification|unverified|not verified)|(verify|verification|unverified|not verified).{0,40}email/i.test(error.message);
-
-  verificationForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = verificationEmail.value.trim();
-    const code = verificationCode.value.trim();
-    if (!isEmail(email)) {
-      verificationEmail.focus();
-      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter a valid email address.', true);
-    }
-    if (!code) {
-      verificationCode.focus();
-      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the verification code from your email.', true);
-    }
-
-    const submitButton = verificationForm.querySelector('[type="submit"]');
-    submitButton.disabled = true;
-    try {
-      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email, code }, { auth: false });
-      verificationCode.value = '';
-      emailInput.value = email;
-      window.SkillBridgeApi.showStatus(verificationForm, 'Email verified. You can now sign in with your password.');
-      passwordInput.focus();
-    } catch (error) {
-      window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
-    } finally {
-      submitButton.disabled = false;
-    }
-  });
-
   signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = emailInput.value.trim();
@@ -113,21 +73,11 @@ if (signinForm) {
         password: passwordInput.value,
       }, { auth: false });
       const { user, token } = response?.data || {};
-      if (user?.isVerified === false) {
-        showVerification(email);
-        window.SkillBridgeApi.showStatus(signinForm, 'Verify your email to continue signing in.');
-        return;
-      }
       if (!user || !token) throw new Error('The API response did not include a user and access token.');
       window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
       window.location.href = 'dashboard.html';
     } catch (error) {
-      if (needsEmailVerification(error)) {
-        showVerification(email);
-        window.SkillBridgeApi.showStatus(signinForm, 'Verify your email to continue signing in.');
-      } else {
-        window.SkillBridgeApi.showStatus(signinForm, error.message, true);
-      }
+      window.SkillBridgeApi.showStatus(signinForm, error.message, true);
     } finally {
       submitButton.disabled = false;
     }
