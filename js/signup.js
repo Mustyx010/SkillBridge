@@ -181,11 +181,9 @@ if (signupForm) {
         password: f.password.value,
       }, { auth: false });
       const registeredUser = registration?.data;
-      localStorage.setItem('skillbridge_user', JSON.stringify({
-        name: registeredUser?.fullName || name,
-        email: registeredUser?.email || email,
-        id: registeredUser?.id,
-      }));
+      if (registeredUser?.email?.trim().toLowerCase() !== email.toLowerCase()) {
+        throw new Error('The API returned account details that do not match the email you registered. Contact the backend team before continuing.');
+      }
       if (registeredUser?.isVerified !== true) {
         signupForm.classList.add('hidden');
         showVerification(email);
@@ -199,6 +197,9 @@ if (signupForm) {
         }, { auth: false });
         const { user, token } = login?.data || {};
         if (!user || !token) throw new Error('The API response did not include a user and access token.');
+        if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
+          throw new Error('The API returned account details that do not match the email you registered. For your security, you have not been signed in. Contact the backend team.');
+        }
         window.SkillBridgeApi.setSession(user, token);
         window.location.href = 'survey.html';
       } catch (error) {

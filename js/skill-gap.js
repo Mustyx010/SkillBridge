@@ -9,7 +9,7 @@ const storedObject = (key) => {
 
 const survey = storedObject('skillbridge_survey');
 const account = storedObject('skillbridge_user');
-const name = survey.data?.fullName || account.name || 'Amaka Okafor';
+const name = account.name || survey.data?.fullName || 'Amaka Okafor';
 const firstName = name.trim().split(/\s+/)[0] || 'Candidate';
 const lastName = name.trim().split(/\s+/).at(-1) || '';
 document.getElementById('skill-gap-user-name').textContent = `${firstName} ${lastName ? `${lastName[0]}.` : ''}`;

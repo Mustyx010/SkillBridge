@@ -18,7 +18,7 @@ function filterOpportunityCards() {
 
 const profile = safeRead('skillbridge_user', {});
 const survey = safeRead('skillbridge_survey', {});
-const candidateName = survey.data?.fullName || profile.name || 'Amaka Okafor';
+const candidateName = profile.name || survey.data?.fullName || 'Amaka Okafor';
 const candidateFirst = candidateName.trim().split(/\s+/)[0] || 'Candidate';
 const candidateLast = candidateName.trim().split(/\s+/).at(-1) || '';
 document.getElementById('opportunities-user-name').textContent = `${candidateFirst} ${candidateLast ? `${candidateLast[0]}.` : ''}`;

@@ -4,7 +4,7 @@
 };
 const user = readProfile('skillbridge_user');
 const survey = readProfile('skillbridge_survey');
-const fullName = survey.data?.fullName || user.name || 'Amaka Okafor';
+const fullName = user.name || survey.data?.fullName || 'Amaka Okafor';
 const givenName = fullName.trim().split(/\s+/)[0] || 'Candidate';
 const familyName = fullName.trim().split(/\s+/).at(-1) || '';
 document.getElementById('diagnostic-user-name').textContent = `${givenName} ${familyName ? `${familyName[0]}.` : ''}`;

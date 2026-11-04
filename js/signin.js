@@ -74,6 +74,9 @@ if (signinForm) {
       }, { auth: false });
       const { user, token } = response?.data || {};
       if (!user || !token) throw new Error('The API response did not include a user and access token.');
+      if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
+        throw new Error('The API returned account details that do not match the email you entered. For your security, you have not been signed in. Contact the backend team.');
+      }
       window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
       window.location.href = 'dashboard.html';
     } catch (error) {

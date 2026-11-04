@@ -10,9 +10,9 @@ const readStoredObject = (key) => {
 const user = readStoredObject('skillbridge_user');
 const survey = readStoredObject('skillbridge_survey');
 const surveyData = survey.data || {};
-const firstName = (surveyData.fullName || user.name || 'Amaka').trim().split(/\s+/)[0] || 'Candidate';
+const firstName = (user.name || surveyData.fullName || 'Amaka').trim().split(/\s+/)[0] || 'Candidate';
 document.querySelectorAll('[data-candidate-name]').forEach((element) => { element.textContent = firstName; });
-const lastName = (surveyData.fullName || user.name || 'Amaka Okafor').trim().split(/\s+/).at(-1) || '';
+const lastName = (user.name || surveyData.fullName || 'Amaka Okafor').trim().split(/\s+/).at(-1) || '';
 document.getElementById('topbar-user-name').textContent = `${firstName} ${lastName ? `${lastName[0]}.` : ''}`;
 
 const trackLabels = {

@@ -17,6 +17,45 @@
   };
 
   const setSession = (user, token, remember = false) => {
+    const previousSession = readSession();
+    let previousUser = previousSession?.user;
+    if (!previousUser) {
+      try {
+        previousUser = JSON.parse(localStorage.getItem('skillbridge_user') || 'null');
+      } catch {
+        previousUser = null;
+      }
+    }
+
+    const sameAccount = previousUser && (
+      (user?.id && previousUser.id && user.id === previousUser.id)
+      || (user?.email && previousUser.email && user.email.toLowerCase() === previousUser.email.toLowerCase())
+    );
+    if (!sameAccount) {
+      [
+        'skillbridge_user',
+        'skillbridge_survey',
+        'skillbridgeUploadedCvId',
+        'skillbridgeUploadedCvName',
+        'skillbridgeSkillGapId',
+        'skillbridgeSelectedCareer',
+        'skillbridgeRoadmapActivated',
+        'skillbridgeRoadmapTasks',
+        'skillbridgeGapPriorities',
+        'skillbridgeSavedRoles',
+        'skillbridgeCompletedResources',
+        'skillbridgePortfolioConnected',
+        'skillbridge_candidate_active',
+        'skillbridgeDashboardStudyRoom',
+        'skillbridgeGapStudyCircle',
+        'skillbridgeStudyCircleJoined',
+        'skillbridgeDiagnosticScore',
+        'skillbridge_capstone',
+        'skillbridgeDash1SavedRoles',
+        'skillbridgeDash1CapstoneTasks',
+      ].forEach((key) => localStorage.removeItem(key));
+    }
+
     const storage = remember ? localStorage : sessionStorage;
     const otherStorage = remember ? sessionStorage : localStorage;
     otherStorage.removeItem('skillbridge_session');

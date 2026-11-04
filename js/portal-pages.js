@@ -18,7 +18,7 @@ if (dashboard && document.getElementById('welcome-name')) {
   const account = readObject('skillbridge_user');
   const survey = readObject('skillbridge_survey');
   const surveyData = survey.data || {};
-  const fullName = surveyData.fullName || account.name || 'Amaka';
+  const fullName = account.name || surveyData.fullName || 'Amaka';
   const firstName = fullName.trim().split(/\s+/)[0] || 'Candidate';
   const lastName = fullName.trim().split(/\s+/).slice(-1)[0] || '';
   document.getElementById('welcome-name').textContent = `${firstName}!`;

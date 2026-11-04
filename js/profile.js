@@ -12,7 +12,7 @@
     backend: 'Associate Backend Engineer',
     growth: 'Growth Product Associate',
   };
-  const name = survey.fullName || user.name || 'Candidate';
+  const name = user.name || survey.fullName || 'Candidate';
   const institution = survey.institution || 'Add your institution';
   const formatDegree = ({ degree: qualification, field, classification }) => {
     const rawQualification = String(qualification || 'B.Sc').trim();

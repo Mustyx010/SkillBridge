@@ -19,7 +19,7 @@ const readArray = (key) => {
 const survey = readObject('skillbridge_survey');
 const user = readObject('skillbridge_user');
 const surveyData = survey.data || {};
-const fullName = (surveyData.fullName || user.name || 'Amaka Okafor').trim();
+const fullName = (user.name || surveyData.fullName || 'Amaka Okafor').trim();
 const nameParts = fullName.split(/\s+/);
 const firstName = nameParts[0] || 'Candidate';
 const trackLabels = {
