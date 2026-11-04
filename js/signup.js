@@ -107,14 +107,35 @@ if (signupForm) {
 
   const verificationSection = document.getElementById('signup-verification-section');
   const verificationForm = document.getElementById('signup-verification-form');
+  const verificationEmail = verificationForm.elements['email'];
   const verificationCode = verificationForm.elements['code'];
   const verificationSuccess = document.getElementById('signup-verification-success');
-  const verificationAddress = document.getElementById('signup-verification-address');
-  let pendingVerificationEmail = '';
+  const showVerificationButton = document.getElementById('show-signup-verification');
+  const showVerification = (email = '') => {
+    verificationEmail.value = email;
+    verificationSection.classList.remove('hidden');
+    showVerificationButton.setAttribute('aria-expanded', 'true');
+    (email ? verificationCode : verificationEmail).focus();
+  };
+
+  showVerificationButton.addEventListener('click', () => {
+    const isOpen = showVerificationButton.getAttribute('aria-expanded') === 'true';
+    if (isOpen) {
+      verificationSection.classList.add('hidden');
+      showVerificationButton.setAttribute('aria-expanded', 'false');
+    } else {
+      showVerification(verificationEmail.value.trim() || f.email.value.trim());
+    }
+  });
 
   verificationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const email = verificationEmail.value.trim();
     const code = verificationCode.value.trim();
+    if (!isEmail(email)) {
+      verificationEmail.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter a valid email address.', true);
+    }
     if (!code) {
       verificationCode.focus();
       return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the verification code from your email.', true);
@@ -123,7 +144,8 @@ if (signupForm) {
     const submitButton = verificationForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email: pendingVerificationEmail, code }, { auth: false });
+      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email, code }, { auth: false });
+      verificationForm.parentElement.querySelector('[data-api-status]')?.remove();
       verificationForm.classList.add('hidden');
       verificationSuccess.classList.remove('hidden');
     } catch (error) {
@@ -165,10 +187,8 @@ if (signupForm) {
         id: registeredUser?.id,
       }));
       if (registeredUser?.isVerified !== true) {
-        pendingVerificationEmail = email;
-        verificationAddress.textContent = email;
         signupForm.classList.add('hidden');
-        verificationSection.classList.remove('hidden');
+        showVerification(email);
         verificationCode.focus();
         return;
       }
@@ -185,7 +205,12 @@ if (signupForm) {
         window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Please sign in to continue.`, true);
       }
     } catch (error) {
-      window.SkillBridgeApi.showStatus(signupForm, error.message, true);
+      if (error.status === 409 || /email.{0,30}(already exists|already registered)|already exists.{0,30}email/i.test(error.message)) {
+        showVerification(email);
+        window.SkillBridgeApi.showStatus(signupForm, 'This email already has an account. Enter the verification code here, or sign in if your email is already verified.');
+      } else {
+        window.SkillBridgeApi.showStatus(signupForm, error.message, true);
+      }
     } finally {
       submitButton.disabled = false;
     }

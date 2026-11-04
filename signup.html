@@ -104,10 +104,17 @@
             <p class="pt-1 text-center text-[11px] text-[#625B6D]">Already registered? <a href="signin.html" class="font-semibold text-[#731F94] hover:underline">Sign In here</a></p>
           </form>
 
+          <p class="mt-3 text-center text-sm text-[#625B6D]">
+            Already received a code?
+            <button id="show-signup-verification" type="button" aria-expanded="false" aria-controls="signup-verification-section" class="font-semibold text-[#731F94] hover:underline">Verify your email</button>
+          </p>
+
           <section id="signup-verification-section" class="hidden" aria-labelledby="signup-verification-title">
             <h2 id="signup-verification-title" class="text-lg font-bold">Check your email</h2>
-            <p class="mt-1 text-sm text-[#625B6D]">Enter the code sent to <span id="signup-verification-address"></span>.</p>
+            <p class="mt-1 text-sm text-[#625B6D]">Enter your email and the code we sent you.</p>
             <form id="signup-verification-form" class="mt-4 space-y-3">
+              <label for="signup-verification-email" class="block text-sm font-semibold">Email address</label>
+              <input id="signup-verification-email" name="email" type="email" autocomplete="email" required class="h-11 w-full rounded-lg border border-[#E8DDEE] px-4 text-sm outline-none focus:border-[#BD39E5] focus:ring-2 focus:ring-[#BD39E5]/20">
               <label for="signup-verification-code" class="block text-sm font-semibold">Verification code</label>
               <input id="signup-verification-code" name="code" type="text" autocomplete="one-time-code" required class="h-11 w-full rounded-lg border border-[#E8DDEE] px-4 text-sm outline-none focus:border-[#BD39E5] focus:ring-2 focus:ring-[#BD39E5]/20">
               <button type="submit" class="flex h-11 w-full items-center justify-center rounded-lg bg-[#731F94] px-5 text-sm font-semibold text-white hover:bg-[#8D09B5]">Verify email</button>
