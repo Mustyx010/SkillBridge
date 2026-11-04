@@ -57,17 +57,14 @@ if (signinForm) {
   const verificationForm = document.getElementById('signin-verification-form');
   const verificationEmail = verificationForm.elements['email'];
   const verificationCode = verificationForm.elements['code'];
-  const showVerificationButton = document.getElementById('show-signin-verification');
   const verificationPanel = document.getElementById('signin-verification-panel');
-  showVerificationButton.addEventListener('click', () => {
-    const isOpen = showVerificationButton.getAttribute('aria-expanded') === 'true';
-    showVerificationButton.setAttribute('aria-expanded', String(!isOpen));
-    verificationPanel.classList.toggle('hidden', isOpen);
-    if (!isOpen) {
-      verificationEmail.value = emailInput.value.trim();
-      verificationEmail.focus();
-    }
-  });
+  const showVerification = (email) => {
+    verificationEmail.value = email;
+    verificationPanel.classList.remove('hidden');
+    verificationCode.focus();
+  };
+  const needsEmailVerification = (error) =>
+    /email.{0,40}(verify|verification|unverified|not verified)|(verify|verification|unverified|not verified).{0,40}email/i.test(error.message);
 
   verificationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -116,11 +113,21 @@ if (signinForm) {
         password: passwordInput.value,
       }, { auth: false });
       const { user, token } = response?.data || {};
+      if (user?.isVerified === false) {
+        showVerification(email);
+        window.SkillBridgeApi.showStatus(signinForm, 'Verify your email to continue signing in.');
+        return;
+      }
       if (!user || !token) throw new Error('The API response did not include a user and access token.');
       window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
       window.location.href = 'dashboard.html';
     } catch (error) {
-      window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+      if (needsEmailVerification(error)) {
+        showVerification(email);
+        window.SkillBridgeApi.showStatus(signinForm, 'Verify your email to continue signing in.');
+      } else {
+        window.SkillBridgeApi.showStatus(signinForm, error.message, true);
+      }
     } finally {
       submitButton.disabled = false;
     }
