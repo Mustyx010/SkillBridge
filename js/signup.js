@@ -161,6 +161,11 @@ if (signupForm) {
       verificationForm.parentElement.querySelector('[data-api-status]')?.remove();
       verificationForm.classList.add('hidden');
       verificationSuccess.classList.remove('hidden');
+      const activeSession = window.SkillBridgeApi.session();
+      if (activeSession?.user?.email?.trim().toLowerCase() === email.toLowerCase()) {
+        window.location.href = 'survey.html';
+        return;
+      }
       const password = f.password.value;
       if (password) {
         verificationSuccess.firstChild.textContent = 'Email verified. Signing you in... ';

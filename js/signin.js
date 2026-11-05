@@ -34,6 +34,22 @@ if (signinForm) {
   const passwordInput = signinForm.elements['password'];
   const toggle = document.getElementById('toggle-password');
   const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  const signIn = async (email, password) => {
+    const response = await window.SkillBridgeApi.post('/api/v1/auth/login', {
+      email,
+      password,
+    }, { auth: false });
+    const { user, token } = response?.data || {};
+    if (!user || !token) throw new Error('The API response did not include a user and access token.');
+    if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
+      throw new Error('The API returned account details that do not match the email you entered. For your security, you have not been signed in. Contact the backend team.');
+    }
+    if (user.isVerified === false) {
+      throw new Error('Your email address is not verified. Verify it from the sign-up page before signing in.');
+    }
+    window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
+    window.location.href = 'dashboard.html';
+  };
 
   function showError(input, message) {
     const error = document.getElementById(`${input.id}-error`);
@@ -68,17 +84,7 @@ if (signinForm) {
     const submitButton = signinForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
     try {
-      const response = await window.SkillBridgeApi.post('/api/v1/auth/login', {
-        email,
-        password: passwordInput.value,
-      }, { auth: false });
-      const { user, token } = response?.data || {};
-      if (!user || !token) throw new Error('The API response did not include a user and access token.');
-      if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
-        throw new Error('The API returned account details that do not match the email you entered. For your security, you have not been signed in. Contact the backend team.');
-      }
-      window.SkillBridgeApi.setSession(user, token, signinForm.elements['remember'].checked);
-      window.location.href = 'dashboard.html';
+      await signIn(email, passwordInput.value);
     } catch (error) {
       window.SkillBridgeApi.showStatus(signinForm, error.message, true);
     } finally {
