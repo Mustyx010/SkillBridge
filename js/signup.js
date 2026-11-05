@@ -117,6 +117,19 @@ if (signupForm) {
     showVerificationButton.setAttribute('aria-expanded', 'true');
     (email ? verificationCode : verificationEmail).focus();
   };
+  const signInAndContinue = async (email, password) => {
+    const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
+      email,
+      password,
+    }, { auth: false });
+    const { user, token } = login?.data || {};
+    if (!user || !token) throw new Error('The API response did not include a user and access token.');
+    if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
+      throw new Error('The API returned account details that do not match the email you registered. For your security, you have not been signed in. Contact the backend team.');
+    }
+    window.SkillBridgeApi.setSession(user, token);
+    window.location.href = 'survey.html';
+  };
 
   showVerificationButton.addEventListener('click', () => {
     const isOpen = showVerificationButton.getAttribute('aria-expanded') === 'true';
@@ -148,6 +161,20 @@ if (signupForm) {
       verificationForm.parentElement.querySelector('[data-api-status]')?.remove();
       verificationForm.classList.add('hidden');
       verificationSuccess.classList.remove('hidden');
+      const password = f.password.value;
+      if (password) {
+        verificationSuccess.firstChild.textContent = 'Email verified. Signing you in... ';
+        try {
+          await signInAndContinue(email, password);
+        } catch (error) {
+          verificationSuccess.firstChild.textContent = 'Email verified. ';
+          window.SkillBridgeApi.showStatus(
+            verificationForm,
+            `Your email was verified, but automatic sign-in failed: ${error.message} Please sign in to continue.`,
+            true,
+          );
+        }
+      }
     } catch (error) {
       window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
     } finally {
@@ -191,17 +218,7 @@ if (signupForm) {
         return;
       }
       try {
-        const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
-          email,
-          password: f.password.value,
-        }, { auth: false });
-        const { user, token } = login?.data || {};
-        if (!user || !token) throw new Error('The API response did not include a user and access token.');
-        if (user.email?.trim().toLowerCase() !== email.toLowerCase()) {
-          throw new Error('The API returned account details that do not match the email you registered. For your security, you have not been signed in. Contact the backend team.');
-        }
-        window.SkillBridgeApi.setSession(user, token);
-        window.location.href = 'survey.html';
+        await signInAndContinue(email, f.password.value);
       } catch (error) {
         window.SkillBridgeApi.showStatus(signupForm, `Your account was created, but automatic sign-in failed: ${error.message} Please sign in to continue.`, true);
       }

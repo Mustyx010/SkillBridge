@@ -16,9 +16,10 @@ function filterOpportunityCards() {
   updateVisibleCount();
 }
 
-const profile = safeRead('skillbridge_user', {});
-const survey = safeRead('skillbridge_survey', {});
-const candidateName = profile.name || survey.data?.fullName || 'Amaka Okafor';
+const session = window.SkillBridgeApi.session();
+const profile = session?.user || {};
+const survey = session ? safeRead('skillbridge_survey', {}) : {};
+const candidateName = profile.fullName || profile.name || survey.data?.fullName || 'Candidate';
 const candidateFirst = candidateName.trim().split(/\s+/)[0] || 'Candidate';
 const candidateLast = candidateName.trim().split(/\s+/).at(-1) || '';
 document.getElementById('opportunities-user-name').textContent = `${candidateFirst} ${candidateLast ? `${candidateLast[0]}.` : ''}`;
@@ -192,6 +193,37 @@ dialog.addEventListener('click', (event) => { if (event.target === dialog) dialo
 
 const opportunityList = document.getElementById('opportunity-list');
 const opportunityStatus = document.getElementById('opportunity-status');
+if (emptyState.parentElement === opportunityList) opportunityList.after(emptyState);
+opportunityList.replaceChildren();
+cards = [];
+selectedCard = null;
+resultCount.textContent = '0';
+emptyState.textContent = 'Loading live opportunities from your account…';
+emptyState.classList.remove('hidden');
+const initialRoleBadge = document.querySelector('[data-location-chip="all"]');
+if (initialRoleBadge) initialRoleBadge.textContent = 'All Roles (0)';
+const introBadge = document.querySelector('main > section .rounded-full');
+if (introBadge) introBadge.classList.add('hidden');
+const introCopy = document.querySelector('main > section p');
+if (introCopy) introCopy.textContent = 'Current vacancies and account-specific match scores are provided by the SkillBridge API.';
+const sortingLabel = document.querySelector('#opportunity-count')?.parentElement?.previousElementSibling;
+if (sortingLabel) sortingLabel.textContent = 'Live API opportunities';
+if (resultCount?.parentElement) {
+  resultCount.parentElement.replaceChildren(resultCount, document.createTextNode(' Live positions'));
+}
+detail.company.textContent = 'Select an opportunity';
+detail.role.textContent = 'Live listing details will appear here.';
+detail.recruitment.textContent = '—';
+detail.closing.textContent = '—';
+detail.sector.textContent = '—';
+detail.team.textContent = '—';
+detail.location.textContent = '—';
+detail.salary.textContent = 'Compensation not listed';
+detail.fit.textContent = 'No match score';
+detail.rationale.textContent = 'Listings and match scores load from the SkillBridge API.';
+detail.apply.href = '#';
+detail.apply.classList.add('pointer-events-none', 'opacity-50');
+detail.apply.textContent = 'Select a live opportunity';
 let matchScores = new Map();
 const workModeLabel = (workMode) => ({
   remote: 'Remote',
@@ -249,14 +281,21 @@ const renderApiOpportunities = (opportunities) => {
   selectedCard = cards[0] || null;
   selectCard(selectedCard);
   filterOpportunityCards();
+  if (!cards.length) {
+    emptyState.textContent = 'No active opportunities were returned by the API.';
+    emptyState.classList.remove('hidden');
+  }
 };
 
 const loadApiOpportunities = async () => {
   opportunityStatus.classList.remove('sr-only');
   opportunityStatus.textContent = 'Loading live opportunities…';
   try {
+    if (!window.SkillBridgeApi.session()) {
+      throw new Error('Sign in to load opportunities for your account.');
+    }
     const [opportunityResult, matchResult] = await Promise.allSettled([
-      window.SkillBridgeApi.get('/api/v1/opportunities'),
+      window.SkillBridgeApi.get('/api/v1/opportunities?page=1&limit=50'),
       window.SkillBridgeApi.get('/api/v1/matching'),
     ]);
     if (opportunityResult.status === 'rejected') throw opportunityResult.reason;
@@ -270,12 +309,22 @@ const loadApiOpportunities = async () => {
       const opportunity = item.opportunity || item;
       return [item.opportunityId || opportunity.id, item];
     }));
-    renderApiOpportunities(listing?.items || []);
+    const opportunities = Array.isArray(listing?.items) ? listing.items : [];
+    opportunities.sort((a, b) =>
+      (matchScores.get(b.id)?.matchPercentage ?? -1) - (matchScores.get(a.id)?.matchPercentage ?? -1));
+    renderApiOpportunities(opportunities);
+    if (initialRoleBadge) initialRoleBadge.textContent = `All Roles (${opportunities.length})`;
+    if (introBadge) {
+      introBadge.textContent = matchList.length ? `${matchList.length} API matches` : `${opportunities.length} live listings`;
+      introBadge.classList.remove('hidden');
+    }
     opportunityStatus.textContent = matchResult.status === 'rejected'
       ? `${cards.length} opportunities loaded, but match scores could not be fetched: ${matchResult.reason.message}`
-      : `${cards.length} opportunities loaded from your account.`;
+      : `${cards.length} live opportunities loaded from the API.`;
   } catch (error) {
     opportunityStatus.textContent = `Live opportunities could not be loaded: ${error.message}`;
+    emptyState.textContent = `No live opportunity data is available: ${error.message}`;
+    emptyState.classList.remove('hidden');
   }
 };
 
