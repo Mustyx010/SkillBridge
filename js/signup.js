@@ -149,9 +149,9 @@ if (signupForm) {
       verificationEmail.focus();
       return window.SkillBridgeApi.showStatus(verificationForm, 'Enter a valid email address.', true);
     }
-    if (!code) {
+    if (!/^\d{6}$/.test(code)) {
       verificationCode.focus();
-      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the verification code from your email.', true);
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the six-digit verification code from your email.', true);
     }
 
     const submitButton = verificationForm.querySelector('[type="submit"]');
@@ -163,6 +163,7 @@ if (signupForm) {
       verificationSuccess.classList.remove('hidden');
       const activeSession = window.SkillBridgeApi.session();
       if (activeSession?.user?.email?.trim().toLowerCase() === email.toLowerCase()) {
+        verificationForm.classList.add('hidden');
         window.location.href = 'survey.html';
         return;
       }
@@ -173,11 +174,11 @@ if (signupForm) {
           await signInAndContinue(email, password);
         } catch (error) {
           verificationSuccess.firstChild.textContent = 'Email verified. ';
-          window.SkillBridgeApi.showStatus(
-            verificationForm,
-            `Your email was verified, but automatic sign-in failed: ${error.message} Please sign in to continue.`,
-            true,
-          );
+          verificationSuccess.classList.remove('hidden');
+          verificationSuccess.firstChild.textContent = `Email verified, but automatic sign-in failed: ${error.message} `;
+          verificationForm.classList.remove('hidden');
+          verificationCode.value = '';
+          window.SkillBridgeApi.showStatus(verificationForm, 'Sign in with your verified account to continue.', true);
         }
       }
     } catch (error) {
