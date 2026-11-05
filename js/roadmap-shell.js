@@ -1,13 +1,9 @@
-const readProfile = (key) => {
-  try { return JSON.parse(localStorage.getItem(key) || '{}'); }
-  catch { return {}; }
-};
-const user = readProfile('skillbridge_user');
-const survey = readProfile('skillbridge_survey');
-const fullName = user.name || survey.data?.fullName || 'Amaka Okafor';
+const fullName = window.SkillBridgeApi.session()?.user?.fullName || 'Candidate';
 const givenName = fullName.trim().split(/\s+/)[0] || 'Candidate';
 const familyName = fullName.trim().split(/\s+/).at(-1) || '';
-document.getElementById('roadmap-user-name').textContent = `${givenName} ${familyName ? `${familyName[0]}.` : ''}`;
+document.getElementById('roadmap-user-name').textContent = `${givenName} ${familyName && familyName !== givenName ? `${familyName[0]}.` : ''}`;
+document.title = 'Career Roadmap | SkillBridge';
+document.querySelector('header span.ml-auto')?.remove();
 
 const sidebar = document.getElementById('roadmap-sidebar');
 const backdrop = document.getElementById('roadmap-backdrop');
@@ -57,76 +53,17 @@ const roadmapNotice = (message) => {
   roadmapNotice.timeout = setTimeout(() => notice.classList.add('hidden'), 3200);
 };
 
-const savedCapstone = (() => {
-  try { return JSON.parse(localStorage.getItem('skillbridge_capstone') || '{}'); }
-  catch { return {}; }
-})();
-for (const [id, value] of [['roadmap-repo-url', savedCapstone.repo], ['roadmap-dataset-url', savedCapstone.dataset], ['roadmap-project-notes', savedCapstone.notes]]) {
-  if (value) document.getElementById(id).value = value;
-}
-for (const id of ['roadmap-repo-url', 'roadmap-dataset-url', 'roadmap-project-notes']) {
-  document.getElementById(id).addEventListener('input', () => {
-    const capstone = {
-      ...savedCapstone,
-      repo: document.getElementById('roadmap-repo-url').value,
-      dataset: document.getElementById('roadmap-dataset-url').value,
-      notes: document.getElementById('roadmap-project-notes').value,
-    };
-    localStorage.setItem('skillbridge_capstone', JSON.stringify(capstone));
-  });
-}
-
-document.querySelectorAll('[data-roadmap-week]').forEach((button) => button.addEventListener('click', () => {
-  const week = Number(button.dataset.roadmapWeek);
-  if (week > 2) {
-    roadmapNotice(`Week ${String(week).padStart(2, '0')} unlocks after you complete the active sprint.`);
-    return;
-  }
-  if (week === 1) {
-    roadmapNotice('Week 01 is complete. Review your relational foundations modules from the dashboard.');
-    return;
-  }
-  roadmapNotice('You are viewing the active Week 02 sprint.');
-}));
-
-document.querySelectorAll('[data-roadmap-action]').forEach((button) => button.addEventListener('click', () => {
-  const action = button.dataset.roadmapAction;
-  const messages = {
-    review: 'Completed module review is ready in your learning history.',
-    resume: 'Opening the SQL window functions sandbox…',
-    sandbox: 'PostgreSQL sandbox is ready for your Week 02 practice.',
-    'cheat-sheet': 'The SQL cheat sheet is being prepared for download.',
-    'data-docs': 'Dataset schema: transaction_id, terminal_id, tap_time, fare_amount, and route_id.',
-    'milestone-info': 'Analyze anonymized Cowry validator taps and submit your query and findings for review.',
-    rubric: 'Rubric: data cleaning 25%, SQL analysis 35%, anomaly detection 25%, clear notes 15%.',
-    'preview-certificate': 'Your verified certificate unlocks after completing Week 04.',
-    'verify-linkedin': 'LinkedIn verification becomes available when your certificate is issued.',
-    'mentor-rsvp': 'Mentor Q&A RSVP saved. The session is tomorrow at 4:00 PM WAT.',
-  };
-  if (action === 'submit-review') {
-    const repo = document.getElementById('roadmap-repo-url').value.trim();
-    const dataset = document.getElementById('roadmap-dataset-url').value.trim();
-    const notes = document.getElementById('roadmap-project-notes').value.trim();
-    const status = document.getElementById('roadmap-capstone-status');
-    if (!repo || !dataset || !notes) {
-      status.textContent = 'Add your repository, dataset link, and analysis notes before submitting.';
-      roadmapNotice('Complete all three capstone fields before requesting review.');
-      return;
-    }
-    status.textContent = 'Project details saved locally. Mentor review is not connected in this preview.';
-    roadmapNotice('Project details saved in this browser. No review request was sent.');
-    return;
-  }
-  roadmapNotice(messages[action] || 'This roadmap action is ready.');
-}));
-
 const roadmapMain = document.querySelector('main[aria-label="Personalized career roadmap"]');
 const roadmapApiPanel = document.createElement('section');
-roadmapApiPanel.className = 'hidden rounded-2xl bg-white p-5 shadow-sm sm:p-6';
+roadmapApiPanel.className = 'rounded-2xl bg-white p-5 shadow-sm sm:p-6';
 roadmapApiPanel.setAttribute('aria-labelledby', 'api-roadmap-title');
-const staticWeekNav = roadmapMain.querySelector('[aria-label="Roadmap weeks"]');
-const staticRoadmapContent = staticWeekNav?.nextElementSibling;
-roadmapMain.firstElementChild?.after(roadmapApiPanel);
+roadmapApiPanel.setAttribute('aria-busy', 'true');
+roadmapMain.replaceChildren(roadmapApiPanel);
+const loadingTitle = document.createElement('h2');
+loadingTitle.id = 'api-roadmap-title';
+loadingTitle.className = 'text-lg font-bold';
+loadingTitle.textContent = 'Loading your roadmap…';
+roadmapApiPanel.append(loadingTitle);
 
 const roadmapsFrom = (response) => {
   const data = window.SkillBridgeApi.unwrap(response);
@@ -137,59 +74,86 @@ const roadmapsFrom = (response) => {
 
 const loadApiRoadmap = async () => {
   try {
+    if (!window.SkillBridgeApi.session()) {
+      roadmapApiPanel.replaceChildren();
+      const title = document.createElement('h2');
+      title.id = 'api-roadmap-title';
+      title.className = 'text-lg font-bold';
+      title.textContent = 'Sign in to view your roadmap';
+      const link = document.createElement('a');
+      link.href = 'signin.html';
+      link.className = 'mt-3 inline-flex font-semibold text-[#731F94] underline';
+      link.textContent = 'Sign in';
+      roadmapApiPanel.append(title, link);
+      roadmapApiPanel.setAttribute('aria-busy', 'false');
+      return;
+    }
+
     let roadmaps = roadmapsFrom(await window.SkillBridgeApi.get('/api/v1/roadmaps'));
-    if (!roadmaps.length) {
-      let skillGapId = localStorage.getItem('skillbridgeSkillGapId');
+    let skillGapId = localStorage.getItem('skillbridgeSkillGapId');
+    let roadmap = skillGapId
+      ? roadmaps.find((item) => item.skillGapId === skillGapId)
+      : roadmaps[0];
+    if (!roadmap) {
       if (!skillGapId) {
         const gaps = window.SkillBridgeApi.unwrap(await window.SkillBridgeApi.get('/api/v1/skill-gaps'));
         const gapList = Array.isArray(gaps) ? gaps : gaps?.items || [];
         skillGapId = gapList[0]?.id;
       }
       if (!skillGapId) {
-        window.SkillBridgeApi.showStatus(roadmapApiPanel, 'No API roadmap is available yet. Complete CV analysis to create a skill gap, then generate your roadmap.');
-        roadmapApiPanel.classList.remove('hidden');
+        roadmapApiPanel.replaceChildren();
+        const title = document.createElement('h2');
+        title.id = 'api-roadmap-title';
+        title.className = 'text-lg font-bold';
+        title.textContent = 'No roadmap available yet';
+        const message = document.createElement('p');
+        message.className = 'mt-2 text-sm text-[#625B6D]';
+        message.textContent = 'Analyze a CV to create a skill-gap analysis before generating your roadmap.';
+        const link = document.createElement('a');
+        link.href = 'cv-upload.html';
+        link.className = 'mt-3 inline-flex font-semibold text-[#731F94] underline';
+        link.textContent = 'Upload and analyze your CV';
+        roadmapApiPanel.append(title, message, link);
+        roadmapApiPanel.setAttribute('aria-busy', 'false');
         return;
       }
       localStorage.setItem('skillbridgeSkillGapId', skillGapId);
       await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
       roadmaps = roadmapsFrom(await window.SkillBridgeApi.get('/api/v1/roadmaps'));
+      roadmap = roadmaps.find((item) => item.skillGapId === skillGapId);
     }
 
-    const roadmap = roadmaps[0];
     if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
     const response = await window.SkillBridgeApi.get(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}`);
     const data = window.SkillBridgeApi.unwrap(response);
     const tasksByPhase = data?.tasksByPhase || {};
-    const tasks = [30, 60, 90].flatMap((phase) => (tasksByPhase[String(phase)] || []).map((task) => ({ ...task, phase })));
-    if (!tasks.length) {
-      roadmapApiPanel.replaceChildren();
-      const title = document.createElement('h2');
-      title.id = 'api-roadmap-title';
-      title.className = 'text-lg font-bold';
-      title.textContent = data.title || roadmap.title || 'Your generated roadmap';
-      const summary = document.createElement('p');
-      summary.className = 'mt-2 text-sm text-[#625B6D]';
-      summary.textContent = data.summary || `${data.targetRole || roadmap.targetRole || 'Career'} • ${data.status || roadmap.status || 'Roadmap'}`;
-      roadmapApiPanel.append(title, summary);
-      window.SkillBridgeApi.showStatus(
-        roadmapApiPanel,
-        'The roadmap loaded, but the documented roadmap response does not include task data. Ask the backend team to include tasks in this response before task progress can sync.',
-        true,
-      );
-      roadmapApiPanel.classList.remove('hidden');
-      staticWeekNav?.classList.add('hidden');
-      staticRoadmapContent?.classList.add('hidden');
-      return;
-    }
-
+    const tasks = Array.isArray(data?.tasks)
+      ? data.tasks
+      : [30, 60, 90].flatMap((phase) => (tasksByPhase[String(phase)] || []).map((task) => ({ ...task, phase })));
     roadmapApiPanel.replaceChildren();
     const title = document.createElement('h2');
     title.id = 'api-roadmap-title';
     title.className = 'text-lg font-bold';
-    title.textContent = data.title || roadmap.title || 'Your generated roadmap';
+    title.textContent = data.title || roadmap.title || 'Your roadmap';
     const subtitle = document.createElement('p');
     subtitle.className = 'mt-1 text-sm text-[#625B6D]';
-    subtitle.textContent = `${tasks.length} tasks from your API roadmap. Mark tasks done to sync progress.`;
+    subtitle.textContent = `${data.targetRole || roadmap.targetRole || 'Career goal'} • ${data.status || roadmap.status || 'status unavailable'}`;
+    roadmapApiPanel.append(title, subtitle);
+    document.title = `${title.textContent} | SkillBridge`;
+    const summary = document.createElement('p');
+    summary.className = 'mt-2 text-sm leading-6 text-[#625B6D]';
+    summary.textContent = data.summary || roadmap.summary || '';
+    roadmapApiPanel.append(summary);
+    if (!tasks.length) {
+      window.SkillBridgeApi.showStatus(
+        roadmapApiPanel,
+        'The API returned roadmap details but no task list. Task progress can appear here when the backend includes roadmap tasks in its response.',
+      );
+      roadmapApiPanel.setAttribute('aria-busy', 'false');
+      return;
+    }
+
+    subtitle.textContent += ` • ${tasks.length} API tasks`;
     const taskList = document.createElement('div');
     taskList.className = 'mt-4 grid gap-3 md:grid-cols-2';
     tasks.forEach((task) => {
@@ -231,12 +195,10 @@ const loadApiRoadmap = async () => {
       item.append(phase, taskTitle, description, status, updateButton);
       taskList.append(item);
     });
-    roadmapApiPanel.append(title, subtitle, taskList);
-    roadmapApiPanel.classList.remove('hidden');
-    staticWeekNav?.classList.add('hidden');
-    staticRoadmapContent?.classList.add('hidden');
+    roadmapApiPanel.append(taskList);
+    roadmapApiPanel.setAttribute('aria-busy', 'false');
   } catch (error) {
-    roadmapApiPanel.classList.remove('hidden');
+    roadmapApiPanel.setAttribute('aria-busy', 'false');
     window.SkillBridgeApi.showStatus(roadmapApiPanel, `Your roadmap could not be loaded: ${error.message}`, true);
   }
 };
