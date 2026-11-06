@@ -18,13 +18,15 @@ const lastName = fullName.trim().split(/\s+/).at(-1) || '';
 document.getElementById('topbar-user-name').textContent = `${firstName} ${lastName ? `${lastName[0]}.` : ''}`;
 
 const trackLabels = {
-  'fintech-data': 'Junior Data Analyst',
+  'fintech-data': 'Financial Technology & Data',
   backend: 'Backend Engineer',
   'growth-product': 'Growth Product',
 };
-const track = trackLabels[surveyData.track] || 'Your career goal';
+const track = trackLabels[surveyData.track] || surveyData.track || 'Career goal not set';
 document.querySelectorAll('[data-track-name]').forEach((element) => { element.textContent = track; });
-document.getElementById('topbar-user-track').textContent = `${track} Candidate`;
+document.getElementById('topbar-user-track').textContent = track === 'Career goal not set' ? track : `${track} Candidate`;
+const profileLocation = document.getElementById('dashboard-profile-location');
+if (profileLocation) profileLocation.textContent = '';
 
 const sidebar = document.getElementById('dashboard-sidebar');
 const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -67,10 +69,7 @@ dialog.addEventListener('click', (event) => {
 });
 
 const actionContent = {
-  notes: ['Sprint 2 Review Notes', 'Practice multi-table joins, common table expressions, and window functions. The capstone milestone applies these patterns to anonymized Lagos commute data.', 'Continue Sprint', 'roadmap.html'],
   diagnostic: ['Your Skill Gap Analysis', 'Review the latest skill-gap analysis saved to your account, including current skills and areas to develop.', 'Review Skill Gaps', 'skill-gap.html'],
-  mentor: ['Mentor Office Hours', 'Mentor office hours are scheduled for Thursday at 4:00 PM West Africa Time. Add a reminder to your calendar and prepare one question about your current sprint.', '', ''],
-  pro: ['SkillBridge Pro Advantage', 'Pro includes AI resume tools and direct recruiter introductions. Subscription checkout is not connected in this preview.', '', ''],
 };
 document.querySelectorAll('[data-dashboard-action]').forEach((button) => {
   button.addEventListener('click', () => openDialog(...actionContent[button.dataset.dashboardAction]));
@@ -97,14 +96,10 @@ searchInput.addEventListener('input', () => {
 });
 
 document.querySelectorAll('[data-quick-view]').forEach((button) => {
-  button.addEventListener('click', () => openDialog('Role preview', `${button.dataset.quickView}. Review the listed skills and salary range, then use Direct Apply to continue through your candidate account.`, 'Browse opportunities', 'opportunities.html'));
+  button.addEventListener('click', () => openDialog('Opportunity details', `${button.dataset.quickView}.`, 'Browse opportunities', 'opportunities.html'));
 });
 
-const insightCopy = {
-  Moniepoint: 'Your capstone SQL work and PostgreSQL practice are a strong match for this role’s merchant transaction analysis. Add a public project link to strengthen your application.',
-  'Sterling Bank': 'Your financial modeling and Excel credentials align with the role’s business analysis requirements. Include a concise example of a model you have built.',
-  PiggyVest: 'Your Python and cohort analysis experience fits the growth analytics focus. A retention analysis project would help demonstrate this match.',
-};
+const insightCopy = {};
 document.querySelectorAll('[data-why]').forEach((button) => {
   button.addEventListener('click', () => openDialog(`${button.dataset.why} match insight`, insightCopy[button.dataset.why]));
 });
@@ -115,25 +110,11 @@ const emptyState = document.getElementById('filter-empty');
 const dashboardJobList = jobCards[0]?.parentElement;
 jobCards = [];
 dashboardJobList?.replaceChildren();
+const dashboardJobSection = document.querySelector('[aria-labelledby="matches-title"]');
+if (dashboardJobSection) dashboardJobSection.hidden = true;
 emptyState.textContent = 'Loading opportunities from your account…';
 emptyState.classList.remove('hidden');
 stipendFilter.closest('label')?.classList.add('hidden');
-
-const joinButton = document.getElementById('join-study-room');
-const updateJoinButton = () => {
-  const joined = localStorage.getItem('skillbridgeDashboardStudyRoom') === 'true';
-  joinButton.innerHTML = joined
-    ? '<i class="ph ph-check-circle"></i>Joined Study Room'
-    : '<i class="ph ph-chats"></i>Join Live Study Room';
-  joinButton.setAttribute('aria-pressed', String(joined));
-};
-joinButton.addEventListener('click', () => {
-  const joined = localStorage.getItem('skillbridgeDashboardStudyRoom') === 'true';
-  localStorage.setItem('skillbridgeDashboardStudyRoom', String(!joined));
-  updateJoinButton();
-  openDialog(joined ? 'You left the study room' : 'You joined the study room', joined ? 'You can rejoin the Lekki-Yaba Analyst Peer Squad any time.' : 'You are on the peer squad list. Study room access is shown here as a prototype interaction.');
-});
-updateJoinButton();
 
 const dashboardApiStatus = document.createElement('p');
 dashboardApiStatus.className = 'text-xs text-[#625B6D]';
@@ -172,6 +153,7 @@ const renderMetricLink = (href, label, value, detail, icon) => {
 };
 
 const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pending = new Set()) => {
+  const signedIn = Boolean(activeSession?.token);
   const latestCv = latestFirst(cvs)[0];
   const latestGap = latestFirst(gaps.filter((gap) => !latestCv || gap.cvId === latestCv.id))[0];
   const latestRoadmap = latestFirst(roadmaps)[0];
@@ -180,20 +162,24 @@ const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pendi
   const ringValue = document.getElementById('readiness-percent');
   const ring = ringValue?.parentElement?.parentElement;
   if (ringValue) {
-    ringValue.textContent = analysisPending ? '…' : completedGap ? '✓' : latestCv ? '…' : '—';
-    ringValue.setAttribute('aria-label', analysisPending ? 'Loading CV analysis' : completedGap ? 'CV analysis complete' : latestCv ? 'CV analysis pending' : 'No CV uploaded');
+    ringValue.textContent = !signedIn ? '—' : analysisPending ? '…' : completedGap ? '✓' : latestCv ? '…' : '—';
+    ringValue.setAttribute('aria-label', !signedIn ? 'Sign in to load your CV analysis' : analysisPending ? 'Loading CV analysis' : completedGap ? 'CV analysis complete' : latestCv ? 'CV analysis pending' : 'No CV uploaded');
   }
   if (ring) ring.style.background = '#e6ddf8';
   const readinessCard = ring?.parentElement;
   const readinessCopy = readinessCard?.lastElementChild;
   if (readinessCopy) {
     readinessCopy.children[0].textContent = 'CV ANALYSIS';
-    readinessCopy.children[1].textContent = analysisPending
+    readinessCopy.children[1].textContent = !signedIn
+      ? 'Sign in required'
+      : analysisPending
       ? 'Loading account data'
       : completedGap
       ? 'Analysis complete'
       : latestCv ? 'Analysis pending' : 'No CV uploaded';
-    readinessCopy.children[2].textContent = latestGap
+    readinessCopy.children[2].textContent = !signedIn
+      ? 'Sign in to load your CV analysis'
+      : latestGap
       ? `${(latestGap.currentSkills || []).length} skills found • ${(latestGap.missingSkills || []).length} to develop`
       : analysisPending ? 'Checking your saved CV and analysis'
         : latestCv ? 'Continue to run your CV analysis' : 'Upload a CV to get started';
@@ -202,17 +188,20 @@ const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pendi
   renderMetricLink(
     'roadmap.html',
     'Your Roadmaps',
-    pending.has('roadmaps') ? '…' : String(roadmaps.length),
-    pending.has('roadmaps') ? 'Loading your account roadmaps'
+    !signedIn ? '—' : pending.has('roadmaps') ? '…' : String(roadmaps.length),
+    !signedIn ? 'Sign in to load your roadmaps'
+      : pending.has('roadmaps') ? 'Loading your account roadmaps'
       : latestRoadmap ? `${latestRoadmap.targetRole || latestRoadmap.title} • ${latestRoadmap.status}` : 'No roadmap in your account yet',
     'ph-calendar-blank',
   );
   renderMetricLink(
     'skill-gap.html',
     'CV Skill Analysis',
-    latestGap ? `${(latestGap.currentSkills || []).length} skills found`
+    !signedIn ? 'Sign in required'
+      : latestGap ? `${(latestGap.currentSkills || []).length} skills found`
       : analysisPending ? 'Loading…' : 'Not analyzed',
-    latestGap ? `${(latestGap.missingSkills || []).length} skills to develop`
+    !signedIn ? 'Sign in to load your skill analysis'
+      : latestGap ? `${(latestGap.missingSkills || []).length} skills to develop`
       : analysisPending ? 'Checking your CV analysis' : latestCv ? 'Analyze your uploaded CV' : 'Upload a CV to get started',
     'ph-seal-check',
   );
@@ -220,8 +209,9 @@ const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pendi
   renderMetricLink(
     'opportunities.html',
     'Job Opportunities',
-    pending.has('opportunities') ? '…' : String(opportunities.length),
-    pending.has('matches') ? 'Loading account matches'
+    !signedIn ? '—' : pending.has('opportunities') ? '…' : String(opportunities.length),
+    !signedIn ? 'Sign in to load your opportunities'
+      : pending.has('matches') ? 'Loading account matches'
       : matchedCount ? `${matchedCount} API-generated matches` : 'Listings from the opportunities API',
     'ph-briefcase',
   );
@@ -231,7 +221,8 @@ const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pendi
 const renderApiLearning = (roadmap, progress, pending = new Set()) => {
   const section = document.querySelector('[aria-labelledby="sprint-title"]');
   if (!section) return;
-  const heading = makeText('h2', 'mt-2 text-xl font-bold tracking-tight sm:text-2xl', roadmap?.title || (pending.has('roadmaps') ? 'Loading your roadmap…' : 'No roadmap created yet'));
+  section.hidden = false;
+  const heading = makeText('h2', 'mt-2 text-xl font-bold tracking-tight sm:text-2xl', roadmap?.title || (!activeSession ? 'Sign in to view your roadmap' : pending.has('roadmaps') ? 'Loading your roadmap…' : 'No roadmap created yet'));
   heading.id = 'sprint-title';
   const header = document.createElement('div');
   header.className = 'flex flex-wrap items-start justify-between gap-3';
@@ -239,7 +230,7 @@ const renderApiLearning = (roadmap, progress, pending = new Set()) => {
   headingGroup.append(
     makeText('p', 'text-[11px] font-semibold text-[#81798B]', 'ACCOUNT ROADMAP'),
     heading,
-    makeText('p', 'mt-2 text-xs leading-5 text-[#625B6D]', roadmap?.summary || (pending.has('roadmaps') ? 'Loading your account roadmap…' : 'Your roadmap will appear here when generated from a completed CV skill analysis.')),
+    makeText('p', 'mt-2 text-xs leading-5 text-[#625B6D]', roadmap?.summary || (!activeSession ? 'Sign in to load roadmap details for your account.' : pending.has('roadmaps') ? 'Loading your account roadmap…' : 'Your roadmap will appear here when generated from a completed CV skill analysis.')),
   );
   header.append(headingGroup);
   if (roadmap?.status) header.append(makeText('span', 'rounded-full bg-[#EEE8FF] px-2.5 py-1 text-[10px] font-bold uppercase text-[#731F94]', roadmap.status));
@@ -258,9 +249,9 @@ const renderApiLearning = (roadmap, progress, pending = new Set()) => {
       body.append(record);
     });
   } else {
-    body.append(makeText('p', 'rounded-xl bg-[#F5F0FD] p-4 text-sm text-[#625B6D]', pending.has('progress') ? 'Loading your learning progress…' : 'No learning progress records are available for this account yet.'));
+    body.append(makeText('p', 'rounded-xl bg-[#F5F0FD] p-4 text-sm text-[#625B6D]', !activeSession ? 'Sign in to load learning progress for your account.' : pending.has('progress') ? 'Loading your learning progress…' : 'No learning progress records are available for this account yet.'));
   }
-  if (!roadmap && !pending.has('roadmaps')) {
+  if (activeSession && !roadmap && !pending.has('roadmaps')) {
     const link = makeText('a', 'inline-flex rounded-lg bg-[#731F94] px-4 py-2.5 text-sm font-semibold text-white', 'Review your CV skill gaps');
     link.href = 'skill-gap.html';
     body.append(link);
@@ -270,6 +261,7 @@ const renderApiLearning = (roadmap, progress, pending = new Set()) => {
 
 const renderDashboardJobs = (opportunities, matches, isLoading = false) => {
   if (!dashboardJobList) return;
+  if (dashboardJobSection) dashboardJobSection.hidden = false;
   const matchById = new Map(matches.map((match) => [
     match.opportunityId || match.opportunity?.id,
     match,
@@ -335,14 +327,16 @@ const renderDashboardJobs = (opportunities, matches, isLoading = false) => {
   });
 
   const matchHeading = document.getElementById('matches-title');
-  if (matchHeading) matchHeading.textContent = matches.length ? 'Your API-generated job matches' : 'Job opportunities from SkillBridge';
+  if (matchHeading) matchHeading.textContent = !activeSession ? 'Your job opportunities' : matches.length ? 'Your API-generated job matches' : 'Job opportunities from SkillBridge';
   const matchBadge = matchHeading?.parentElement?.querySelector('span');
   if (matchBadge) {
     matchBadge.textContent = matches.length ? `${matches.length} matches` : `${opportunities.length} listings`;
     matchBadge.classList.toggle('hidden', opportunities.length === 0);
   }
   if (!uniqueItems.length) {
-    emptyState.textContent = isLoading
+    emptyState.textContent = !activeSession
+      ? 'Sign in to load opportunities for your account.'
+      : isLoading
       ? 'Loading opportunities from your account…'
       : opportunities.length
       ? 'No opportunities match your saved profile data.'
@@ -389,6 +383,7 @@ const loadDashboardApiSummary = async () => {
       document.querySelectorAll('[data-track-name]').forEach((element) => { element.textContent = profile.careerGoal; });
       document.getElementById('topbar-user-track').textContent = profile.careerGoal;
     }
+    if (profileLocation) profileLocation.textContent = profile?.location ? `• ${profile.location}` : '';
     const cvs = listFrom(data.cvs);
     const roadmaps = listFrom(data.roadmaps);
     const gaps = listFrom(data.gaps);

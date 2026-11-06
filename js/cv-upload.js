@@ -341,24 +341,12 @@ continueButton.addEventListener('click', async (event) => {
     try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
     catch { return {}; }
   })();
-  const careers = {
-    'fintech-data': 'Junior Fintech Data Analyst',
-    backend: 'Associate Backend Engineer',
-    'growth-product': 'Growth Product Associate',
-  };
-  const role = localStorage.getItem('skillbridgeSelectedCareer') || careers[survey.track] || 'Junior Fintech Data Analyst';
-  if (existingSkillGap && existingSkillGap.targetJobTitle?.toLowerCase() === role.toLowerCase()) {
-    localStorage.setItem('skillbridgeSkillGapId', existingSkillGap.id);
-    window.location.href = 'career-paths.html';
-    return;
-  }
   const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
   continueButton.setAttribute('aria-disabled', 'true');
   continueButton.classList.add('pointer-events-none', 'opacity-50');
   uploadStatus.textContent = 'Analyzing your CV…';
   try {
     const response = await window.SkillBridgeApi.post(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}/analyze`, {
-      targetJobTitle: role,
       industryFocus: survey.track === 'fintech-data' ? 'Financial Technology' : 'Technology',
       careerStage,
       primaryGoal: 'Gap Analysis',
@@ -366,7 +354,8 @@ continueButton.addEventListener('click', async (event) => {
     const analysis = window.SkillBridgeApi.unwrap(response);
     if (!analysis?.skillGapId) throw new Error('The API response did not include a skill-gap analysis ID.');
     localStorage.setItem('skillbridgeSkillGapId', analysis.skillGapId);
-    existingSkillGap = analysis.skillGap || { id: analysis.skillGapId, targetJobTitle: role, status: 'completed' };
+    localStorage.setItem('skillbridgeUploadedCvId', uploadedCvId);
+    existingSkillGap = analysis.skillGap || { id: analysis.skillGapId, status: 'completed' };
     setAnalysisProgress(100, 'Analysis complete');
     uploadStatus.textContent = 'CV analysis completed by the SkillBridge API.';
     window.location.href = 'career-paths.html';

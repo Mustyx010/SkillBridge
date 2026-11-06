@@ -7,11 +7,6 @@
   const user = read('skillbridge_user');
   const surveyRecord = read('skillbridge_survey');
   const survey = surveyRecord.data || {};
-  const careers = {
-    'fintech-data': 'Junior Fintech Data Analyst',
-    backend: 'Associate Backend Engineer',
-    growth: 'Growth Product Associate',
-  };
   const name = user.name || survey.fullName || 'Candidate';
   const institution = survey.institution || 'Add your institution';
   const formatDegree = ({ degree: qualification, field, classification }) => {
@@ -32,7 +27,7 @@
   };
   const degree = formatDegree(survey);
   const location = survey.location || 'Add your location';
-  const role = localStorage.getItem('skillbridgeSelectedCareer') || careers[survey.track] || 'Junior Fintech Data Analyst';
+  const role = localStorage.getItem('skillbridgeSelectedCareer') || survey.careerGoal || 'Not selected yet';
   const availabilityMap = { immediate: ['Immediate Placement', 'NYSC status can be added in your survey profile.'], serving: ['Currently Serving', 'Availability details can be updated in your survey profile.'], 'final-year': ['Final Year Student', 'Available after exams'] };
   const [availability, availabilityDetail] = availabilityMap[survey.availability] || ['Immediate Placement', 'Update your availability in career preferences.'];
   const fmt = (value) => `₦${Number(value).toLocaleString('en-NG')}`;
@@ -47,12 +42,21 @@
   setText('profile-degree', `${degree} • ${institution}`); setText('profile-location', location);
   setText('target-role', role); setText('availability-label', availability); setText('availability-detail', availabilityDetail);
 
-  const low = Number(survey.payMin) || 250000;
-  const high = Number(survey.payMax) || 350000;
-  setText('salary-range', `${fmt(low)}–${fmt(high)}`);
-  setText('salary-bracket', `Your Bracket (${fmt(low / 1000)}k–${fmt(high / 1000)}k)`);
+  const low = Number(survey.payMin);
+  const high = Number(survey.payMax);
+  setText('salary-range', low && high ? `${fmt(low)}–${fmt(high)}` : 'Not specified');
+  setText('salary-bracket', low && high ? `Your Bracket (${fmt(low / 1000)}k–${fmt(high / 1000)}k)` : 'Salary preference not specified');
   const fill = $('#salary-fill');
-  if (fill) { const start = Math.max(0, Math.min(100, ((low - 150000) / 350000) * 100)); const width = Math.max(3, Math.min(100 - start, ((high - low) / 350000) * 100)); fill.style.marginLeft = `${start}%`; fill.style.width = `${width}%`; }
+  if (fill) {
+    if (low && high) {
+      const start = Math.max(0, Math.min(100, ((low - 150000) / 350000) * 100));
+      const width = Math.max(3, Math.min(100 - start, ((high - low) / 350000) * 100));
+      fill.style.marginLeft = `${start}%`;
+      fill.style.width = `${width}%`;
+    } else {
+      fill.style.width = '0%';
+    }
+  }
   const modes = { hybrid: 'Hybrid Lagos (Island / Mainland)', remote: 'Fully Remote', onsite: 'On-Site Victoria Island / Ikoyi' };
   if (survey.workMode && $('#work-model-chips')) $('#work-model-chips').innerHTML = `<span class="inline-flex items-center gap-1 rounded-full bg-[#EEE8FF] px-3 py-1.5 text-[11px]"><i class="ph ph-buildings text-[#731F94]"></i>${modes[survey.workMode] || survey.workMode}</span>`;
 
