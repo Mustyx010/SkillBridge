@@ -20,3 +20,17 @@ The frontend sends bearer tokens in the `Authorization` header and does not
 require cross-origin cookies.
 
 CV uploads are limited to 10 MB by the frontend.
+
+The supplied OpenAPI contract serves the versioned resource routes under
+`/api/v1`, but its authentication routes are under `/api/auth` (without `/v1`).
+The frontend uses those documented paths for registration, login, and password
+reset. The supplied contract does not define an account email-verification
+endpoint. Signup therefore does not call an undocumented verification route;
+if registration returns an unverified account, the frontend reports that the
+documented API flow is incomplete and cannot continue to the survey until the
+backend provides that endpoint and its request/response contract.
+
+The supplied OpenAPI file advertises `http://localhost:3000` as its server,
+while deployed frontend requests use the production Worker URL above. Keep the
+production base URL for deployed sites; use the local URL only when running the
+API locally.
