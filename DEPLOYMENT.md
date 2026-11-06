@@ -21,14 +21,13 @@ require cross-origin cookies.
 
 CV uploads are limited to 10 MB by the frontend.
 
-The supplied OpenAPI contract serves the versioned resource routes under
-`/api/v1`, but its authentication routes are under `/api/auth` (without `/v1`).
-The frontend uses those documented paths for registration, login, and password
-reset. The supplied contract does not define an account email-verification
-endpoint. Signup therefore does not call an undocumented verification route;
-if registration returns an unverified account, the frontend reports that the
-documented API flow is incomplete and cannot continue to the survey until the
-backend provides that endpoint and its request/response contract.
+The supplied OpenAPI contract lists authentication routes under `/api/auth`,
+but this frontend uses the previously working `/api/v1/auth` routes for
+registration, login, password reset, and email verification. The supplied
+contract does not include the email-verification route, so the deployed
+backend must support that route for signup verification to work. Confirm the
+production API contract with the backend maintainer before changing these
+paths.
 
 The supplied OpenAPI file advertises `http://localhost:3000` as its server,
 while deployed frontend requests use the production Worker URL above. Keep the

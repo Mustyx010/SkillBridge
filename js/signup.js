@@ -75,9 +75,33 @@ if (signupForm) {
   });
   f.terms.addEventListener('change', () => showError(f.terms, ''));
 
-  const contractStatus = document.getElementById('signup-contract-status');
+  const verificationSection = document.getElementById('signup-verification-section');
+  const verificationForm = document.getElementById('signup-verification-form');
+  const verificationEmail = verificationForm.elements['email'];
+  const verificationCode = verificationForm.elements['code'];
+  const verificationSuccess = document.getElementById('signup-verification-success');
+  const existingCodePrompt = document.getElementById('signup-existing-code');
+  const showVerification = (email = '') => {
+    verificationEmail.value = email;
+    signupForm.classList.add('hidden');
+    existingCodePrompt.classList.add('hidden');
+    verificationSection.classList.remove('hidden');
+    (email ? verificationCode : verificationEmail).focus();
+  };
+  const showVerifiedSignIn = (message) => {
+    const signInLink = document.createElement('a');
+    signInLink.href = 'signin.html';
+    signInLink.className = 'font-semibold text-[#731F94] underline';
+    signInLink.textContent = 'Sign in';
+    verificationSuccess.replaceChildren(
+      document.createTextNode(`${message} `),
+      signInLink,
+      document.createTextNode(' to continue.'),
+    );
+    verificationSuccess.classList.remove('hidden');
+  };
   const signInAndContinue = async (email, password) => {
-    const login = await window.SkillBridgeApi.post('/api/auth/login', {
+    const login = await window.SkillBridgeApi.post('/api/v1/auth/login', {
       email,
       password,
     }, { auth: false });
@@ -87,11 +111,59 @@ if (signupForm) {
       throw new Error('The API returned account details that do not match the email you registered. For your security, you have not been signed in. Contact the backend team.');
     }
     if (user.isVerified === false) {
-      throw new Error('Your email is not verified. The documented API does not provide an account email-verification endpoint.');
+      throw new Error('Your email is not verified. Enter the verification code sent to your email before signing in.');
     }
     window.SkillBridgeApi.setSession(user, token);
     window.location.href = 'survey.html';
   };
+  document.getElementById('show-signup-verification').addEventListener('click', () => {
+    showVerification(f.email.value.trim() || verificationEmail.value.trim());
+  });
+  verificationCode.addEventListener('input', () => {
+    verificationCode.value = verificationCode.value.replace(/\D/g, '').slice(0, 6);
+  });
+  verificationForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = verificationEmail.value.trim();
+    const code = verificationCode.value.trim();
+    if (!isEmail(email)) {
+      verificationEmail.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter a valid email address.', true);
+    }
+    if (!/^\d{6}$/.test(code)) {
+      verificationCode.focus();
+      return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the six-digit verification code from your email.', true);
+    }
+    const button = verificationForm.querySelector('[type="submit"]');
+    button.disabled = true;
+    button.textContent = 'Verifying…';
+    try {
+      await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email, code }, { auth: false });
+      verificationForm.parentElement.querySelector('[data-api-status]')?.remove();
+      verificationForm.classList.add('hidden');
+      verificationSuccess.classList.remove('hidden');
+      const session = window.SkillBridgeApi.session();
+      if (session?.user?.email?.trim().toLowerCase() === email.toLowerCase()) {
+        window.location.href = 'survey.html';
+        return;
+      }
+      if (!f.password.value) {
+        showVerifiedSignIn('Email verified. Sign in to continue to your survey.');
+        return;
+      }
+      showVerifiedSignIn('Email verified. Signing you in…');
+      try {
+        await signInAndContinue(email, f.password.value);
+      } catch (error) {
+        showVerifiedSignIn(`Email verified, but automatic sign-in failed: ${error.message}. Sign in to continue.`);
+      }
+    } catch (error) {
+      window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Verify and continue';
+    }
+  });
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = f.name.value.trim();
@@ -114,7 +186,7 @@ if (signupForm) {
     submitButton.textContent = 'Creating account…';
     signupForm.setAttribute('aria-busy', 'true');
     try {
-      const registration = await window.SkillBridgeApi.post('/api/auth/register', {
+      const registration = await window.SkillBridgeApi.post('/api/v1/auth/register', {
         fullName: name,
         email,
         password: f.password.value,
@@ -127,9 +199,7 @@ if (signupForm) {
         throw new Error('The API registration response did not include the documented isVerified status.');
       }
       if (!registeredUser.isVerified) {
-        contractStatus.textContent = 'Your account was created, but the API reports that your email is not verified. The supplied OpenAPI contract does not define an email-verification endpoint, so this page cannot verify the account or continue to the survey yet. Please ask the SkillBridge backend team to provide the documented verification flow.';
-        contractStatus.classList.remove('hidden');
-        signupForm.classList.add('hidden');
+        showVerification(email);
         return;
       }
       try {
@@ -139,7 +209,8 @@ if (signupForm) {
       }
     } catch (error) {
       if (error.status === 409 || /email.{0,30}(already exists|already registered)|already exists.{0,30}email/i.test(error.message)) {
-        window.SkillBridgeApi.showStatus(signupForm, 'This email already has an account. Sign in to continue.', true);
+        showVerification(email);
+        window.SkillBridgeApi.showStatus(verificationForm, 'This email already has an account. Enter a code you have already received, or sign in if your email is verified.', true);
       } else {
         window.SkillBridgeApi.showStatus(signupForm, error.message, true);
       }

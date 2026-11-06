@@ -119,6 +119,21 @@ function showFile(file) {
   uploadError.textContent = '';
   uploadError.classList.add('hidden');
   if (!file) return;
+  if (!window.SkillBridgeApi.session()) {
+    const signInLink = document.createElement('a');
+    signInLink.href = 'signin.html';
+    signInLink.className = 'font-bold underline';
+    signInLink.textContent = 'Sign in';
+    uploadError.replaceChildren(
+      document.createTextNode('You need to '),
+      signInLink,
+      document.createTextNode(' before uploading a CV. Select your file after signing in.'),
+    );
+    uploadError.classList.remove('hidden');
+    setContinueState(false);
+    uploadStatus.textContent = 'Sign in required before CV upload.';
+    return;
+  }
 
   const extension = file.name.split('.').pop().toLowerCase();
   if (fileInput.dataset.pdfOnly === 'true' && extension !== 'pdf') {
@@ -190,7 +205,11 @@ function showFile(file) {
       setContinueState(true);
     })
     .catch((error) => {
-      uploadError.textContent = `CV upload failed: ${error.message}`;
+      const status = error.status ? ` (HTTP ${error.status})` : '';
+      const guidance = error.status === 401
+        ? ' Your session may have expired; sign in again and retry.'
+        : '';
+      uploadError.textContent = `CV upload failed${status}: ${error.message}${guidance}`;
       uploadError.classList.remove('hidden');
       setContinueState(false);
       uploadStatus.textContent = 'CV upload failed. Try again after resolving the error.';
