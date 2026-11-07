@@ -4,11 +4,12 @@
     try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
     catch { return fallback; }
   };
-  const user = read('skillbridge_user');
-  const surveyRecord = read('skillbridge_survey');
-  const survey = surveyRecord.data || {};
-  const name = user.name || survey.fullName || 'Candidate';
-  const institution = survey.institution || 'Add your institution';
+  let user = read('skillbridge_user');
+  let surveyRecord = read('skillbridge_survey');
+  let survey = surveyRecord.data || {};
+  let name = user.name || survey.fullName || 'Candidate';
+  let institution = survey.institution || 'Add your institution';
+  let education = '';
   const formatDegree = ({ degree: qualification, field, classification }) => {
     const rawQualification = String(qualification || 'B.Sc').trim();
     const normalizedQualification = rawQualification.match(/B\.Sc|B\.Eng|B\.A|HND|M\.Sc/i)?.[0]
@@ -25,21 +26,48 @@
     }
     return rawQualification;
   };
-  const degree = formatDegree(survey);
-  const location = survey.location || 'Add your location';
-  const role = localStorage.getItem('skillbridgeSelectedCareer') || survey.careerGoal || 'Not selected yet';
+  let degree = formatDegree(survey);
+  let location = survey.location || 'Add your location';
+  let pendingProfileSync = read('skillbridge_profile_pending_sync', null);
+  if (pendingProfileSync) {
+    name = pendingProfileSync.fullName || name;
+    institution = pendingProfileSync.institution || institution;
+    degree = pendingProfileSync.degree || degree;
+    location = pendingProfileSync.location || location;
+    education = pendingProfileSync.education || '';
+    survey = { ...survey, fullName: name, institution, degree, location };
+  }
+  let role = localStorage.getItem('skillbridgeSelectedCareer') || survey.careerGoal || 'Not selected yet';
   const availabilityMap = { immediate: ['Immediate Placement', 'NYSC status can be added in your survey profile.'], serving: ['Currently Serving', 'Availability details can be updated in your survey profile.'], 'final-year': ['Final Year Student', 'Available after exams'] };
-  const [availability, availabilityDetail] = availabilityMap[survey.availability] || ['Immediate Placement', 'Update your availability in career preferences.'];
+  const [availability, availabilityDetail] = availabilityMap[survey.availability] || ['Not set', 'Complete your survey to set your availability.'];
   const fmt = (value) => `₦${Number(value).toLocaleString('en-NG')}`;
   const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   const setField = (id, value) => { const el = document.getElementById(id); if (el) el.value = value || ''; };
+  const setCareerGoalField = (value) => {
+    const select = $('#criteria-role');
+    if (!select) return;
+    if (![...select.options].some((option) => option.value === value || option.textContent === value)) {
+      select.add(new Option(value, value));
+    }
+    select.value = value;
+  };
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('');
   setText('profile-name', name); setText('profile-name-mobile', name); setText('profile-initials', initials);
   const firstName = name.trim().split(/\s+/)[0] || 'Candidate';
   const lastName = name.trim().split(/\s+/).slice(-1)[0] || '';
   setText('profile-topbar-name', `${firstName} ${lastName && lastName !== firstName ? `${lastName[0]}.` : ''}`.trim());
   setText('profile-topbar-track', 'Level 2 Candidate');
-  setText('profile-degree', `${degree} • ${institution}`); setText('profile-location', location);
+  const renderProfileDetails = () => {
+    setText('profile-name', name);
+    setText('profile-name-mobile', name);
+    setText('profile-initials', name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join(''));
+    const first = name.trim().split(/\s+/)[0] || 'Candidate';
+    const last = name.trim().split(/\s+/).slice(-1)[0] || '';
+    setText('profile-topbar-name', `${first} ${last && last !== first ? `${last[0]}.` : ''}`.trim());
+    setText('profile-degree', education || `${formatDegree(survey)} • ${institution}`);
+    setText('profile-location', location);
+  };
+  renderProfileDetails();
   setText('target-role', role); setText('availability-label', availability); setText('availability-detail', availabilityDetail);
 
   const low = Number(survey.payMin);
@@ -58,7 +86,18 @@
     }
   }
   const modes = { hybrid: 'Hybrid Lagos (Island / Mainland)', remote: 'Fully Remote', onsite: 'On-Site Victoria Island / Ikoyi' };
-  if (survey.workMode && $('#work-model-chips')) $('#work-model-chips').innerHTML = `<span class="inline-flex items-center gap-1 rounded-full bg-[#EEE8FF] px-3 py-1.5 text-[11px]"><i class="ph ph-buildings text-[#731F94]"></i>${modes[survey.workMode] || survey.workMode}</span>`;
+  if ($('#work-model-chips')) {
+    if (survey.workMode) {
+      const chip = document.createElement('span');
+      chip.className = 'inline-flex items-center gap-1 rounded-full bg-[#EEE8FF] px-3 py-1.5 text-[11px]';
+      const icon = document.createElement('i');
+      icon.className = 'ph ph-buildings text-[#731F94]';
+      chip.append(icon, document.createTextNode(modes[survey.workMode] || survey.workMode));
+      $('#work-model-chips').replaceChildren(chip);
+    } else {
+      $('#work-model-chips').replaceChildren();
+    }
+  }
 
   const active = localStorage.getItem('skillbridge_candidate_active') !== 'false';
   const statusButton = $('#candidate-status-toggle');
@@ -80,7 +119,6 @@
     setText('active-cv-name', cvName);
     $('#cv-uploaded-state')?.classList.remove('hidden');
     $('#cv-empty-state')?.classList.add('hidden');
-    $('#verified-competencies')?.classList.remove('hidden');
   }
   document.querySelectorAll('[data-setting]').forEach((input) => {
     const key = `skillbridgeProfileSetting_${input.dataset.setting}`;
@@ -111,7 +149,7 @@
   });
   $('#profile-notifications')?.addEventListener('click', () => announce('Notifications', 'You’re all caught up. Assessment and recruiter updates will appear here.'));
   $('#edit-profile-button')?.addEventListener('click', () => {
-    setField('edit-name', name); setField('edit-institution', survey.institution); setField('edit-degree', degree); setField('edit-location', location); open('edit-profile-dialog');
+  setField('edit-name', name); setField('edit-institution', institution); setField('edit-degree', degree); setField('edit-location', location); open('edit-profile-dialog');
   });
   document.querySelectorAll('[data-close-edit]').forEach((button) => button.addEventListener('click', () => close('edit-profile-dialog')));
   $('#edit-profile-form')?.addEventListener('submit', async (event) => {
@@ -136,26 +174,57 @@
     submitButton.disabled = true;
     status.classList.remove('hidden', 'text-red-700');
     status.textContent = 'Saving your profile…';
-    try {
-      await window.SkillBridgeApi.put('/api/v1/profiles/me', {
+    pendingProfileSync = {
+      fullName: nextName,
+      institution: nextInstitution,
+      degree: nextDegree,
+      location: nextLocation,
+      education: [nextDegree, nextInstitution].filter(Boolean).join(' - '),
+    };
+    surveyRecord = { ...surveyRecord, data: nextSurvey };
+    survey = nextSurvey;
+    name = nextName;
+    institution = nextInstitution || 'Add your institution';
+    degree = nextDegree || 'B.Sc';
+    location = nextLocation || 'Add your location';
+    education = pendingProfileSync.education;
+    localStorage.setItem('skillbridge_user', JSON.stringify(nextUser));
+    localStorage.setItem('skillbridge_survey', JSON.stringify(surveyRecord));
+    localStorage.setItem('skillbridge_profile_pending_sync', JSON.stringify(pendingProfileSync));
+    renderProfileDetails();
+    if (!window.SkillBridgeApi.session()?.token) {
+      status.textContent = 'Saved on this device. Sign in to sync these changes with your account.';
+      submitButton.disabled = false;
+      return;
+    }
+
+    const [profileResult, userResult] = await Promise.allSettled([
+      window.SkillBridgeApi.put('/api/v1/profiles/me', {
         location: nextLocation || null,
         education: [nextDegree, nextInstitution].filter(Boolean).join(' - ') || null,
-      });
-      await window.SkillBridgeApi.put('/api/v1/users/me', { fullName: nextName });
-      localStorage.setItem('skillbridge_user', JSON.stringify(nextUser));
-      localStorage.setItem('skillbridge_survey', JSON.stringify({ ...surveyRecord, data: nextSurvey }));
-      close('edit-profile-dialog');
-      window.location.reload();
-    } catch (error) {
+      }),
+      window.SkillBridgeApi.put('/api/v1/users/me', { fullName: nextName }),
+    ]);
+
+    if (userResult.status === 'fulfilled') user = nextUser;
+
+    const failures = [
+      profileResult.status === 'rejected' ? `Profile details: ${profileResult.reason.message}` : '',
+      userResult.status === 'rejected' ? `Name: ${userResult.reason.message}` : '',
+    ].filter(Boolean);
+    if (failures.length) {
       status.classList.add('text-red-700');
-      status.textContent = `Profile could not be fully saved: ${error.message}`;
-    } finally {
-      submitButton.disabled = false;
+      status.textContent = `Saved on this device; account sync is pending. ${failures.join(' ')}`;
+    } else {
+      localStorage.removeItem('skillbridge_profile_pending_sync');
+      pendingProfileSync = null;
+      close('edit-profile-dialog');
     }
+    submitButton.disabled = false;
   });
 
   $('#edit-criteria-button')?.addEventListener('click', () => {
-    setField('criteria-role', role); setField('criteria-availability', availability);
+    setCareerGoalField(role); setField('criteria-availability', availability);
     setField('criteria-min-salary', low); setField('criteria-max-salary', high); open('edit-criteria-dialog');
   });
   document.querySelectorAll('[data-close-criteria]').forEach((button) => button.addEventListener('click', () => close('edit-criteria-dialog')));
@@ -169,6 +238,7 @@
     try {
       const careerGoal = $('#criteria-role').value;
       await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal });
+      role = careerGoal;
       localStorage.setItem('skillbridgeSelectedCareer', careerGoal);
       setText('target-role', careerGoal);
       close('edit-criteria-dialog');
@@ -209,33 +279,62 @@
     signInNotice.append(signInLink, '.');
     profileHeading?.insertAdjacentElement('afterend', signInNotice);
   } else if (activeSession?.token) {
-    window.SkillBridgeApi.get('/api/v1/profiles/me')
+    const syncPendingProfile = async () => {
+      if (!pendingProfileSync) return;
+      const results = await Promise.allSettled([
+        window.SkillBridgeApi.put('/api/v1/profiles/me', {
+          location: pendingProfileSync.location || null,
+          education: pendingProfileSync.education || null,
+        }),
+        window.SkillBridgeApi.put('/api/v1/users/me', { fullName: pendingProfileSync.fullName }),
+      ]);
+      if (results.every((result) => result.status === 'fulfilled')) {
+        localStorage.removeItem('skillbridge_profile_pending_sync');
+        pendingProfileSync = null;
+      } else {
+        const failures = results
+          .filter((result) => result.status === 'rejected')
+          .map((result) => result.reason.message);
+        window.SkillBridgeApi.showStatus('profile-name', `Profile changes remain saved on this device; account sync is still pending: ${failures.join(' ')}`, true);
+      }
+    };
+    syncPendingProfile()
+      .then(() => window.SkillBridgeApi.get('/api/v1/profiles/me'))
       .then(async (response) => {
         const account = window.SkillBridgeApi.unwrap(response);
         const remoteProfile = account?.profile;
-        if (account?.fullName) {
+        if (!pendingProfileSync && account?.fullName) {
+          name = account.fullName;
           user.name = account.fullName;
           user.email = account.email || user.email;
           localStorage.setItem('skillbridge_user', JSON.stringify(user));
-          const remoteFirst = account.fullName.trim().split(/\s+/)[0] || 'Candidate';
-          const remoteLast = account.fullName.trim().split(/\s+/).slice(-1)[0] || '';
-          setText('profile-name', account.fullName);
-          setText('profile-name-mobile', account.fullName);
-          setText('profile-initials', account.fullName.trim().split(/\s+/).slice(0, 2).map((part) => part[0].toUpperCase()).join(''));
-          setText('profile-topbar-name', `${remoteFirst} ${remoteLast && remoteLast !== remoteFirst ? `${remoteLast[0]}.` : ''}`.trim());
+          renderProfileDetails();
         }
-        if (remoteProfile?.location) setText('profile-location', remoteProfile.location);
-        if (remoteProfile?.careerGoal) setText('target-role', remoteProfile.careerGoal);
+        if (!pendingProfileSync && remoteProfile?.location) location = remoteProfile.location;
+        if (!pendingProfileSync && remoteProfile?.education) {
+          education = remoteProfile.education;
+          const parts = remoteProfile.education.split(/\s+-\s+/);
+          degree = parts.shift() || degree;
+          institution = parts.join(' - ') || institution;
+        }
+        if (!pendingProfileSync && (remoteProfile?.location || remoteProfile?.education || account?.fullName)) renderProfileDetails();
+        if (!pendingProfileSync && remoteProfile?.careerGoal) {
+          role = remoteProfile.careerGoal;
+          localStorage.setItem('skillbridgeSelectedCareer', role);
+          setText('target-role', role);
+        }
         try {
           const result = await window.SkillBridgeApi.get('/api/v1/cvs/my-cvs');
           const cvs = window.SkillBridgeApi.unwrap(result);
           const items = Array.isArray(cvs) ? cvs : cvs?.items || [];
-          const latest = items[0];
+          const latest = [...items].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0))[0];
           if (latest?.fileName) {
+            localStorage.setItem('skillbridgeUploadedCvId', latest.id);
+            localStorage.setItem('skillbridgeUploadedCvName', latest.fileName);
             setText('active-cv-name', latest.fileName);
             $('#cv-uploaded-state')?.classList.remove('hidden');
             $('#cv-empty-state')?.classList.add('hidden');
-            $('#verified-competencies')?.classList.remove('hidden');
+            $('#verified-competencies')?.classList.add('hidden');
           }
         } catch (error) {
           window.SkillBridgeApi.showStatus('active-cv-name', `CV records could not be refreshed: ${error.message}`, true);

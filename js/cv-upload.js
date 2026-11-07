@@ -36,6 +36,14 @@ function setAnalysisProgress(percent, label) {
   parseProgress.style.width = `${percent}%`;
 }
 
+function listFrom(value, keys = []) {
+  if (Array.isArray(value)) return value;
+  for (const key of keys) {
+    if (Array.isArray(value?.[key])) return value[key];
+  }
+  return null;
+}
+
 function hideSampleAnalysis() {
   uploadedPanel.querySelectorAll('p').forEach((paragraph) => {
     if (paragraph.textContent.includes('Processing with Nigerian Academic Entity Classifier')) {
@@ -82,16 +90,17 @@ async function loadSavedCv() {
     uploadError.classList.remove('hidden');
     return;
   }
-  const cvs = window.SkillBridgeApi.unwrap(cvResult.value);
-  if (!Array.isArray(cvs)) throw new Error('The API returned an invalid saved CV list.');
+  const cvs = listFrom(window.SkillBridgeApi.unwrap(cvResult.value), ['items', 'cvs']);
+  if (!cvs) throw new Error('The API returned an invalid saved CV list.');
   const skillGaps = gapsResult.status === 'fulfilled'
-    ? window.SkillBridgeApi.unwrap(gapsResult.value)
+    ? listFrom(window.SkillBridgeApi.unwrap(gapsResult.value), ['items', 'skillGaps'])
     : [];
+  if (!skillGaps) throw new Error('The API returned an invalid skill-gap list.');
   if (gapsResult.status === 'rejected') {
     uploadError.textContent = `Your saved CV is available, but its analysis status could not be checked: ${gapsResult.reason.message}`;
     uploadError.classList.remove('hidden');
   }
-  const availableGaps = Array.isArray(skillGaps) ? skillGaps : [];
+  const availableGaps = skillGaps;
   const preferredId = localStorage.getItem('skillbridgeUploadedCvId');
   if (!cvs.length) {
     localStorage.removeItem('skillbridgeUploadedCvId');
@@ -177,7 +186,6 @@ function showFile(file) {
   fileName.textContent = file.name;
   uploadedPanel.classList.remove('hidden');
   hideSampleAnalysis();
-  localStorage.setItem('skillbridgeUploadedCvName', file.name);
   const sizeLabel = fileName.parentElement.querySelector('span');
   if (sizeLabel) sizeLabel.textContent = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
   setAnalysisProgress(0, 'Waiting for analysis');
@@ -194,26 +202,34 @@ function showFile(file) {
   uploadStatus.textContent = 'Uploading CV to your account…';
   uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
     const formData = new FormData();
-    formData.append('cv', file);
+    formData.append('cv', file, file.name);
     return formData;
   })())
     .then((response) => {
-      const cv = window.SkillBridgeApi.unwrap(response);
+      const payload = window.SkillBridgeApi.unwrap(response);
+      if (response?.success === false) {
+        throw new Error(response.message || 'The API rejected the CV upload.');
+      }
+      const cv = payload?.cv || payload;
       if (!cv?.id) throw new Error('The API response did not include the uploaded CV ID.');
       uploadedCvId = cv.id;
       localStorage.setItem('skillbridgeUploadedCvId', cv.id);
+      localStorage.setItem('skillbridgeUploadedCvName', cv.fileName || file.name);
       setContinueState(true);
     })
     .catch((error) => {
-      const status = error.status ? ` (HTTP ${error.status})` : '';
-      const guidance = error.status === 401
-        ? ' Your session may have expired; sign in again and retry.'
-        : '';
-      uploadError.textContent = `CV upload failed${status}: ${error.message}${guidance}`;
+      const guidance = {
+        400: ' Check that the selected file is a valid PDF or DOCX.',
+        401: ' Sign in again, then select the file to retry.',
+        413: ' The file may exceed the server upload limit.',
+        415: ' The server rejected this file type. Choose a PDF or DOCX.',
+      }[error.status] || '';
+      uploadError.textContent = `CV upload failed: ${error.message}${guidance}`;
       uploadError.classList.remove('hidden');
       setContinueState(false);
       uploadStatus.textContent = 'CV upload failed. Try again after resolving the error.';
-    });
+    })
+    .finally(() => { uploadPromise = null; });
 }
 
 browseButton.addEventListener('click', (event) => {
@@ -300,7 +316,7 @@ document.getElementById('choose-compressed-file').addEventListener('click', () =
   compressorDialog.close();
 });
 
-document.getElementById('deep-ocr-button').addEventListener('click', () => {
+document.getElementById('deep-ocr-button')?.addEventListener('click', () => {
   if (!fileInput.files.length) {
     announceDiagnostic('Upload a scanned PDF first, then run deep OCR on that file.');
     uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -313,7 +329,7 @@ document.getElementById('deep-ocr-button').addEventListener('click', () => {
   announceDiagnostic('Deep OCR requested. This preview has no OCR service connected yet.');
 });
 
-document.getElementById('text-native-pdf-button').addEventListener('click', () => {
+document.getElementById('text-native-pdf-button')?.addEventListener('click', () => {
   fileInput.dataset.pdfOnly = 'true';
   fileInput.accept = '.pdf,application/pdf';
   fileInput.click();
