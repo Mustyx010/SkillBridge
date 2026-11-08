@@ -74,8 +74,43 @@
     sessionStorage.removeItem('skillbridge_session');
   };
 
+  const parseResponse = (responseText) => {
+    if (!responseText) return null;
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      return { message: responseText };
+    }
+  };
+
+  const handleResponse = (status, responseText, auth) => {
+    const payload = parseResponse(responseText);
+    if (status < 200 || status >= 300) {
+      const message = payload?.message
+        || payload?.error
+        || `The API request failed with status ${status}.`;
+      if (status === 401 && auth) clearSession();
+      const error = new Error(
+        status >= 500 ? `${message} (HTTP ${status})` : message,
+      );
+      error.status = status;
+      throw error;
+    }
+    return payload;
+  };
+
+  const networkError = () => new Error(
+    `Could not reach SkillBridge API at ${apiLabel}. Check your connection, API availability, or whether the site can access the API.`,
+  );
+
   const request = async (path, options = {}) => {
-    const { auth = true, body, headers = {}, ...requestOptions } = options;
+    const {
+      auth = true,
+      body,
+      headers = {},
+      onUploadProgress,
+      ...requestOptions
+    } = options;
     const requestHeaders = new Headers(headers);
     const session = readSession();
     const token = auth ? session?.token : null;
@@ -90,6 +125,36 @@
     if (body !== undefined && !(body instanceof FormData)) {
       requestHeaders.set('Content-Type', 'application/json');
       requestBody = JSON.stringify(body);
+    }
+
+    if (typeof onUploadProgress === 'function') {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(requestOptions.method || 'GET', `${baseUrl}${path}`, true);
+        xhr.timeout = 55_000;
+        requestHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            onUploadProgress({
+              loaded: event.loaded,
+              total: event.total,
+              percent: Math.round((event.loaded / event.total) * 100),
+            });
+          }
+        });
+        xhr.addEventListener('load', () => {
+          try {
+            resolve(handleResponse(xhr.status, xhr.responseText, auth));
+          } catch (error) {
+            reject(error);
+          }
+        });
+        xhr.addEventListener('error', () => reject(networkError()));
+        xhr.addEventListener('timeout', () => {
+          reject(new Error(`The SkillBridge API request timed out at ${apiLabel}.`));
+        });
+        xhr.send(requestBody ?? null);
+      });
     }
 
     let response;
@@ -108,31 +173,12 @@
       if (error.name === 'AbortError') {
         throw new Error(`The SkillBridge API request timed out at ${apiLabel}.`);
       }
-      throw new Error(`Could not reach SkillBridge API at ${apiLabel}. Check that the backend is available and allows this site's origin through CORS.`);
+      throw networkError();
     } finally {
       clearTimeout(timeout);
     }
 
-    let payload = null;
-    if (responseText) {
-      try {
-        payload = JSON.parse(responseText);
-      } catch {
-        payload = { message: responseText };
-      }
-    }
-    if (!response.ok) {
-      const message = payload?.message
-        || payload?.error
-        || `The API request failed with status ${response.status}.`;
-      if (response.status === 401 && auth) clearSession();
-      const error = new Error(
-        response.status >= 500 ? `${message} (HTTP ${response.status})` : message,
-      );
-      error.status = response.status;
-      throw error;
-    }
-    return payload;
+    return handleResponse(response.status, responseText, auth);
   };
 
   const showStatus = (anchor, message, isError = false) => {

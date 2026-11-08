@@ -11,29 +11,27 @@ const uploadStatus = document.getElementById('upload-status');
 const continueButton = document.getElementById('continue-button');
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const compressorDialog = document.getElementById('compress-dialog');
-const diagnosticStatus = document.getElementById('diagnostic-action-status');
-const diagnosticCards = document.querySelector('[aria-labelledby="diagnostics-title"] .mt-4.space-y-2');
-if (diagnosticCards) {
-  diagnosticCards.replaceChildren();
-  const guidance = document.createElement('p');
-  guidance.className = 'rounded-xl bg-[#F6F1FD] p-4 text-xs leading-5 text-[#625B6D]';
-  guidance.textContent = 'Choose a PDF or DOCX file up to 10 MB. The SkillBridge API analyzes your CV after upload when you continue.';
-  diagnosticCards.append(guidance);
-}
 let uploadedCvId = localStorage.getItem('skillbridgeUploadedCvId');
 let existingSkillGap = null;
 let currentUpload = null;
 let uploadPromise = null;
 
-function announceDiagnostic(message) {
-  diagnosticStatus.textContent = message;
-  diagnosticStatus.classList.remove('hidden');
-}
-
-function setAnalysisProgress(percent, label) {
-  parsePercent.textContent = `${percent}%`;
+function setAnalysisProgress(percent, label, indeterminate = false) {
+  parsePercent.textContent = indeterminate ? 'Analysis in progress' : `${percent}% uploaded`;
   parseProgressLabel.textContent = label;
-  parseProgress.style.width = `${percent}%`;
+  parseProgress.style.width = `${indeterminate ? 36 : percent}%`;
+  parseProgress.classList.toggle('animate-pulse', indeterminate);
+  parseProgress.setAttribute(
+    'aria-label',
+    indeterminate ? 'CV analysis progress' : 'CV upload progress',
+  );
+  if (indeterminate) {
+    parseProgress.removeAttribute('aria-valuenow');
+    parseProgress.setAttribute('aria-valuetext', label);
+  } else {
+    parseProgress.setAttribute('aria-valuenow', String(percent));
+    parseProgress.removeAttribute('aria-valuetext');
+  }
 }
 
 function listFrom(value, keys = []) {
@@ -44,28 +42,18 @@ function listFrom(value, keys = []) {
   return null;
 }
 
-function hideSampleAnalysis() {
-  uploadedPanel.querySelectorAll('p').forEach((paragraph) => {
-    if (paragraph.textContent.includes('Processing with Nigerian Academic Entity Classifier')) {
-      paragraph.textContent = 'Analysis is performed by the SkillBridge API when you continue.';
-    }
-    if (paragraph.textContent.includes('Live Parsing Pipeline') || paragraph.textContent.includes('Identified Metadata Tokens')) {
-      paragraph.parentElement.remove();
-    }
-  });
-}
-
 function showSavedCv(cv, skillGaps) {
   uploadedCvId = cv.id;
   localStorage.setItem('skillbridgeUploadedCvId', cv.id);
   localStorage.setItem('skillbridgeUploadedCvName', cv.fileName || 'Uploaded CV');
   fileName.textContent = cv.fileName || 'Uploaded CV';
   const sizeLabel = fileName.parentElement.querySelector('span');
-  if (sizeLabel && Number.isFinite(cv.fileSize)) {
+  if (sizeLabel && Number.isFinite(cv.fileSize) && cv.fileSize > 0) {
     sizeLabel.textContent = `${(cv.fileSize / (1024 * 1024)).toFixed(1)} MB`;
+  } else if (sizeLabel) {
+    sizeLabel.textContent = 'Saved to your account';
   }
   uploadedPanel.classList.remove('hidden');
-  hideSampleAnalysis();
   existingSkillGap = skillGaps
     .filter((gap) => gap.cvId === cv.id && gap.status === 'completed')
     .sort((a, b) => Date.parse(b.updatedAt || b.createdAt || 0) - Date.parse(a.updatedAt || a.createdAt || 0))[0] || null;
@@ -74,7 +62,7 @@ function showSavedCv(cv, skillGaps) {
     setAnalysisProgress(100, 'Analysis complete');
     uploadStatus.textContent = 'Your saved CV has an API analysis and is ready to continue.';
   } else {
-    setAnalysisProgress(0, 'Analysis not run');
+    setAnalysisProgress(0, 'Ready to analyze');
   }
   setContinueState(true);
 }
@@ -145,19 +133,6 @@ function showFile(file) {
   }
 
   const extension = file.name.split('.').pop().toLowerCase();
-  if (fileInput.dataset.pdfOnly === 'true' && extension !== 'pdf') {
-    fileInput.value = '';
-    currentUpload = null;
-    uploadedCvId = null;
-    localStorage.removeItem('skillbridgeUploadedCvId');
-    localStorage.removeItem('skillbridgeUploadedCvName');
-    uploadedPanel.classList.add('hidden');
-    setContinueState(false);
-    uploadError.textContent = 'Choose a PDF file for the text-native document check.';
-    uploadError.classList.remove('hidden');
-    announceDiagnostic('That file is not a PDF. Choose a text-native PDF to continue.');
-    return;
-  }
   if (!['pdf', 'docx'].includes(extension)) {
     fileInput.value = '';
     currentUpload = null;
@@ -185,10 +160,9 @@ function showFile(file) {
 
   fileName.textContent = file.name;
   uploadedPanel.classList.remove('hidden');
-  hideSampleAnalysis();
   const sizeLabel = fileName.parentElement.querySelector('span');
   if (sizeLabel) sizeLabel.textContent = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
-  setAnalysisProgress(0, 'Waiting for analysis');
+  setAnalysisProgress(0, 'Preparing upload');
 
   if (currentUpload === file && uploadedCvId) {
     setContinueState(true);
@@ -200,11 +174,16 @@ function showFile(file) {
   localStorage.removeItem('skillbridgeUploadedCvId');
   setContinueState(false);
   uploadStatus.textContent = 'Uploading CV to your account…';
+  setAnalysisProgress(0, 'Uploading CV');
   uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
     const formData = new FormData();
     formData.append('cv', file, file.name);
     return formData;
-  })())
+  })(), {
+    onUploadProgress: ({ percent }) => {
+      setAnalysisProgress(percent, `Uploading CV • ${percent}%`);
+    },
+  })
     .then((response) => {
       const payload = window.SkillBridgeApi.unwrap(response);
       if (response?.success === false) {
@@ -215,6 +194,7 @@ function showFile(file) {
       uploadedCvId = cv.id;
       localStorage.setItem('skillbridgeUploadedCvId', cv.id);
       localStorage.setItem('skillbridgeUploadedCvName', cv.fileName || file.name);
+      setAnalysisProgress(100, 'Upload complete');
       setContinueState(true);
     })
     .catch((error) => {
@@ -226,6 +206,7 @@ function showFile(file) {
       }[error.status] || '';
       uploadError.textContent = `CV upload failed: ${error.message}${guidance}`;
       uploadError.classList.remove('hidden');
+      setAnalysisProgress(0, 'Upload failed');
       setContinueState(false);
       uploadStatus.textContent = 'CV upload failed. Try again after resolving the error.';
     })
@@ -286,13 +267,13 @@ document.getElementById('remove-file').addEventListener('click', async () => {
   localStorage.removeItem('skillbridgeUploadedCvName');
   uploadedPanel.classList.add('hidden');
   setContinueState(false);
-  setAnalysisProgress(0, '0% Complete');
+  setAnalysisProgress(0, 'No file selected');
   removeButton.disabled = false;
 });
 
 document.getElementById('retry-parse').addEventListener('click', () => {
   if (!fileInput.files.length) {
-    uploadError.textContent = 'Choose a PDF or DOCX file before retrying extraction.';
+    uploadError.textContent = 'Choose a PDF or DOCX file before retrying the upload.';
     uploadError.classList.remove('hidden');
     return;
   }
@@ -310,30 +291,9 @@ compressorDialog.addEventListener('click', (event) => {
   if (event.target === compressorDialog) compressorDialog.close();
 });
 document.getElementById('choose-compressed-file').addEventListener('click', () => {
-  delete fileInput.dataset.pdfOnly;
   fileInput.accept = '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   fileInput.click();
   compressorDialog.close();
-});
-
-document.getElementById('deep-ocr-button')?.addEventListener('click', () => {
-  if (!fileInput.files.length) {
-    announceDiagnostic('Upload a scanned PDF first, then run deep OCR on that file.');
-    uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-  if (!fileInput.files[0].name.toLowerCase().endsWith('.pdf')) {
-    announceDiagnostic('Deep OCR is available for PDF uploads. Choose a PDF to continue.');
-    return;
-  }
-  announceDiagnostic('Deep OCR requested. This preview has no OCR service connected yet.');
-});
-
-document.getElementById('text-native-pdf-button')?.addEventListener('click', () => {
-  fileInput.dataset.pdfOnly = 'true';
-  fileInput.accept = '.pdf,application/pdf';
-  fileInput.click();
-  announceDiagnostic('Choose a text-native PDF (maximum 10 MB).');
 });
 
 continueButton.addEventListener('click', async (event) => {
@@ -353,16 +313,33 @@ continueButton.addEventListener('click', async (event) => {
       return;
     }
   }
+  if (existingSkillGap) {
+    window.location.href = 'career-paths.html';
+    return;
+  }
+
   const survey = (() => {
     try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
     catch { return {}; }
   })();
+  const targetJobTitle = {
+    'fintech-data': 'Junior Fintech Data Analyst',
+    backend: 'Associate Backend Engineer',
+    'growth-product': 'Growth Product Associate',
+  }[survey.track];
+  if (!targetJobTitle) {
+    uploadError.textContent = 'Complete the profile survey and select a career focus before analyzing your CV.';
+    uploadError.classList.remove('hidden');
+    return;
+  }
   const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
   continueButton.setAttribute('aria-disabled', 'true');
   continueButton.classList.add('pointer-events-none', 'opacity-50');
   uploadStatus.textContent = 'Analyzing your CV…';
+  setAnalysisProgress(36, 'Analyzing CV…', true);
   try {
     const response = await window.SkillBridgeApi.post(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}/analyze`, {
+      targetJobTitle,
       industryFocus: survey.track === 'fintech-data' ? 'Financial Technology' : 'Technology',
       careerStage,
       primaryGoal: 'Gap Analysis',
@@ -379,6 +356,7 @@ continueButton.addEventListener('click', async (event) => {
     uploadError.textContent = error.message;
     uploadError.classList.remove('hidden');
     uploadStatus.textContent = 'CV analysis could not be completed.';
+    setAnalysisProgress(100, 'Upload complete');
     setContinueState(true);
   }
 });

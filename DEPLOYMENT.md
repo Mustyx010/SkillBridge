@@ -19,7 +19,15 @@ If using separate preview and production domains, each origin must be allowed.
 The frontend sends bearer tokens in the `Authorization` header and does not
 require cross-origin cookies.
 
-CV uploads are limited to 10 MB by the frontend.
+CV uploads are limited to 10 MB by the frontend. The upload progress bar
+reports bytes transferred to the API; analysis is shown as in progress until
+the analysis endpoint responds, because the API does not expose a progress
+stream.
+
+The onboarding flow uploads the CV first, then calls
+`POST /api/v1/cvs/{cvId}/analyze` with the selected survey career focus as
+`targetJobTitle`. The Career Paths page uses the saved analysis and CV-matched
+opportunities to render recommendations.
 
 The supplied OpenAPI contract lists authentication routes under `/api/auth`,
 but this frontend uses the previously working `/api/v1/auth` routes for
