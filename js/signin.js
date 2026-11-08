@@ -82,13 +82,13 @@ if (signinForm) {
     if (!passwordOk) return passwordInput.focus();
 
     const submitButton = signinForm.querySelector('[type="submit"]');
-    submitButton.disabled = true;
+    const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Signing in…');
     try {
       await signIn(email, passwordInput.value);
     } catch (error) {
       window.SkillBridgeApi.showStatus(signinForm, error.message, true);
     } finally {
-      submitButton.disabled = false;
+      stopLoading();
     }
   });
 }
@@ -129,12 +129,14 @@ forgotPassword?.addEventListener('click', (event) => {
     email.focus();
   } else {
     status.textContent = 'Sending password reset request…';
+    const stopLoading = window.SkillBridgeApi.setLoading(forgotPassword, 'Sending…');
     window.SkillBridgeApi.post('/api/v1/auth/forgot-password', { email: email.value.trim() }, { auth: false })
       .then((response) => {
         status.textContent = response?.message || 'If an account exists for this address, password reset instructions will be sent.';
       })
       .catch((error) => {
         status.textContent = error.message;
-      });
+      })
+      .finally(stopLoading);
   }
 });

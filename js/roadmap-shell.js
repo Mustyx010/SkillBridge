@@ -176,7 +176,7 @@ const loadApiRoadmap = async () => {
       updateButton.className = 'mt-3 rounded-lg bg-[#731F94] px-3 py-2 text-xs font-semibold text-white';
       updateButton.textContent = task.status === 'done' ? 'Reopen task' : 'Mark complete';
       updateButton.addEventListener('click', async () => {
-        updateButton.disabled = true;
+        const stopLoading = window.SkillBridgeApi.setLoading(updateButton, 'Updating task…');
         try {
           const nextStatus = task.status === 'done' ? 'todo' : 'done';
           await window.SkillBridgeApi.patch(
@@ -189,7 +189,8 @@ const loadApiRoadmap = async () => {
         } catch (error) {
           roadmapNotice(`Could not update task: ${error.message}`);
         } finally {
-          updateButton.disabled = false;
+          stopLoading();
+          updateButton.textContent = task.status === 'done' ? 'Reopen task' : 'Mark complete';
         }
       });
       item.append(phase, taskTitle, description, status, updateButton);

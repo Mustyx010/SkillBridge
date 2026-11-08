@@ -107,7 +107,7 @@ form.addEventListener('submit', async (e) => {
   };
   const education = [data.degree, data.field, data.institution].filter(Boolean).join(' - ');
   const submitButton = form.querySelector('[type="submit"]');
-  submitButton.disabled = true;
+  const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Saving and continuing…');
   try {
     await window.SkillBridgeApi.put('/api/v1/profiles/me', {
       location: data.location || null,
@@ -122,7 +122,7 @@ form.addEventListener('submit', async (e) => {
       true,
     );
   } finally {
-    submitButton.disabled = false;
+    stopLoading();
   }
 });
 

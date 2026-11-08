@@ -198,7 +198,7 @@ careerList.addEventListener('click', async (event) => {
   const candidate = candidates[Number(button.dataset.candidateIndex)];
   if (!candidate) return;
 
-  button.disabled = true;
+  const stopLoading = window.SkillBridgeApi.setLoading(button, 'Saving career goal…');
   setStatus(`Generating a skill-gap analysis for ${candidate.title}…`);
   try {
     const survey = (() => {
@@ -229,7 +229,7 @@ careerList.addEventListener('click', async (event) => {
   } catch (error) {
     setStatus(`Could not save this career goal: ${error.message}`, true);
   } finally {
-    button.disabled = false;
+    stopLoading();
   }
 });
 

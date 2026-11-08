@@ -74,6 +74,33 @@
     sessionStorage.removeItem('skillbridge_session');
   };
 
+  const setLoading = (element, label) => {
+    if (!element) return () => {};
+    const originalContent = element.innerHTML;
+    const wasDisabled = 'disabled' in element ? element.disabled : null;
+    const previousBusy = element.getAttribute('aria-busy');
+    const hadPointerEventsNone = element.classList.contains('pointer-events-none');
+    const spinner = document.createElement('span');
+    spinner.className = 'h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent';
+    spinner.setAttribute('aria-hidden', 'true');
+    const message = document.createElement('span');
+    message.textContent = label;
+    element.replaceChildren(spinner, message);
+    element.setAttribute('aria-busy', 'true');
+    if (wasDisabled !== null) element.disabled = true;
+    else element.classList.add('pointer-events-none');
+
+    return () => {
+      element.innerHTML = originalContent;
+      if (wasDisabled !== null) element.disabled = wasDisabled;
+      if (previousBusy === null) element.removeAttribute('aria-busy');
+      else element.setAttribute('aria-busy', previousBusy);
+      if (wasDisabled === null) {
+        element.classList.toggle('pointer-events-none', hadPointerEventsNone);
+      }
+    };
+  };
+
   const parseResponse = (responseText) => {
     if (!responseText) return null;
     try {
@@ -209,6 +236,7 @@
     session: readSession,
     setSession,
     clearSession,
+    setLoading,
     showStatus,
     unwrap: (response) => response?.data ?? response,
   };

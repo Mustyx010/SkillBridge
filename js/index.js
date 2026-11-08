@@ -2,6 +2,21 @@
 const menuBtn = document.getElementById('menu-btn');
 const menu = document.getElementById('mobile-menu');
 
+document.addEventListener('click', (event) => {
+  const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+  if (
+    !link
+    || link.target === '_blank'
+    || event.metaKey
+    || event.ctrlKey
+    || event.shiftKey
+    || event.altKey
+  ) return;
+  const destination = new URL(link.href, window.location.href);
+  if (destination.origin !== window.location.origin || !/\/(signin|signup)\.html$/.test(destination.pathname)) return;
+  window.SkillBridgeApi?.setLoading(link, 'Loading…');
+});
+
 function setMenu(open) {
   menu.classList.toggle('hidden', !open);
   menuBtn.setAttribute('aria-expanded', String(open));
@@ -60,15 +75,19 @@ if (ctaForm) {
   const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
   ctaForm.addEventListener('submit', (e) => {
+    e.preventDefault();
     const value = input.value.trim();
     if (!isEmail(value)) {
-      e.preventDefault();
       error.textContent = 'Please enter a valid email address.';
       error.classList.remove('hidden');
       input.setAttribute('aria-invalid', 'true');
       input.focus();
     } else {
-      input.value = value;
+      const destination = new URL(ctaForm.action, window.location.href);
+      destination.searchParams.set('email', value);
+      const submitButton = ctaForm.querySelector('[type="submit"]');
+      window.SkillBridgeApi?.setLoading(submitButton, 'Opening registration…');
+      window.setTimeout(() => window.location.assign(destination.href), 80);
     }
   });
 

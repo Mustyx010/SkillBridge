@@ -314,6 +314,7 @@ continueButton.addEventListener('click', async (event) => {
     }
   }
   if (existingSkillGap) {
+    window.SkillBridgeApi.setLoading(continueButton, 'Opening career paths…');
     window.location.href = 'career-paths.html';
     return;
   }
@@ -334,7 +335,7 @@ continueButton.addEventListener('click', async (event) => {
   }
   const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
   continueButton.setAttribute('aria-disabled', 'true');
-  continueButton.classList.add('pointer-events-none', 'opacity-50');
+  const stopLoading = window.SkillBridgeApi.setLoading(continueButton, 'Analyzing your CV…');
   uploadStatus.textContent = 'Analyzing your CV…';
   setAnalysisProgress(36, 'Analyzing CV…', true);
   try {
@@ -358,6 +359,8 @@ continueButton.addEventListener('click', async (event) => {
     uploadStatus.textContent = 'CV analysis could not be completed.';
     setAnalysisProgress(100, 'Upload complete');
     setContinueState(true);
+  } finally {
+    stopLoading();
   }
 });
 

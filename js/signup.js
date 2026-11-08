@@ -135,8 +135,7 @@ if (signupForm) {
       return window.SkillBridgeApi.showStatus(verificationForm, 'Enter the six-digit verification code from your email.', true);
     }
     const button = verificationForm.querySelector('[type="submit"]');
-    button.disabled = true;
-    button.textContent = 'Verifying…';
+    const stopLoading = window.SkillBridgeApi.setLoading(button, 'Verifying…');
     try {
       await window.SkillBridgeApi.post('/api/v1/auth/verify-email', { email, code }, { auth: false });
       verificationForm.parentElement.querySelector('[data-api-status]')?.remove();
@@ -160,8 +159,7 @@ if (signupForm) {
     } catch (error) {
       window.SkillBridgeApi.showStatus(verificationForm, error.message, true);
     } finally {
-      button.disabled = false;
-      button.textContent = 'Verify and continue';
+      stopLoading();
     }
   });
   signupForm.addEventListener('submit', async (e) => {
@@ -180,10 +178,8 @@ if (signupForm) {
       firstBad[0].focus();
       return;
     }
-
     const submitButton = signupForm.querySelector('[type="submit"]');
-    submitButton.disabled = true;
-    submitButton.textContent = 'Creating account…';
+    const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Creating account…');
     signupForm.setAttribute('aria-busy', 'true');
     try {
       const registration = await window.SkillBridgeApi.post('/api/v1/auth/register', {
@@ -215,8 +211,7 @@ if (signupForm) {
         window.SkillBridgeApi.showStatus(signupForm, error.message, true);
       }
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = 'Create account';
+      stopLoading();
       signupForm.removeAttribute('aria-busy');
     }
   });

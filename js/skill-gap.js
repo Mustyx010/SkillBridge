@@ -140,7 +140,7 @@ const applySkillSearch = () => {
 };
 
 const addSkillToRoadmap = async (skill, button) => {
-  button.disabled = true;
+  const stopLoading = window.SkillBridgeApi.setLoading(button, 'Adding to roadmap…');
   try {
     const skillGapId = localStorage.getItem('skillbridgeSkillGapId');
     if (!skillGapId) throw new Error('Analyze your CV before adding a skill to a roadmap.');
@@ -164,11 +164,12 @@ const addSkillToRoadmap = async (skill, button) => {
       skill: skill.toLowerCase(),
       status: 'todo',
     });
+    stopLoading();
     button.textContent = 'Added to roadmap';
     button.disabled = true;
     showDialog('Added to your roadmap', `${skill} has been saved to your API roadmap.`);
   } catch (error) {
-    button.disabled = false;
+    stopLoading();
     showDialog('Could not update your roadmap', error.message);
   }
 };

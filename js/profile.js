@@ -161,6 +161,7 @@
     const form = $('#edit-profile-form');
     const status = $('#edit-profile-status');
     const submitButton = form.querySelector('[type="submit"]');
+    const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Saving profile…');
     const nextUser = { ...user, name: nextName };
     const nextSurvey = {
       ...survey,
@@ -171,7 +172,6 @@
       classification: '',
       location: nextLocation,
     };
-    submitButton.disabled = true;
     status.classList.remove('hidden', 'text-red-700');
     status.textContent = 'Saving your profile…';
     pendingProfileSync = {
@@ -194,7 +194,7 @@
     renderProfileDetails();
     if (!window.SkillBridgeApi.session()?.token) {
       status.textContent = 'Saved on this device. Sign in to sync these changes with your account.';
-      submitButton.disabled = false;
+      stopLoading();
       return;
     }
 
@@ -220,7 +220,7 @@
       pendingProfileSync = null;
       close('edit-profile-dialog');
     }
-    submitButton.disabled = false;
+    stopLoading();
   });
 
   $('#edit-criteria-button')?.addEventListener('click', () => {
@@ -234,7 +234,7 @@
     if (!min || !max || max <= min) return announce('Check your salary range', 'Maximum salary must be greater than minimum salary.');
     const form = $('#edit-criteria-form');
     const submitButton = form.querySelector('[type="submit"]');
-    submitButton.disabled = true;
+    const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Saving preferences…');
     try {
       const careerGoal = $('#criteria-role').value;
       await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal });
@@ -246,7 +246,7 @@
     } catch (error) {
       announce('Preferences could not be saved', error.message);
     } finally {
-      submitButton.disabled = false;
+      stopLoading();
     }
   });
 
