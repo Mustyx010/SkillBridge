@@ -349,9 +349,20 @@ continueButton.addEventListener('click', async (event) => {
     if (!analysis?.skillGapId) throw new Error('The API response did not include a skill-gap analysis ID.');
     localStorage.setItem('skillbridgeSkillGapId', analysis.skillGapId);
     localStorage.setItem('skillbridgeUploadedCvId', uploadedCvId);
+    localStorage.setItem('skillbridgeSelectedCareer', targetJobTitle);
+    window.SkillBridgeApi.setAnalysisContext({ skillGapId: analysis.skillGapId, careerGoal: targetJobTitle });
     existingSkillGap = analysis.skillGap || { id: analysis.skillGapId, status: 'completed' };
     setAnalysisProgress(100, 'Analysis complete');
-    uploadStatus.textContent = 'CV analysis completed by the SkillBridge API.';
+    uploadStatus.textContent = 'Updating your account recommendations…';
+    const artifactResults = await window.SkillBridgeApi.refreshAnalysisArtifacts({
+      skillGapId: analysis.skillGapId,
+      careerGoal: targetJobTitle,
+      includeRoadmap: true,
+    });
+    const generatedMatches = artifactResults.find((result) => result.name === 'matches')?.ok;
+    uploadStatus.textContent = generatedMatches
+      ? 'CV analysis completed and your account recommendations were refreshed.'
+      : 'CV analysis completed. Career matches will be generated when you open career paths.';
     window.location.href = 'career-paths.html';
   } catch (error) {
     uploadError.textContent = error.message;

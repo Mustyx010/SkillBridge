@@ -119,8 +119,13 @@ const addCareerCard = (candidate, index) => {
   const content = document.createElement('div');
   content.className = 'grid items-center gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]';
   const description = document.createElement('div');
-  description.append(makeText('p', 'text-[10px] font-bold uppercase tracking-wide text-[#8527A1]', candidate.source));
-  description.append(makeText('h2', 'mt-2 text-xl font-bold', candidate.title));
+  const rank = makeText('span', 'rounded-full bg-[#F2E8FA] px-2.5 py-1 text-[10px] font-semibold text-[#8527A1]',
+    candidate.match ? `Rank #${index + 1} • API-verified match` : 'CV recommendation');
+  const source = makeText('span', 'rounded-full bg-[#EEE8FF] px-2.5 py-1 text-[10px] font-semibold text-[#4A4455]', candidate.source);
+  const badges = document.createElement('div');
+  badges.className = 'flex flex-wrap gap-1.5';
+  badges.append(rank, source);
+  description.append(badges, makeText('h2', 'mt-4 text-xl font-bold', candidate.title));
 
   const opportunity = candidate.opportunity;
   if (opportunity) {
@@ -131,7 +136,7 @@ const addCareerCard = (candidate, index) => {
     }
     const match = candidate.match;
     if (match?.explanation) {
-      description.append(makeText('p', 'mt-3 rounded-lg bg-[#F5F0FD] p-3 text-xs leading-5 text-[#625B6D]', match.explanation));
+      description.append(makeText('p', 'mt-4 rounded-lg bg-[#F5F0FD] p-4 text-xs leading-5 text-[#4A4455]', `Why this matches: ${match.explanation}`));
     } else if (candidate.overlap?.length) {
       description.append(makeText('p', 'mt-3 rounded-lg bg-[#F5F0FD] p-3 text-xs leading-5 text-[#625B6D]', `CV skills matching this opportunity: ${candidate.overlap.join(', ')}`));
     }
@@ -159,13 +164,30 @@ const addCareerCard = (candidate, index) => {
   const actionPanel = document.createElement('div');
   actionPanel.className = 'rounded-xl bg-[#F5F0FD] p-5';
   if (candidate.match && Number.isFinite(candidate.match.matchPercentage)) {
-    actionPanel.append(makeText('p', 'text-xs font-semibold text-[#8527A1]', `${candidate.match.matchPercentage}% API match`));
+    const score = Math.max(0, Math.min(100, candidate.match.matchPercentage));
+    const calibration = makeText('p', 'text-[10px] font-bold uppercase tracking-wide text-[#81798B]', 'Match calibration');
+    const percentage = document.createElement('p');
+    percentage.className = 'mt-1';
+    percentage.append(makeText('strong', 'text-5xl font-extrabold text-[#8527A1]', `${score}%`), makeText('span', 'ml-1 text-xs', 'Fit'));
+    const factor = makeText('p', 'mt-4 flex justify-between text-[10px] font-medium', `${(candidate.match.matchedSkills || candidate.overlap || []).length} verified matching skill${(candidate.match.matchedSkills || candidate.overlap || []).length === 1 ? '' : 's'}`);
+    const progress = document.createElement('div');
+    progress.className = 'mt-1 h-2 overflow-hidden rounded-full bg-[#E5DDFA]';
+    const fill = document.createElement('div');
+    fill.className = 'h-full bg-[#8527A1]';
+    fill.style.width = `${score}%`;
+    progress.append(fill);
+    actionPanel.append(calibration, percentage, factor, progress);
+    const chips = document.createElement('div');
+    chips.className = 'mt-3 flex flex-wrap gap-1 text-[10px]';
+    (candidate.match.matchedSkills || candidate.overlap || []).slice(0, 4).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-[#EAE2FF] px-2 py-1 text-[#8527A1]', skill)));
+    (candidate.match.missingSkills || []).slice(0, 2).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-white px-2 py-1 text-[#81798B]', `Develop: ${skill}`)));
+    if (chips.childElementCount) actionPanel.append(chips);
   } else if (candidate.overlap?.length) {
     actionPanel.append(makeText('p', 'text-xs font-semibold text-[#8527A1]', `${candidate.overlap.length} matching CV skill${candidate.overlap.length === 1 ? '' : 's'}`));
   } else {
     actionPanel.append(makeText('p', 'text-xs text-[#625B6D]', 'Recommended by your CV analysis'));
   }
-  const select = makeText('button', 'select-path mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#8527A1] px-4 py-3 text-sm font-semibold text-white hover:bg-[#6E2186]', 'Choose this career goal');
+  const select = makeText('button', 'select-path mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#8527A1] px-4 py-3 text-sm font-semibold text-white hover:bg-[#6E2186]', 'Select & Build Roadmap');
   select.type = 'button';
   select.dataset.candidateIndex = String(index);
   actionPanel.append(select);
@@ -219,13 +241,20 @@ careerList.addEventListener('click', async (event) => {
       },
     ));
     if (!analysis?.skillGapId) throw new Error('The API response did not include a skill-gap analysis ID.');
-    await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal: candidate.title });
+    const artifactResults = await window.SkillBridgeApi.refreshAnalysisArtifacts({
+      skillGapId: analysis.skillGapId,
+      careerGoal: candidate.title,
+      includeRoadmap: true,
+    });
 
     localStorage.setItem('skillbridgeSkillGapId', analysis.skillGapId);
     localStorage.setItem('skillbridgeSelectedCareer', candidate.title);
+    window.SkillBridgeApi.setAnalysisContext({ skillGapId: analysis.skillGapId, careerGoal: candidate.title });
     dashboardCta.setAttribute('aria-disabled', 'false');
     dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
-    setStatus(`${candidate.title} is saved and its skill-gap analysis is ready. Continue to your dashboard.`);
+    const matchUpdated = artifactResults.find((result) => result.name === 'matches')?.ok;
+    const roadmapUpdated = artifactResults.find((result) => result.name === 'roadmap')?.ok;
+    setStatus(`${candidate.title} is saved. Your skill gap and profile are updated${matchUpdated ? ', along with your job matches' : ''}${roadmapUpdated ? ' and roadmap' : ''}. Continue to your dashboard.`);
   } catch (error) {
     setStatus(`Could not save this career goal: ${error.message}`, true);
   } finally {
@@ -253,6 +282,9 @@ const loadCareerOptions = async () => {
     }
     if (!cvId) throw new Error('No uploaded CV was found. Complete the survey and upload your CV to continue.');
 
+    // Saved matches are not created by a GET. Generate them first so a CV
+    // analysis immediately has job-match cards, including on a fresh account.
+    const matchingRefresh = await window.SkillBridgeApi.refreshAnalysisArtifacts();
     const results = await Promise.allSettled([
       window.SkillBridgeApi.get(`/api/v1/cvs/${encodeURIComponent(cvId)}/analysis`),
       window.SkillBridgeApi.get('/api/v1/skill-gaps'),
@@ -268,6 +300,9 @@ const loadCareerOptions = async () => {
         ? [`${['CV analysis', 'skill gaps', 'opportunities', 'job matches'][index]}: ${result.reason?.message || 'request failed'}`]
         : []
     ));
+    if (!matchingRefresh.find((result) => result.name === 'matches')?.ok) {
+      sourceErrors.push('job match generation: the API could not refresh matches');
+    }
     const skillGap = gaps.find((gap) => gap.cvId === cvId)
       || gaps.find((gap) => gap.id === localStorage.getItem('skillbridgeSkillGapId'));
     const analysisResult = analysis?.analysisResult || {};

@@ -1,6 +1,15 @@
 const CAPSTONE_STORAGE_KEY = 'skillbridge_capstone';
 const CAPSTONE_MILESTONES = ['dataset', 'queries', 'findings', 'publish'];
 
+const readAnalysisContext = () => {
+  try {
+    const value = JSON.parse(localStorage.getItem('skillbridgeAccountAnalysis') || '{}');
+    return value && typeof value === 'object' ? value : {};
+  } catch {
+    return {};
+  }
+};
+
 const readCapstoneState = () => {
   try {
     const value = JSON.parse(localStorage.getItem(CAPSTONE_STORAGE_KEY) || '{}');
@@ -11,12 +20,23 @@ const readCapstoneState = () => {
 };
 
 const capstoneState = readCapstoneState();
+const analysisContext = readAnalysisContext();
 const repoInput = document.getElementById('roadmap-repo-url');
 const datasetInput = document.getElementById('roadmap-dataset-url');
 const notesInput = document.getElementById('roadmap-project-notes');
 const saveStatus = document.getElementById('capstone-save-status');
 const milestoneInputs = [...document.querySelectorAll('.capstone-milestone')];
 const savedMilestones = Array.isArray(capstoneState.milestones) ? capstoneState.milestones : [];
+
+if (analysisContext.careerGoal) {
+  const title = document.getElementById('active-capstone-title');
+  const description = title?.nextElementSibling;
+  if (description) {
+    description.textContent = `This local capstone workspace is aligned to your latest ${analysisContext.careerGoal} skill-gap analysis. Use it to turn the skills in your roadmap into portfolio evidence.`;
+  }
+  const status = document.getElementById('capstone-save-status');
+  if (status) status.textContent = `Aligned with your latest ${analysisContext.careerGoal} analysis.`;
+}
 
 repoInput.value = capstoneState.repo || '';
 datasetInput.value = capstoneState.dataset || '';

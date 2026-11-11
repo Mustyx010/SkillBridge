@@ -51,6 +51,7 @@
         'skillbridgeStudyCircleJoined',
         'skillbridgeDiagnosticScore',
         'skillbridge_capstone',
+        'skillbridgeAccountAnalysis',
         'skillbridgeDash1SavedRoles',
         'skillbridgeDash1CapstoneTasks',
       ].forEach((key) => localStorage.removeItem(key));
@@ -225,6 +226,46 @@
     status.textContent = message;
   };
 
+  // A completed CV analysis changes the account data used by several pages.
+  // Keep the server-side match and roadmap records in step with that analysis
+  // instead of leaving each page to render stale (or empty) derived data.
+  const refreshAnalysisArtifacts = async ({ skillGapId, careerGoal, includeRoadmap = false } = {}) => {
+    const jobs = [];
+    if (careerGoal) {
+      jobs.push(['profile', request('/api/v1/profiles/me', {
+        method: 'PUT',
+        body: { careerGoal },
+      })]);
+    }
+    // Match generation has no body; it always uses the user's latest completed
+    // analysis. A roadmap is tied to the exact analysis that was just created.
+    jobs.push(['matches', request('/api/v1/matching/generate', { method: 'POST' })]);
+    if (includeRoadmap && skillGapId) {
+      jobs.push(['roadmap', request('/api/v1/roadmaps/generate', {
+        method: 'POST',
+        body: { skillGapId },
+      })]);
+    }
+    const results = await Promise.allSettled(jobs.map(([, promise]) => promise));
+    return results.map((result, index) => ({
+      name: jobs[index][0],
+      ok: result.status === 'fulfilled',
+      ...(result.status === 'fulfilled' ? { data: result.value } : { error: result.reason }),
+    }));
+  };
+
+  const setAnalysisContext = ({ skillGapId, careerGoal } = {}) => {
+    try {
+      localStorage.setItem('skillbridgeAccountAnalysis', JSON.stringify({
+        skillGapId: skillGapId || null,
+        careerGoal: careerGoal || null,
+        updatedAt: new Date().toISOString(),
+      }));
+    } catch {
+      // The API-backed updates still succeed when browser storage is unavailable.
+    }
+  };
+
   window.SkillBridgeApi = {
     baseUrl,
     request,
@@ -238,6 +279,8 @@
     clearSession,
     setLoading,
     showStatus,
+    refreshAnalysisArtifacts,
+    setAnalysisContext,
     unwrap: (response) => response?.data ?? response,
   };
 })();
