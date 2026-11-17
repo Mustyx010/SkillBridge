@@ -34,7 +34,7 @@ searchForm.addEventListener('submit', (event) => {
 document.getElementById('diagnostic-notifications').addEventListener('click', () => {
   const dialog = document.createElement('dialog');
   dialog.className = 'w-[min(92vw,420px)] rounded-2xl border-0 p-6 text-[#181445] shadow-2xl backdrop:bg-[#181445]/40';
-  dialog.innerHTML = '<div class="flex items-start justify-between gap-4"><div><h2 class="text-lg font-bold">Notifications</h2><p class="mt-2 text-sm leading-6 text-[#625B6D]">Youâ€™re all caught up. Sprint and mentor updates will appear here.</p></div><button type="button" class="text-xl" aria-label="Close">Ã—</button></div>';
+  dialog.innerHTML = '<div class="flex items-start justify-between gap-4"><div><h2 class="text-lg font-bold">Notifications</h2><p class="mt-2 text-sm leading-6 text-[#625B6D]">You’re all caught up. Sprint and mentor updates will appear here.</p></div><button type="button" class="text-xl" aria-label="Close">×</button></div>';
   document.body.append(dialog);
   dialog.querySelector('button').addEventListener('click', () => { dialog.close(); dialog.remove(); });
   dialog.addEventListener('click', (event) => { if (event.target === dialog) { dialog.close(); dialog.remove(); } });

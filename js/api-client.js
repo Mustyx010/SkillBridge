@@ -55,6 +55,9 @@
         'skillbridgeDash1SavedRoles',
         'skillbridgeDash1CapstoneTasks',
       ].forEach((key) => localStorage.removeItem(key));
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('skillbridgeProfileSetting_') || key.startsWith('skillbridge_')) localStorage.removeItem(key);
+      }
     }
 
     const storage = remember ? localStorage : sessionStorage;

@@ -118,7 +118,14 @@ const loadApiRoadmap = async () => {
         return;
       }
       localStorage.setItem('skillbridgeSkillGapId', skillGapId);
-      await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
+      try {
+        await window.SkillBridgeApi.post('/api/v1/roadmaps/generate', { skillGapId });
+      } catch (error) {
+        if (error.status === 503) {
+          throw new Error('Roadmap generation is currently unavailable because the API has no AI provider configured. Ask the API administrator to configure one, then try again.');
+        }
+        throw error;
+      }
       roadmaps = roadmapsFrom(await window.SkillBridgeApi.get('/api/v1/roadmaps'));
       roadmap = roadmaps.find((item) => item.skillGapId === skillGapId);
     }
@@ -126,23 +133,24 @@ const loadApiRoadmap = async () => {
     if (!roadmap?.id) throw new Error('The API did not return a roadmap ID.');
     const response = await window.SkillBridgeApi.get(`/api/v1/roadmaps/${encodeURIComponent(roadmap.id)}`);
     const data = window.SkillBridgeApi.unwrap(response);
+    const roadmapData = data?.roadmap || data;
     const tasksByPhase = data?.tasksByPhase || {};
-    const tasks = Array.isArray(data?.tasks)
-      ? data.tasks
+    const tasks = Array.isArray(roadmapData?.tasks)
+      ? roadmapData.tasks
       : [30, 60, 90].flatMap((phase) => (tasksByPhase[String(phase)] || []).map((task) => ({ ...task, phase })));
     roadmapApiPanel.replaceChildren();
     const title = document.createElement('h2');
     title.id = 'api-roadmap-title';
     title.className = 'text-lg font-bold';
-    title.textContent = data.title || roadmap.title || 'Your roadmap';
+    title.textContent = roadmapData.title || roadmap.title || 'Your roadmap';
     const subtitle = document.createElement('p');
     subtitle.className = 'mt-1 text-sm text-[#625B6D]';
-    subtitle.textContent = `${data.targetRole || roadmap.targetRole || 'Career goal'} • ${data.status || roadmap.status || 'status unavailable'}`;
+    subtitle.textContent = `${roadmapData.targetRole || roadmap.targetRole || 'Career goal'} • ${roadmapData.status || roadmap.status || 'status unavailable'}`;
     roadmapApiPanel.append(title, subtitle);
     document.title = `${title.textContent} | SkillBridge`;
     const summary = document.createElement('p');
     summary.className = 'mt-2 text-sm leading-6 text-[#625B6D]';
-    summary.textContent = data.summary || roadmap.summary || '';
+    summary.textContent = roadmapData.summary || roadmap.summary || '';
     roadmapApiPanel.append(summary);
     if (!tasks.length) {
       window.SkillBridgeApi.showStatus(

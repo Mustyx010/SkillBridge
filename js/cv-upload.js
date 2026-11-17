@@ -165,7 +165,7 @@ function showFile(file) {
   setAnalysisProgress(0, 'Preparing upload');
 
   if (currentUpload === file && uploadedCvId) {
-    setContinueState(true);
+    setContinueState(false);
     return;
   }
   currentUpload = file;

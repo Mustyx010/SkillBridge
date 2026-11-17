@@ -278,7 +278,10 @@ const loadCareerOptions = async () => {
       const cvs = listFrom(window.SkillBridgeApi.unwrap(await window.SkillBridgeApi.get('/api/v1/cvs/my-cvs')));
       const latestCv = [...cvs].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0))[0];
       cvId = latestCv?.id;
-      if (cvId) localStorage.setItem('skillbridgeUploadedCvId', cvId);
+      if (cvId) {
+        localStorage.setItem('skillbridgeUploadedCvId', cvId);
+        localStorage.setItem('skillbridgeUploadedCvName', latestCv.fileName || 'Uploaded CV');
+      }
     }
     if (!cvId) throw new Error('No uploaded CV was found. Complete the survey and upload your CV to continue.');
 
