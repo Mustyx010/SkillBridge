@@ -1,36 +1,57 @@
+
 (() => {
-  const baseUrl = (window.SKILLBRIDGE_API_BASE_URL || 'https://skillbridge-api.tb-skillbridge-backend.workers.dev').replace(/\/+$/, '');
+  const baseUrl = (
+    window.SKILLBRIDGE_API_BASE_URL ||
+    'https://skillbridge-api.tb-skillbridge-backend.workers.dev'
+  ).replace(/\/+$/, '');
+
   const apiLabel = baseUrl;
 
   const readSession = () => {
     let activeSession = null;
+
     for (const storage of [sessionStorage, localStorage]) {
       try {
-        const session = JSON.parse(storage.getItem('skillbridge_session') || 'null');
-        if (session?.token && !activeSession) activeSession = session;
-        else if (session) storage.removeItem('skillbridge_session');
+        const session = JSON.parse(
+          storage.getItem('skillbridge_session') || 'null'
+        );
+
+        if (session?.token && !activeSession) {
+          activeSession = session;
+        } else if (session) {
+          storage.removeItem('skillbridge_session');
+        }
       } catch {
         storage.removeItem('skillbridge_session');
       }
     }
+
     return activeSession;
   };
 
   const setSession = (user, token, remember = false) => {
     const previousSession = readSession();
     let previousUser = previousSession?.user;
+
     if (!previousUser) {
       try {
-        previousUser = JSON.parse(localStorage.getItem('skillbridge_user') || 'null');
+        previousUser = JSON.parse(
+          localStorage.getItem('skillbridge_user') || 'null'
+        );
       } catch {
         previousUser = null;
       }
     }
 
     const sameAccount = previousUser && (
-      (user?.id && previousUser.id && user.id === previousUser.id)
-      || (user?.email && previousUser.email && user.email.toLowerCase() === previousUser.email.toLowerCase())
+      (user?.id && previousUser.id && user.id === previousUser.id) ||
+      (
+        user?.email &&
+        previousUser.email &&
+        user.email.toLowerCase() === previousUser.email.toLowerCase()
+      )
     );
+
     if (!sameAccount) {
       [
         'skillbridge_user',
@@ -55,21 +76,36 @@
         'skillbridgeDash1SavedRoles',
         'skillbridgeDash1CapstoneTasks',
       ].forEach((key) => localStorage.removeItem(key));
+
       for (const key of Object.keys(localStorage)) {
-        if (key.startsWith('skillbridgeProfileSetting_') || key.startsWith('skillbridge_')) localStorage.removeItem(key);
+        if (
+          key.startsWith('skillbridgeProfileSetting_') ||
+          key.startsWith('skillbridge_')
+        ) {
+          localStorage.removeItem(key);
+        }
       }
     }
 
     const storage = remember ? localStorage : sessionStorage;
     const otherStorage = remember ? sessionStorage : localStorage;
+
     otherStorage.removeItem('skillbridge_session');
-    storage.setItem('skillbridge_session', JSON.stringify({ user, token }));
+
+    storage.setItem(
+      'skillbridge_session',
+      JSON.stringify({ user, token })
+    );
+
     if (user?.fullName) {
-      localStorage.setItem('skillbridge_user', JSON.stringify({
-        name: user.fullName,
-        email: user.email,
-        id: user.id,
-      }));
+      localStorage.setItem(
+        'skillbridge_user',
+        JSON.stringify({
+          name: user.fullName,
+          email: user.email,
+          id: user.id,
+        })
+      );
     }
   };
 
@@ -80,33 +116,59 @@
 
   const setLoading = (element, label) => {
     if (!element) return () => {};
+
     const originalContent = element.innerHTML;
-    const wasDisabled = 'disabled' in element ? element.disabled : null;
+    const wasDisabled = 'disabled' in element
+      ? element.disabled
+      : null;
+
     const previousBusy = element.getAttribute('aria-busy');
-    const hadPointerEventsNone = element.classList.contains('pointer-events-none');
+    const hadPointerEventsNone = element.classList.contains(
+      'pointer-events-none'
+    );
+
     const spinner = document.createElement('span');
-    spinner.className = 'h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent';
+    spinner.className =
+      'h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent';
     spinner.setAttribute('aria-hidden', 'true');
+
     const message = document.createElement('span');
     message.textContent = label;
+
     element.replaceChildren(spinner, message);
     element.setAttribute('aria-busy', 'true');
-    if (wasDisabled !== null) element.disabled = true;
-    else element.classList.add('pointer-events-none');
+
+    if (wasDisabled !== null) {
+      element.disabled = true;
+    } else {
+      element.classList.add('pointer-events-none');
+    }
 
     return () => {
       element.innerHTML = originalContent;
-      if (wasDisabled !== null) element.disabled = wasDisabled;
-      if (previousBusy === null) element.removeAttribute('aria-busy');
-      else element.setAttribute('aria-busy', previousBusy);
+
+      if (wasDisabled !== null) {
+        element.disabled = wasDisabled;
+      }
+
+      if (previousBusy === null) {
+        element.removeAttribute('aria-busy');
+      } else {
+        element.setAttribute('aria-busy', previousBusy);
+      }
+
       if (wasDisabled === null) {
-        element.classList.toggle('pointer-events-none', hadPointerEventsNone);
+        element.classList.toggle(
+          'pointer-events-none',
+          hadPointerEventsNone
+        );
       }
     };
   };
 
   const parseResponse = (responseText) => {
     if (!responseText) return null;
+
     try {
       return JSON.parse(responseText);
     } catch {
@@ -116,23 +178,43 @@
 
   const handleResponse = (status, responseText, auth) => {
     const payload = parseResponse(responseText);
+
     if (status < 200 || status >= 300) {
-      const message = payload?.message
-        || payload?.error
-        || `The API request failed with status ${status}.`;
-      if (status === 401 && auth) clearSession();
+      const message =
+        payload?.message ||
+        payload?.error ||
+        `The API request failed with status ${status}.`;
+
+      if (status === 401 && auth) {
+        clearSession();
+      }
+
       const error = new Error(
-        status >= 500 ? `${message} (HTTP ${status})` : message,
+        status >= 500
+          ? `${message} (HTTP ${status})`
+          : message
       );
+
       error.status = status;
       throw error;
     }
+
     return payload;
   };
 
-  const networkError = () => new Error(
-    `Could not reach SkillBridge API at ${apiLabel}. Check your connection, API availability, or whether the site can access the API.`,
-  );
+  // Preserve the original browser error for easier debugging.
+  const networkError = (cause) => {
+    const error = new Error(
+      `Could not complete the request to SkillBridge API at ${apiLabel}. ` +
+      `Browser detail: ${cause?.name || 'Unknown error'}: ` +
+      `${cause?.message || 'No additional details available.'}`
+    );
+
+    error.code = 'NETWORK_ERROR';
+    error.cause = cause;
+
+    return error;
+  };
 
   const request = async (path, options = {}) => {
     const {
@@ -142,17 +224,26 @@
       onUploadProgress,
       ...requestOptions
     } = options;
+
     const requestHeaders = new Headers(headers);
     const session = readSession();
     const token = auth ? session?.token : null;
+
     if (auth && !token) {
-      const error = new Error('Please sign in to access this page. Your request was not sent to the API.');
+      const error = new Error(
+        'Please sign in to access this page. Your request was not sent to the API.'
+      );
+
       error.code = 'AUTH_REQUIRED';
       throw error;
     }
-    if (token) requestHeaders.set('Authorization', `Bearer ${token}`);
+
+    if (token) {
+      requestHeaders.set('Authorization', `Bearer ${token}`);
+    }
 
     let requestBody = body;
+
     if (body !== undefined && !(body instanceof FormData)) {
       requestHeaders.set('Content-Type', 'application/json');
       requestBody = JSON.stringify(body);
@@ -161,37 +252,71 @@
     if (typeof onUploadProgress === 'function') {
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open(requestOptions.method || 'GET', `${baseUrl}${path}`, true);
+
+        xhr.open(
+          requestOptions.method || 'GET',
+          `${baseUrl}${path}`,
+          true
+        );
+
         xhr.timeout = 55_000;
-        requestHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
+
+        requestHeaders.forEach((value, name) => {
+          xhr.setRequestHeader(name, value);
+        });
+
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
             onUploadProgress({
               loaded: event.loaded,
               total: event.total,
-              percent: Math.round((event.loaded / event.total) * 100),
+              percent: Math.round(
+                (event.loaded / event.total) * 100
+              ),
             });
           }
         });
+
         xhr.addEventListener('load', () => {
           try {
-            resolve(handleResponse(xhr.status, xhr.responseText, auth));
+            resolve(
+              handleResponse(
+                xhr.status,
+                xhr.responseText,
+                auth
+              )
+            );
           } catch (error) {
             reject(error);
           }
         });
-        xhr.addEventListener('error', () => reject(networkError()));
-        xhr.addEventListener('timeout', () => {
-          reject(new Error(`The SkillBridge API request timed out at ${apiLabel}.`));
+
+        xhr.addEventListener('error', () => {
+          reject(networkError());
         });
+
+        xhr.addEventListener('timeout', () => {
+          reject(
+            new Error(
+              `The SkillBridge API request timed out at ${apiLabel}.`
+            )
+          );
+        });
+
         xhr.send(requestBody ?? null);
       });
     }
 
     let response;
     let responseText;
+
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55_000);
+
+    const timeout = setTimeout(
+      () => controller.abort(),
+      55_000
+    );
+
     try {
       response = await fetch(`${baseUrl}${path}`, {
         ...requestOptions,
@@ -199,84 +324,145 @@
         body: requestBody,
         signal: controller.signal,
       });
+
       responseText = await response.text();
+
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw new Error(`The SkillBridge API request timed out at ${apiLabel}.`);
+        throw new Error(
+          `The SkillBridge API request timed out at ${apiLabel}.`
+        );
       }
-      throw networkError();
+
+      throw networkError(error);
+
     } finally {
       clearTimeout(timeout);
     }
 
-    return handleResponse(response.status, responseText, auth);
+    return handleResponse(
+      response.status,
+      responseText,
+      auth
+    );
   };
 
   const showStatus = (anchor, message, isError = false) => {
-    const target = typeof anchor === 'string' ? document.getElementById(anchor) : anchor;
+    const target = typeof anchor === 'string'
+      ? document.getElementById(anchor)
+      : anchor;
+
     if (!target) return;
-    let status = target.parentElement?.querySelector('[data-api-status]');
+
+    let status = target.parentElement?.querySelector(
+      '[data-api-status]'
+    );
+
     if (!status) {
       status = document.createElement('p');
       status.dataset.apiStatus = '';
       status.className = 'mt-3 text-sm';
       status.setAttribute('role', isError ? 'alert' : 'status');
+
       target.insertAdjacentElement('afterend', status);
     }
+
     status.classList.toggle('text-red-700', isError);
     status.classList.toggle('text-[#625B6D]', !isError);
-    status.setAttribute('role', isError ? 'alert' : 'status');
+
+    status.setAttribute(
+      'role',
+      isError ? 'alert' : 'status'
+    );
+
     status.textContent = message;
   };
 
-  // A completed CV analysis changes the account data used by several pages.
-  // Keep the server-side match and roadmap records in step with that analysis
-  // instead of leaving each page to render stale (or empty) derived data.
-  const refreshAnalysisArtifacts = async ({ skillGapId, careerGoal, includeRoadmap = false } = {}) => {
+  // Refresh related account data after CV analysis.
+  const refreshAnalysisArtifacts = async ({
+    skillGapId,
+    careerGoal,
+    includeRoadmap = false,
+  } = {}) => {
     const jobs = [];
+
     if (careerGoal) {
-      jobs.push(['profile', request('/api/v1/profiles/me', {
-        method: 'PUT',
-        body: { careerGoal },
-      })]);
+      jobs.push([
+        'profile',
+        request('/api/v1/profiles/me', {
+          method: 'PUT',
+          body: { careerGoal },
+        }),
+      ]);
     }
-    // Match generation has no body; it always uses the user's latest completed
-    // analysis. A roadmap is tied to the exact analysis that was just created.
-    jobs.push(['matches', request('/api/v1/matching/generate', { method: 'POST' })]);
-    if (includeRoadmap && skillGapId) {
-      jobs.push(['roadmap', request('/api/v1/roadmaps/generate', {
+
+    jobs.push([
+      'matches',
+      request('/api/v1/matching/generate', {
         method: 'POST',
-        body: { skillGapId },
-      })]);
+      }),
+    ]);
+
+    if (includeRoadmap && skillGapId) {
+      jobs.push([
+        'roadmap',
+        request('/api/v1/roadmaps/generate', {
+          method: 'POST',
+          body: { skillGapId },
+        }),
+      ]);
     }
-    const results = await Promise.allSettled(jobs.map(([, promise]) => promise));
+
+    const results = await Promise.allSettled(
+      jobs.map(([, promise]) => promise)
+    );
+
     return results.map((result, index) => ({
       name: jobs[index][0],
       ok: result.status === 'fulfilled',
-      ...(result.status === 'fulfilled' ? { data: result.value } : { error: result.reason }),
+      ...(result.status === 'fulfilled'
+        ? { data: result.value }
+        : { error: result.reason }),
     }));
   };
 
-  const setAnalysisContext = ({ skillGapId, careerGoal } = {}) => {
+  const setAnalysisContext = ({
+    skillGapId,
+    careerGoal,
+  } = {}) => {
     try {
-      localStorage.setItem('skillbridgeAccountAnalysis', JSON.stringify({
-        skillGapId: skillGapId || null,
-        careerGoal: careerGoal || null,
-        updatedAt: new Date().toISOString(),
-      }));
+      localStorage.setItem(
+        'skillbridgeAccountAnalysis',
+        JSON.stringify({
+          skillGapId: skillGapId || null,
+          careerGoal: careerGoal || null,
+          updatedAt: new Date().toISOString(),
+        })
+      );
     } catch {
-      // The API-backed updates still succeed when browser storage is unavailable.
+      // API-backed updates still succeed when browser storage is unavailable.
     }
   };
 
   window.SkillBridgeApi = {
     baseUrl,
     request,
-    get: (path, options = {}) => request(path, { ...options, method: 'GET' }),
-    post: (path, body, options = {}) => request(path, { ...options, method: 'POST', body }),
-    put: (path, body, options = {}) => request(path, { ...options, method: 'PUT', body }),
-    patch: (path, body, options = {}) => request(path, { ...options, method: 'PATCH', body }),
-    delete: (path, options = {}) => request(path, { ...options, method: 'DELETE' }),
+
+    get: (path, options = {}) =>
+      request(path, { ...options, method: 'GET' }),
+
+    post: (path, body, options = {}) =>
+      request(path, { ...options, method: 'POST', body }),
+
+    put: (path, body, options = {}) =>
+      request(path, { ...options, method: 'PUT', body }),
+
+    patch: (path, body, options = {}) =>
+      request(path, { ...options, method: 'PATCH', body }),
+
+    delete: (path, options = {}) =>
+      request(path, { ...options, method: 'DELETE' }),
+
     session: readSession,
     setSession,
     clearSession,
@@ -284,6 +470,7 @@
     showStatus,
     refreshAnalysisArtifacts,
     setAnalysisContext,
+
     unwrap: (response) => response?.data ?? response,
   };
 })();
