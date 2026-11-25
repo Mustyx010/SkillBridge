@@ -155,8 +155,24 @@ const renderMetricLink = (href, label, value, detail, icon) => {
 const renderApiMetrics = ({ cvs, gaps, roadmaps, opportunities, matches }, pending = new Set()) => {
   const signedIn = Boolean(activeSession?.token);
   const latestCv = latestFirst(cvs)[0];
-  const latestGap = latestFirst(gaps.filter((gap) => !latestCv || gap.cvId === latestCv.id))[0];
-  const latestRoadmap = latestFirst(roadmaps)[0];
+
+const completedGaps = gaps.filter(
+  (gap) => gap.status === 'completed'
+);
+
+const latestGap = latestFirst(
+  completedGaps.filter(
+    (gap) => !latestCv || gap.cvId === latestCv.id
+  )
+)[0] || latestFirst(completedGaps)[0];
+
+const latestRoadmap = latestGap
+  ? latestFirst(
+      roadmaps.filter(
+        (item) => item.skillGapId === latestGap.id
+      )
+    )[0]
+  : null;
   const completedGap = latestGap?.status === 'completed';
   const analysisPending = pending.has('cvs') || pending.has('gaps');
   const ringValue = document.getElementById('readiness-percent');

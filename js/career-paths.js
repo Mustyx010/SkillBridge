@@ -77,12 +77,26 @@ const extractRoleSuggestions = (analysisResult) => {
       else if (!roleContext && child && typeof child === 'object') visit(child);
     });
   };
-  const add = (title, details = {}) => {
-    const key = title.toLowerCase();
-    if (seen.has(key)) return;
-    seen.add(key);
-    suggestions.push({ title, details, source: 'CV recommendation' });
-  };
+const add = (title, details = {}) => {
+  const key = title.toLowerCase();
+
+  if (seen.has(key)) return;
+
+  seen.add(key);
+
+  const matchPercentage = Number(
+    details.match_percentage ?? details.matchPercentage
+  );
+
+  suggestions.push({
+    title,
+    details,
+    match: Number.isFinite(matchPercentage)
+      ? { matchPercentage }
+      : null,
+    source: 'CV recommendation',
+  });
+};
 
   visit(analysisResult);
   return suggestions;
@@ -326,7 +340,10 @@ const loadCareerOptions = async () => {
     }
     const skillGap = gaps.find((gap) => gap.cvId === cvId)
       || gaps.find((gap) => gap.id === localStorage.getItem('skillbridgeSkillGapId'));
-    const analysisResult =  analysis?.analysisResult ||  skillGap?.analysisResult || {};
+const analysisResult = {
+  ...(skillGap?.analysisResult || {}),
+  ...(analysis?.analysisResult || {}),
+};
     const skills = extractSkills(analysisResult, skillGap);
     const recommendations = extractRoleSuggestions(analysisResult);
     const matchByOpportunityId = new Map(matches.map((match) => [
