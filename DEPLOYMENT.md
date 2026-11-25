@@ -1,7 +1,8 @@
+
 # Deployment
 
 The frontend calls the SkillBridge API directly from the browser. The default
-API URL is `https://skillbridge-api.tb-skillbridge-backend.workers.dev`; set
+API URL is `https://skillbridge-backend-1b07.onrender.com`; set
 `window.SKILLBRIDGE_API_BASE_URL` before loading `js/api-client.js` only when
 using a different API.
 
@@ -37,7 +38,8 @@ backend must support that route for signup verification to work. Confirm the
 production API contract with the backend maintainer before changing these
 paths.
 
-The supplied OpenAPI file advertises `http://localhost:3000` as its server,
-while deployed frontend requests use the production Worker URL above. Keep the
-production base URL for deployed sites; use the local URL only when running the
-API locally.
+The backend production API is hosted on Render:
+`https://skillbridge-backend-1b07.onrender.com`.
+
+For local backend development, use:
+`http://localhost:3000`.

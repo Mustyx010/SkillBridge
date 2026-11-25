@@ -2,7 +2,7 @@
 (() => {
   const baseUrl = (
     window.SKILLBRIDGE_API_BASE_URL ||
-    'https://skillbridge-api.tb-skillbridge-backend.workers.dev'
+'https://skillbridge-backend-1b07.onrender.com'
   ).replace(/\/+$/, '');
 
   const apiLabel = baseUrl;
