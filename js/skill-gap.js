@@ -204,37 +204,25 @@ const setSummary = (gap, fallbackStatus = 'No analysis') => {
   summarySection?.setAttribute('aria-busy', 'false');
 };
 
-// Format action-plan items safely
-const getActionPlanDetails = (item) => {
-  if (typeof item === 'string') {
-    return {
-      title: item,
-      description: '',
-    };
-  }
 
+// Format action-plan phases and their learning activities
+const getActionPlanDetails = (item) => {
   if (!item || typeof item !== 'object') {
     return {
-      title: String(item ?? ''),
-      description: '',
+      phase: 'Recommended Development Step',
+      focus: '',
+      actionItems: typeof item === 'string' ? [item] : [],
     };
   }
 
   return {
-    title:
-      item.title ||
-      item.task ||
-      item.name ||
-      item.phase ||
-      item.step ||
-      'Recommended development step',
-
-    description:
-      item.description ||
-      item.details ||
-      item.objective ||
-      item.reason ||
-      '',
+    phase: item.phase || 'Recommended Development Step',
+    focus: item.focus || '',
+    actionItems: Array.isArray(item.action_items)
+      ? item.action_items
+      : Array.isArray(item.actionItems)
+        ? item.actionItems
+        : [],
   };
 };
 
@@ -243,16 +231,17 @@ const renderActionPlan = (actionPlan) => {
   const section = document.createElement('section');
   section.className = 'rounded-2xl bg-white p-5 shadow-sm sm:p-6';
 
-  const heading = makeElement(
-    'h3',
-    'text-lg font-bold text-[#731F94]',
-    'Recommended Action Plan'
-  );
-
-  const description = makeElement(
-    'p',
-    'mt-1 text-sm text-[#625B6D]',
-    'Steps recommended by the AI analysis to help you prepare for your target career.'
+  section.append(
+    makeElement(
+      'h3',
+      'text-lg font-bold text-[#731F94]',
+      'Recommended Action Plan'
+    ),
+    makeElement(
+      'p',
+      'mt-1 text-sm text-[#625B6D]',
+      'Follow these recommended learning activities to prepare for your target career.'
+    )
   );
 
   const list = document.createElement('div');
@@ -274,9 +263,12 @@ const renderActionPlan = (actionPlan) => {
 
       const card = makeElement(
         'article',
-        'flex gap-3 rounded-xl bg-[#F8F4FF] p-4',
+        'rounded-xl bg-[#F8F4FF] p-4 sm:p-5',
         ''
       );
+
+      const header = document.createElement('div');
+      header.className = 'flex items-start gap-3';
 
       const number = makeElement(
         'span',
@@ -284,36 +276,63 @@ const renderActionPlan = (actionPlan) => {
         index + 1
       );
 
-      const content = document.createElement('div');
-      content.className = 'min-w-0';
+      const phaseContent = document.createElement('div');
+      phaseContent.className = 'min-w-0';
 
-      const title = makeElement(
-        'h4',
-        'text-sm font-bold text-[#181445]',
-        details.title
+      phaseContent.append(
+        makeElement(
+          'h4',
+          'text-sm font-bold text-[#181445]',
+          details.phase
+        )
       );
 
-      content.append(title);
-
-      if (details.description) {
-        content.append(
+      if (details.focus) {
+        phaseContent.append(
           makeElement(
             'p',
-            'mt-1 text-xs leading-5 text-[#625B6D]',
-            details.description
+            'mt-1 text-sm font-semibold text-[#731F94]',
+            details.focus
           )
         );
       }
 
-      card.append(number, content);
+      header.append(number, phaseContent);
+      card.append(header);
+
+      if (details.actionItems.length) {
+        const activityList = document.createElement('ul');
+        activityList.className =
+          'mt-4 ml-11 list-disc space-y-2 pl-4 text-sm leading-6 text-[#625B6D]';
+
+        details.actionItems.forEach((activity) => {
+          const activityText =
+            typeof activity === 'string'
+              ? activity
+              : activity?.description ||
+                activity?.title ||
+                activity?.task ||
+                '';
+
+          if (!activityText) return;
+
+          activityList.append(
+            makeElement('li', '', activityText)
+          );
+        });
+
+        card.append(activityList);
+      }
+
       list.append(card);
     });
   }
 
-  section.append(heading, description, list);
+  section.append(list);
 
   return section;
 };
+
 
 // Render complete AI analysis
 const renderAIAnalysis = (gap) => {
