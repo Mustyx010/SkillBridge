@@ -1,59 +1,260 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#FDF8FF">
-    <title>Skill Gap Matrix &amp; Benchmark | SkillBridge</title>
+    <title>Skill Gap Analysis | SkillBridge</title>
     <link rel="icon" type="image/svg+xml" href="./assets/Logo.svg">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
     <link href="./src/output.css" rel="stylesheet">
   </head>
+
   <body class="min-h-screen bg-[#FBF8FF] font-['Plus_Jakarta_Sans',sans-serif] text-[#181445]">
     <div class="min-h-screen lg:pl-[246px]">
-      <aside id="skill-gap-sidebar" class="fixed inset-y-0 left-0 z-40 flex w-[246px] -translate-x-full flex-col border-r border-[#F3EAF6] bg-white px-4 py-5 transition-transform lg:translate-x-0">
-        <a href="dashboard.html" class="mb-7 flex items-center gap-2.5 px-2" aria-label="SkillBridge dashboard"><img src="assets/Logo.svg" alt="" class="h-9 w-9"><span class="text-sm font-bold tracking-[-0.04em]">SkillBridge</span></a>
-        <p class="mb-3 px-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#81798B]">Navigation</p>
+
+      <!-- Sidebar -->
+      <aside
+        id="skill-gap-sidebar"
+        class="fixed inset-y-0 left-0 z-40 flex w-[246px] -translate-x-full flex-col border-r border-[#F3EAF6] bg-white px-4 py-5 transition-transform lg:translate-x-0"
+      >
+        <a href="dashboard.html" class="mb-7 flex items-center gap-2.5 px-2" aria-label="SkillBridge dashboard">
+          <img src="assets/Logo.svg" alt="" class="h-9 w-9">
+          <span class="text-sm font-bold tracking-[-0.04em]">SkillBridge</span>
+        </a>
+
+        <p class="mb-3 px-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#81798B]">
+          Navigation
+        </p>
+
         <nav class="space-y-1 text-[14px] font-semibold text-[#4A4455]" aria-label="Candidate dashboard">
-          <a href="dashboard.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]"><i class="ph ph-squares-four text-base"></i>Dashboard</a>
-          <a href="skill-gap.html" aria-current="page" class="flex items-center gap-2.5 rounded-lg bg-[#731F94] px-3 py-2.5 text-white"><i class="ph ph-chart-line-up text-base"></i>Skill Gap &amp; Benchmark</a>
-          <a href="roadmap.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]"><i class="ph ph-git-branch text-base"></i>Roadmap</a>
-          <a href="learning-opportunities.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs leading-4 hover:bg-[#F7F3FE]"><i class="ph ph-graduation-cap shrink-0 text-base"></i>Learning Opportunities &amp; Capstone</a>
-          <a href="opportunities.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]"><i class="ph ph-briefcase text-base"></i>Job Opportunities</a>
-          <a href="profile.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]"><i class="ph ph-identification-card text-base"></i>Profile &amp; CV Hub</a>
+          <a href="dashboard.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]">
+            <i class="ph ph-squares-four text-base"></i>
+            Dashboard
+          </a>
+
+          <a href="skill-gap.html" aria-current="page" class="flex items-center gap-2.5 rounded-lg bg-[#731F94] px-3 py-2.5 text-white">
+            <i class="ph ph-chart-line-up text-base"></i>
+            Skill Gap &amp; Benchmark
+          </a>
+
+          <a href="roadmap.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]">
+            <i class="ph ph-git-branch text-base"></i>
+            Roadmap
+          </a>
+
+          <a href="learning-opportunities.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs leading-4 hover:bg-[#F7F3FE]">
+            <i class="ph ph-graduation-cap shrink-0 text-base"></i>
+            Learning Opportunities &amp; Capstone
+          </a>
+
+          <a href="opportunities.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]">
+            <i class="ph ph-briefcase text-base"></i>
+            Job Opportunities
+          </a>
+
+          <a href="profile.html" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 hover:bg-[#F7F3FE]">
+            <i class="ph ph-identification-card text-base"></i>
+            Profile &amp; CV Hub
+          </a>
         </nav>
       </aside>
+
+      <!-- Mobile backdrop -->
       <div id="skill-gap-backdrop" class="fixed inset-0 z-30 hidden bg-[#181445]/30 lg:hidden"></div>
+
+      <!-- Header -->
       <header class="sticky top-0 z-20 flex h-[56px] items-center gap-3 border-b border-[#F3EAF6] bg-white px-4 sm:px-6">
-        <button id="skill-gap-menu-button" type="button" class="rounded-lg p-2 text-xl text-[#4A4455] hover:bg-[#F5F0FD] lg:hidden" aria-label="Open navigation" aria-expanded="false"><i class="ph ph-list"></i></button>
-        <form id="skill-gap-search-form" class="relative min-w-0 max-w-[490px] flex-1"><label class="flex h-10 items-center gap-2 rounded-xl bg-[#F5F0FD] px-3 text-[#81798B]"><i class="ph ph-magnifying-glass"></i><input id="skill-gap-search" type="search" placeholder="Search skills, benchmarks..." aria-label="Search the skill matrix" class="w-full bg-transparent text-xs text-[#181445] outline-none placeholder:text-[#81798B]"></label></form>
-        <a href="profile.html" aria-label="Account" class="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-[#F7F3FE]"><span class="text-right"><strong id="skill-gap-user-name" class="block text-xs font-bold">Candidate</strong><span class="block text-[10px] font-semibold text-[#81798B]">Candidate</span></span><span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEE8FF] text-[#731F94]"><i class="ph ph-user-circle text-2xl"></i></span></a>
+        <button
+          id="skill-gap-menu-button"
+          type="button"
+          class="rounded-lg p-2 text-xl text-[#4A4455] hover:bg-[#F5F0FD] lg:hidden"
+          aria-label="Open navigation"
+          aria-expanded="false"
+        >
+          <i class="ph ph-list"></i>
+        </button>
+
+        <form id="skill-gap-search-form" class="relative min-w-0 max-w-[490px] flex-1">
+          <label class="flex h-10 items-center gap-2 rounded-xl bg-[#F5F0FD] px-3 text-[#81798B]">
+            <i class="ph ph-magnifying-glass"></i>
+            <input
+              id="skill-gap-search"
+              type="search"
+              placeholder="Search skills, benchmarks..."
+              aria-label="Search the skill matrix"
+              class="w-full bg-transparent text-xs text-[#181445] outline-none placeholder:text-[#81798B]"
+            >
+          </label>
+        </form>
+
+        <a href="profile.html" aria-label="Account" class="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-[#F7F3FE]">
+          <span class="text-right">
+            <strong id="skill-gap-user-name" class="block text-xs font-bold">Candidate</strong>
+            <span class="block text-[10px] font-semibold text-[#81798B]">Candidate</span>
+          </span>
+
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#EEE8FF] text-[#731F94]">
+            <i class="ph ph-user-circle text-2xl"></i>
+          </span>
+        </a>
       </header>
 
+      <!-- Main content -->
       <main class="mx-auto max-w-[1440px] space-y-8 px-5 py-7 sm:px-8 sm:py-9 lg:px-10">
-  <section class="flex flex-wrap items-end justify-between gap-5" aria-labelledby="page-title"></section>
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Skill gap summary"></section>
-  <section aria-labelledby="matrix-title">
-    <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h2 id="matrix-title" class="text-2xl font-bold tracking-tight">Skills to develop</h2>
-        <p class="text-xs text-[#81798B]">Current, required, and missing skills returned by your CV analysis.</p>
-      </div>
-      <div class="flex rounded-xl bg-[#F4EFFF] p-1 text-xs font-semibold">
-        <button id="card-view-button" type="button" aria-pressed="true" class="rounded-lg bg-white px-4 py-2 text-[#731F94] shadow-sm">Card View</button>
-        <button id="hierarchy-view-button" type="button" aria-pressed="false" class="rounded-lg px-4 py-2 text-[#625B6D]">Full Hierarchy</button>
-      </div>
+
+        <!-- Page heading -->
+        <section
+          class="flex flex-wrap items-end justify-between gap-5"
+          aria-labelledby="page-title"
+        ></section>
+
+        <!-- AI-generated CV analysis -->
+        <section
+          id="cv-analysis-section"
+          class="space-y-5"
+          aria-labelledby="cv-analysis-heading"
+        >
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.12em] text-[#731F94]">
+              Personalized assessment
+            </p>
+
+            <h2 id="cv-analysis-heading" class="mt-1 text-2xl font-extrabold tracking-tight">
+              Your CV Analysis
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-[#625B6D]">
+              Understand your current skills, career alignment and recommended development steps.
+            </p>
+          </div>
+
+          <!-- JavaScript renders the actual API analysis here -->
+          <div
+            id="cv-analysis-content"
+            class="space-y-5"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <div class="rounded-2xl bg-white p-6 shadow-sm">
+              <p class="text-sm text-[#81798B]">
+                Loading your CV analysis...
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Skill gap summary -->
+        <section
+          class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+          aria-label="Skill gap summary"
+        ></section>
+
+        <!-- Skills to develop -->
+        <section aria-labelledby="matrix-title">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="matrix-title" class="text-2xl font-bold tracking-tight">
+                Skills to develop
+              </h2>
+
+              <p class="text-xs text-[#81798B]">
+                Current, required, and missing skills returned by your CV analysis.
+              </p>
+            </div>
+
+            <div class="flex rounded-xl bg-[#F4EFFF] p-1 text-xs font-semibold">
+              <button
+                id="card-view-button"
+                type="button"
+                aria-pressed="true"
+                class="rounded-lg bg-white px-4 py-2 text-[#731F94] shadow-sm"
+              >
+                Card View
+              </button>
+
+              <button
+                id="hierarchy-view-button"
+                type="button"
+                aria-pressed="false"
+                class="rounded-lg px-4 py-2 text-[#625B6D]"
+              >
+                Full Hierarchy
+              </button>
+            </div>
+          </div>
+
+          <div id="matrix-grid" class="grid items-start gap-4 lg:grid-cols-3"></div>
+
+          <p
+            id="skill-search-empty"
+            class="mt-4 hidden rounded-xl bg-white p-5 text-sm text-[#625B6D]"
+          >
+            No skill cards match that search.
+          </p>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="border-t border-[#F3EAF6] bg-white/70 px-5 py-4 text-[11px] text-[#81798B]">
+        <div class="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-3 sm:px-3">
+          <span>© 2025 SkillBridge Inc. Candidate Benchmark</span>
+
+          <nav class="flex gap-4">
+            <a href="dashboard.html" class="hover:text-[#731F94]">Dashboard</a>
+            <a href="index.html#diagnostics" class="hover:text-[#731F94]">Help &amp; FAQ</a>
+            <a href="profile.html" class="hover:text-[#731F94]">Profile</a>
+          </nav>
+        </div>
+      </footer>
     </div>
-    <div id="matrix-grid" class="grid items-start gap-4 lg:grid-cols-3"></div>
-    <p id="skill-search-empty" class="mt-4 hidden rounded-xl bg-white p-5 text-sm text-[#625B6D]">No skill cards match that search.</p>
-  </section>
-</main>
-      <footer class="border-t border-[#F3EAF6] bg-white/70 px-5 py-4 text-[11px] text-[#81798B]"><div class="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-3 sm:px-3"><span>© 2025 SkillBridge Inc. Candidate Benchmark</span><nav class="flex gap-4"><a href="dashboard.html" class="hover:text-[#731F94]">Dashboard</a><a href="index.html#diagnostics" class="hover:text-[#731F94]">Help &amp; FAQ</a><a href="profile.html" class="hover:text-[#731F94]">Profile</a></nav></div></footer>
-    </div>
-    <dialog id="skill-gap-dialog" class="w-[min(92vw,480px)] rounded-2xl border-0 p-0 text-[#181445] shadow-2xl backdrop:bg-[#181445]/40"><div class="p-6"><div class="flex items-start justify-between gap-3"><div><p class="text-[10px] font-bold uppercase tracking-wide text-[#731F94]">SkillBridge Benchmark</p><h2 id="skill-gap-dialog-title" class="mt-1 text-lg font-bold"></h2></div><button type="button" data-close-skill-gap-dialog class="rounded-lg p-1 text-xl text-[#625B6D] hover:bg-[#F5F0FD]" aria-label="Close"><i class="ph ph-x"></i></button></div><p id="skill-gap-dialog-copy" class="mt-3 text-sm leading-6 text-[#625B6D]"></p><div class="mt-5 flex justify-end"><button type="button" data-close-skill-gap-dialog class="rounded-lg bg-[#731F94] px-4 py-2.5 text-sm font-semibold text-white">Got it</button></div></div></dialog>
+
+    <!-- Dialog -->
+    <dialog
+      id="skill-gap-dialog"
+      class="w-[min(92vw,480px)] rounded-2xl border-0 p-0 text-[#181445] shadow-2xl backdrop:bg-[#181445]/40"
+    >
+      <div class="p-6">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wide text-[#731F94]">
+              SkillBridge Benchmark
+            </p>
+
+            <h2 id="skill-gap-dialog-title" class="mt-1 text-lg font-bold"></h2>
+          </div>
+
+          <button
+            type="button"
+            data-close-skill-gap-dialog
+            class="rounded-lg p-1 text-xl text-[#625B6D] hover:bg-[#F5F0FD]"
+            aria-label="Close"
+          >
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <p id="skill-gap-dialog-copy" class="mt-3 text-sm leading-6 text-[#625B6D]"></p>
+
+        <div class="mt-5 flex justify-end">
+          <button
+            type="button"
+            data-close-skill-gap-dialog
+            class="rounded-lg bg-[#731F94] px-4 py-2.5 text-sm font-semibold text-white"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Scripts -->
     <script src="js/api-client.js" defer></script>
     <script src="js/skill-gap.js" defer></script>
   </body>
