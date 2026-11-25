@@ -29,10 +29,21 @@ const makeText = (tag, className, value) => {
 
 const normalizeField = (field) => field.replace(/[^a-z]/gi, '').toLowerCase();
 const roleFields = new Set([
-  'careerPaths', 'careerPathways', 'careerOptions', 'careerRecommendations',
-  'recommendedCareers', 'suggestedCareers', 'recommendedRoles', 'suggestedRoles',
-  'targetRoles', 'jobTitles', 'recommendedJobTitles', 'suggestedJobTitles',
-  'jobRecommendations', 'roles',
+  'careerPaths',
+  'careerPathways',
+  'careerOptions',
+  'careerRecommendations',
+  'recommendedCareers',
+  'recommendedCareerPath',
+  'suggestedCareers',
+  'recommendedRoles',
+  'suggestedRoles',
+  'targetRoles',
+  'jobTitles',
+  'recommendedJobTitles',
+  'suggestedJobTitles',
+  'jobRecommendations',
+  'roles',
 ].map(normalizeField));
 
 const extractRoleSuggestions = (analysisResult) => {
@@ -51,7 +62,7 @@ const extractRoleSuggestions = (analysisResult) => {
 
     if (roleContext) {
       const title = Object.entries(value).find(([key, child]) => (
-        ['jobtitle', 'targetjobtitle', 'careertitle', 'role', 'title', 'name', 'label']
+        ['jobtitle', 'targetjobtitle', 'targetrole', 'careertitle', 'role', 'title', 'name', 'label']
           .includes(normalizeField(key))
         && typeof child === 'string'
         && child.trim()
@@ -79,10 +90,17 @@ const extractRoleSuggestions = (analysisResult) => {
 
 const extractSkills = (...sources) => {
   const skills = new Set();
-  const skillFields = new Set([
-    'currentSkills', 'extractedSkills', 'skills', 'technicalSkills',
-    'competencies', 'skillsFound', 'matchedSkills',
-  ].map(normalizeField));
+const skillFields = new Set([
+  'currentSkills',
+  'extractedSkills',
+  'skills',
+  'technicalSkills',
+  'competencies',
+  'skillsFound',
+  'matchedSkills',
+  'identifiedSkills',
+  'identified_skills',
+].map(normalizeField));
   const visit = (value, inSkillField = false) => {
     if (typeof value === 'string') {
       if (inSkillField && value.trim()) skills.add(value.trim().toLowerCase());
@@ -308,7 +326,7 @@ const loadCareerOptions = async () => {
     }
     const skillGap = gaps.find((gap) => gap.cvId === cvId)
       || gaps.find((gap) => gap.id === localStorage.getItem('skillbridgeSkillGapId'));
-    const analysisResult = analysis?.analysisResult || {};
+    const analysisResult =  analysis?.analysisResult ||  skillGap?.analysisResult || {};
     const skills = extractSkills(analysisResult, skillGap);
     const recommendations = extractRoleSuggestions(analysisResult);
     const matchByOpportunityId = new Map(matches.map((match) => [
