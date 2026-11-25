@@ -489,8 +489,16 @@ const loadApiRoadmap = async () => {
       phase.className =
         "text-[10px] font-bold uppercase text-[#731F94]";
 
+      const phaseLabels = {
+          30: "Phase 1 — Days 1–30: Foundation",
+          60: "Phase 2 — Days 31–60: Skill Development",
+          90: "Phase 3 — Days 61–90: Practical Application",
+      };
+
       phase.textContent =
-        `Phase ${task.phase} days • ${task.taskType || "task"}`;
+        `${phaseLabels[Number(task.phase)] || `Phase ${task.phase}`} • ${
+          task.taskType || "task"
+        }`;
 
       const taskTitle = document.createElement("h3");
 
