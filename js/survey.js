@@ -1,20 +1,20 @@
 
-const form = document.getElementById('survey-form');
-const STORAGE_KEY = 'skillbridge_survey';
+const form = document.getElementById("survey-form");
+const STORAGE_KEY = "skillbridge_survey";
 
 // =====================================================
 // 1. SALARY RANGE SLIDER
 // =====================================================
 
-const payMin = document.getElementById('pay-min');
-const payMax = document.getElementById('pay-max');
-const payFill = document.getElementById('pay-fill');
-const payRange = document.getElementById('pay-range');
+const payMin = document.getElementById("pay-min");
+const payMax = document.getElementById("pay-max");
+const payFill = document.getElementById("pay-fill");
+const payRange = document.getElementById("pay-range");
 
 const GAP = 10000;
 
 const naira = (n) =>
-  '₦' + Number(n).toLocaleString('en-US');
+  "₦" + Number(n).toLocaleString("en-US");
 
 function updateRange(changed) {
   if (!payMin || !payMax || !payFill || !payRange) return;
@@ -49,23 +49,23 @@ function updateRange(changed) {
 }
 
 [payMin, payMax].forEach((input) => {
-  input?.addEventListener('input', () => updateRange(input));
+  input?.addEventListener("input", () => updateRange(input));
 });
 
 // =====================================================
 // 2. INSTITUTION SUGGESTIONS
 // =====================================================
 
-const institution = document.getElementById('institution');
+const institution = document.getElementById("institution");
 
-document.querySelectorAll('[data-institution]').forEach((chip) => {
-  chip.addEventListener('click', () => {
+document.querySelectorAll("[data-institution]").forEach((chip) => {
+  chip.addEventListener("click", () => {
     if (!institution) return;
 
     institution.value = chip.dataset.institution;
 
     institution.dispatchEvent(
-      new Event('input', { bubbles: true })
+      new Event("input", { bubbles: true })
     );
 
     institution.focus();
@@ -76,7 +76,7 @@ document.querySelectorAll('[data-institution]').forEach((chip) => {
 // 3. AUTO-SAVE
 // =====================================================
 
-const saveStatus = document.getElementById('save-status');
+const saveStatus = document.getElementById("save-status");
 
 let savedAt = null;
 let timer;
@@ -86,16 +86,16 @@ function readForm() {
 }
 
 function timeAgo() {
-  if (!savedAt) return '';
+  if (!savedAt) return "";
 
   const minutes = Math.floor(
     (Date.now() - savedAt) / 60000
   );
 
-  if (minutes < 1) return 'just now';
+  if (minutes < 1) return "just now";
 
   return minutes === 1
-    ? '1 min ago'
+    ? "1 min ago"
     : `${minutes} min ago`;
 }
 
@@ -140,9 +140,9 @@ function restore() {
     );
 
     fields.forEach((field) => {
-      if (field.type === 'radio') {
+      if (field.type === "radio") {
         field.checked = field.value === value;
-      } else if (field.type === 'checkbox') {
+      } else if (field.type === "checkbox") {
         field.checked = Array.isArray(value)
           ? value.includes(field.value)
           : field.value === value;
@@ -159,71 +159,186 @@ function restore() {
   showStatus();
 }
 
-form.addEventListener('input', () => {
+form.addEventListener("input", () => {
   clearTimeout(timer);
 
   timer = setTimeout(() => save(), 600);
 });
 
-form.addEventListener('change', () => save());
+form.addEventListener("change", () => save());
 
 setInterval(showStatus, 30000);
 
 // =====================================================
-// 4. CONTINUE TO CV UPLOAD
+// 4. CAREER STAGE MAPPING
 // =====================================================
 
-form.addEventListener('submit', async (e) => {
+// The survey uses different values from the backend.
+// Convert them before sending the profile data.
+
+const careerStageMap = {
+  "final-year": "Student",
+  graduate: "Entry",
+  entry: "Entry",
+  mid: "Mid",
+  senior: "Senior",
+  "career-pivot": "Pivot",
+};
+
+// =====================================================
+// 5. HELPER FUNCTIONS
+// =====================================================
+
+// Convert salary values into integers.
+// Empty values are saved as null.
+
+function toNullableInteger(value) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isSafeInteger(number) || number < 0) {
+    return null;
+  }
+
+  return number;
+}
+
+// Display form errors.
+
+function showError(message) {
+  window.SkillBridgeApi.showStatus(
+    form,
+    message,
+    true
+  );
+}
+
+// =====================================================
+// 6. CONTINUE TO CV UPLOAD
+// =====================================================
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const data = readForm();
 
-  // Validate the new career fields.
+  // -----------------------------------------------
+  // Validate required career information
+  // -----------------------------------------------
+
   if (!data.targetJobTitle?.trim()) {
-    window.SkillBridgeApi.showStatus(
-      form,
-      'Enter your target job role before continuing.',
-      true
+    showError(
+      "Enter your target job role before continuing."
     );
 
-    document.getElementById('targetJobTitle')?.focus();
+    document.getElementById("targetJobTitle")?.focus();
 
     return;
   }
 
   if (!data.industryFocus?.trim()) {
-    window.SkillBridgeApi.showStatus(
-      form,
-      'Enter your preferred industry before continuing.',
-      true
+    showError(
+      "Enter your preferred industry before continuing."
     );
 
-    document.getElementById('industryFocus')?.focus();
+    document.getElementById("industryFocus")?.focus();
 
     return;
   }
 
   if (!data.primaryGoal) {
-    window.SkillBridgeApi.showStatus(
-      form,
-      'Select your primary career goal before continuing.',
-      true
+    showError(
+      "Select your primary career goal before continuing."
     );
 
-    document.getElementById('primaryGoal')?.focus();
+    document.getElementById("primaryGoal")?.focus();
 
     return;
   }
 
-  save(true);
+  // -----------------------------------------------
+  // Map the survey career stage to backend values
+  // -----------------------------------------------
+
+  const careerStage = data.availability
+    ? careerStageMap[data.availability]
+    : null;
+
+  if (data.availability && !careerStage) {
+    showError(
+      "Your selected career stage is not supported. Please select it again."
+    );
+
+    return;
+  }
+
+  // -----------------------------------------------
+  // Convert salary values into numbers
+  // -----------------------------------------------
+
+  const minimumSalary = toNullableInteger(data.payMin);
+  const maximumSalary = toNullableInteger(data.payMax);
+
+  if (
+    minimumSalary !== null &&
+    maximumSalary !== null &&
+    minimumSalary > maximumSalary
+  ) {
+    showError(
+      "Your minimum salary cannot be greater than your maximum salary."
+    );
+
+    return;
+  }
+
+  // -----------------------------------------------
+  // Prepare education information
+  // -----------------------------------------------
 
   const education = [
     data.degree,
     data.field,
     data.institution,
   ]
-    .filter(Boolean)
-    .join(' - ');
+    .filter((value) => value?.trim())
+    .join(" - ");
+
+  // -----------------------------------------------
+  // Prepare the profile data for the backend
+  // -----------------------------------------------
+
+  const profileData = {
+    // Basic profile information
+    location: data.location?.trim() || null,
+
+    education: education || null,
+
+    // Preserve the existing careerGoal field.
+    careerGoal: data.targetJobTitle.trim(),
+
+    // Career information
+    targetJobTitle: data.targetJobTitle.trim(),
+
+    industryFocus: data.industryFocus.trim(),
+
+    careerStage,
+
+    primaryGoal: data.primaryGoal,
+
+    // Salary preferences
+    payMin: minimumSalary,
+
+    payMax: maximumSalary,
+
+    // Preferred work arrangement
+    workMode: data.workMode || null,
+  };
+
+  // Save locally as incomplete until the API succeeds.
+  save(false);
 
   const submitButton = form.querySelector(
     '[type="submit"]'
@@ -232,56 +347,32 @@ form.addEventListener('submit', async (e) => {
   const stopLoading =
     window.SkillBridgeApi.setLoading(
       submitButton,
-      'Saving and continuing…'
+      "Saving and continuing…"
     );
 
   try {
+    // -----------------------------------------------
+    // Save the profile to the backend
+    // -----------------------------------------------
+
     await window.SkillBridgeApi.put(
-      '/api/v1/profiles/me',
-      {
-        location: data.location || null,
-
-        education: education || null,
-
-        // The candidate can enter any role.
-        careerGoal: data.targetJobTitle.trim(),
-
-        // Additional career preferences.
-        targetJobTitle: data.targetJobTitle.trim(),
-
-        industryFocus: data.industryFocus.trim(),
-
-        primaryGoal: data.primaryGoal,
-
-        // Keep the previous survey track if it exists.
-        track: data.track || null,
-
-        // Preserve remuneration preferences.
-        salaryExpectation: {
-          minimum: data.payMin
-            ? Number(data.payMin)
-            : null,
-
-          maximum: data.payMax
-            ? Number(data.payMax)
-            : null,
-        },
-
-        // Preserve work preference if supplied.
-        preferredWorkMode:
-          data.workMode ||
-          data.preferredWorkMode ||
-          null,
-      }
+      "/api/v1/profiles/me",
+      profileData
     );
 
-    window.location.href = 'cv-upload.html';
+    // Mark the survey as completed only after
+    // the backend successfully saves the profile.
+    save(true);
+
+    // -----------------------------------------------
+    // Continue to CV upload
+    // -----------------------------------------------
+
+    window.location.href = "cv-upload.html";
 
   } catch (error) {
-    window.SkillBridgeApi.showStatus(
-      form,
-      `Could not save your answers to your account: ${error.message}`,
-      true
+    showError(
+      `Could not save your answers to your account: ${error.message}`
     );
 
   } finally {
@@ -290,7 +381,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 // =====================================================
-// 5. RESTORE PREVIOUS ANSWERS
+// 7. RESTORE PREVIOUS ANSWERS
 // =====================================================
 
 restore();
