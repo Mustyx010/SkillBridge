@@ -26,15 +26,25 @@ let existingSkillGap = null;
 let currentUpload = null;
 let uploadPromise = null;
 
+// =====================================================
+// 1. UPLOAD AND ANALYSIS PROGRESS
+// =====================================================
+
 function setAnalysisProgress(percent, label, indeterminate = false) {
-  parsePercent.textContent = indeterminate ? 'Analysis in progress' : `${percent}% uploaded`;
+  parsePercent.textContent = indeterminate
+    ? 'Analysis in progress'
+    : `${percent}% uploaded`;
+
   parseProgressLabel.textContent = label;
   parseProgress.style.width = `${indeterminate ? 36 : percent}%`;
+
   parseProgress.classList.toggle('animate-pulse', indeterminate);
+
   parseProgress.setAttribute(
     'aria-label',
     indeterminate ? 'CV analysis progress' : 'CV upload progress',
   );
+
   if (indeterminate) {
     parseProgress.removeAttribute('aria-valuenow');
     parseProgress.setAttribute('aria-valuetext', label);
@@ -44,18 +54,47 @@ function setAnalysisProgress(percent, label, indeterminate = false) {
   }
 }
 
+// =====================================================
+// 2. API RESPONSE HELPERS
+// =====================================================
+
 function listFrom(value, keys = []) {
   if (Array.isArray(value)) return value;
+
   for (const key of keys) {
-    if (Array.isArray(value?.[key])) return value[key];
+    if (Array.isArray(value?.[key])) {
+      return value[key];
+    }
   }
+
   return null;
 }
 
+function getSurveyData() {
+  try {
+    const savedSurvey = JSON.parse(
+      localStorage.getItem('skillbridge_survey') || '{}',
+    );
+
+    return savedSurvey?.data || {};
+  } catch {
+    return {};
+  }
+}
+
+// =====================================================
+// 3. DISPLAY SAVED CV
+// =====================================================
+
 function showSavedCv(cv, skillGaps) {
   uploadedCvId = cv.id;
+
   localStorage.setItem('skillbridgeUploadedCvId', cv.id);
-  localStorage.setItem('skillbridgeUploadedCvName', cv.fileName || 'Uploaded CV');
+  localStorage.setItem(
+    'skillbridgeUploadedCvName',
+    cv.fileName || 'Uploaded CV',
+  );
+
   fileName.textContent = cv.fileName || 'Uploaded CV';
 
   const sizeLabel = fileName.parentElement.querySelector('span');
@@ -68,20 +107,39 @@ function showSavedCv(cv, skillGaps) {
 
   uploadedPanel.classList.remove('hidden');
 
+  // Find a completed analysis belonging to this CV only.
   existingSkillGap = skillGaps
-    .filter((gap) => gap.cvId === cv.id && gap.status === 'completed')
-    .sort((a, b) => Date.parse(b.updatedAt || b.createdAt || 0) - Date.parse(a.updatedAt || a.createdAt || 0))[0] || null;
+    .filter(
+      (gap) =>
+        gap.cvId === cv.id &&
+        gap.status === 'completed',
+    )
+    .sort(
+      (a, b) =>
+        Date.parse(b.updatedAt || b.createdAt || 0) -
+        Date.parse(a.updatedAt || a.createdAt || 0),
+    )[0] || null;
 
   if (existingSkillGap) {
-    localStorage.setItem('skillbridgeSkillGapId', existingSkillGap.id);
+    localStorage.setItem(
+      'skillbridgeSkillGapId',
+      existingSkillGap.id,
+    );
+
     setAnalysisProgress(100, 'Analysis complete');
-    uploadStatus.textContent = 'Your saved CV has an API analysis and is ready to continue.';
+
+    uploadStatus.textContent =
+      'Your saved CV has an API analysis and is ready to continue.';
   } else {
     setAnalysisProgress(0, 'Ready to analyze');
   }
 
   setContinueState(true);
 }
+
+// =====================================================
+// 4. LOAD SAVED CVS FROM THE BACKEND
+// =====================================================
 
 async function loadSavedCv() {
   if (!window.SkillBridgeApi.session()) return;
@@ -92,28 +150,44 @@ async function loadSavedCv() {
   ]);
 
   if (cvResult.status === 'rejected') {
-    uploadError.textContent = `Your saved CVs could not be loaded: ${cvResult.reason.message}`;
+    uploadError.textContent =
+      `Your saved CVs could not be loaded: ${cvResult.reason.message}`;
+
     uploadError.classList.remove('hidden');
     return;
   }
 
-  const cvs = listFrom(window.SkillBridgeApi.unwrap(cvResult.value), ['items', 'cvs']);
+  const cvs = listFrom(
+    window.SkillBridgeApi.unwrap(cvResult.value),
+    ['items', 'cvs'],
+  );
 
-  if (!cvs) throw new Error('The API returned an invalid saved CV list.');
+  if (!cvs) {
+    throw new Error('The API returned an invalid saved CV list.');
+  }
 
-  const skillGaps = gapsResult.status === 'fulfilled'
-    ? listFrom(window.SkillBridgeApi.unwrap(gapsResult.value), ['items', 'skillGaps'])
-    : [];
+  const skillGaps =
+    gapsResult.status === 'fulfilled'
+      ? listFrom(
+          window.SkillBridgeApi.unwrap(gapsResult.value),
+          ['items', 'skillGaps'],
+        )
+      : [];
 
-  if (!skillGaps) throw new Error('The API returned an invalid skill-gap list.');
+  if (!skillGaps) {
+    throw new Error('The API returned an invalid skill-gap list.');
+  }
 
   if (gapsResult.status === 'rejected') {
-    uploadError.textContent = `Your saved CV is available, but its analysis status could not be checked: ${gapsResult.reason.message}`;
+    uploadError.textContent =
+      `Your saved CV is available, but its analysis status could not be checked: ${gapsResult.reason.message}`;
+
     uploadError.classList.remove('hidden');
   }
 
-  const availableGaps = skillGaps;
-  const preferredId = localStorage.getItem('skillbridgeUploadedCvId');
+  const preferredId = localStorage.getItem(
+    'skillbridgeUploadedCvId',
+  );
 
   if (!cvs.length) {
     localStorage.removeItem('skillbridgeUploadedCvId');
@@ -121,25 +195,48 @@ async function loadSavedCv() {
     return;
   }
 
-  const cv = cvs.find((item) => item.id === preferredId)
-    || [...cvs].sort((a, b) => Date.parse(b.createdAt || 0) - Date.parse(a.createdAt || 0))[0];
+  const cv =
+    cvs.find((item) => item.id === preferredId) ||
+    [...cvs].sort(
+      (a, b) =>
+        Date.parse(b.createdAt || 0) -
+        Date.parse(a.createdAt || 0),
+    )[0];
 
   if (!cv || currentUpload) return;
 
-  showSavedCv(cv, availableGaps);
+  showSavedCv(cv, skillGaps);
 }
+
+// =====================================================
+// 5. CONTINUE BUTTON STATE
+// =====================================================
 
 function setContinueState(ready) {
-  continueButton.setAttribute('aria-disabled', String(!ready));
-  continueButton.classList.toggle('pointer-events-none', !ready);
-  continueButton.classList.toggle('opacity-50', !ready);
+  continueButton.setAttribute(
+    'aria-disabled',
+    String(!ready),
+  );
 
-  if (ready) {
-    if (!existingSkillGap) uploadStatus.textContent = 'CV uploaded and ready for analysis';
-  } else {
-    uploadStatus.innerHTML = '<span class="h-3 w-3 rounded-full bg-[#81798B]"></span><span>Upload a CV or academic dossier to continue</span>';
+  continueButton.classList.toggle(
+    'pointer-events-none',
+    !ready,
+  );
+
+  continueButton.classList.toggle(
+    'opacity-50',
+    !ready,
+  );
+
+  if (!ready) {
+    uploadStatus.innerHTML =
+      '<span class="h-3 w-3 rounded-full bg-[#81798B]"></span><span>Upload a CV or academic dossier to continue</span>';
   }
 }
+
+// =====================================================
+// 6. SELECT AND VALIDATE CV FILE
+// =====================================================
 
 function showFile(file) {
   uploadError.textContent = '';
@@ -149,6 +246,7 @@ function showFile(file) {
 
   if (!window.SkillBridgeApi.session()) {
     const signInLink = document.createElement('a');
+
     signInLink.href = 'signin.html';
     signInLink.className = 'font-bold underline';
     signInLink.textContent = 'Sign in';
@@ -156,26 +254,39 @@ function showFile(file) {
     uploadError.replaceChildren(
       document.createTextNode('You need to '),
       signInLink,
-      document.createTextNode(' before uploading a CV. Select your file after signing in.'),
+      document.createTextNode(
+        ' before uploading a CV. Select your file after signing in.',
+      ),
     );
 
     uploadError.classList.remove('hidden');
     setContinueState(false);
-    uploadStatus.textContent = 'Sign in required before CV upload.';
+
+    uploadStatus.textContent =
+      'Sign in required before CV upload.';
+
     return;
   }
 
-  const extension = file.name.split('.').pop().toLowerCase();
+  const extension = file.name
+    .split('.')
+    .pop()
+    .toLowerCase();
 
   if (!['pdf', 'docx'].includes(extension)) {
     fileInput.value = '';
     currentUpload = null;
     uploadedCvId = null;
+
     localStorage.removeItem('skillbridgeUploadedCvId');
     localStorage.removeItem('skillbridgeUploadedCvName');
+
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
-    uploadError.textContent = 'Please choose a PDF or DOCX file.';
+
+    uploadError.textContent =
+      'Please choose a PDF or DOCX file.';
+
     uploadError.classList.remove('hidden');
     return;
   }
@@ -184,11 +295,16 @@ function showFile(file) {
     fileInput.value = '';
     currentUpload = null;
     uploadedCvId = null;
+
     localStorage.removeItem('skillbridgeUploadedCvId');
     localStorage.removeItem('skillbridgeUploadedCvName');
+
     uploadedPanel.classList.add('hidden');
     setContinueState(false);
-    uploadError.textContent = 'This file exceeds the 10 MB upload limit. Compress it and try again.';
+
+    uploadError.textContent =
+      'This file exceeds the 10 MB upload limit. Compress it and try again.';
+
     uploadError.classList.remove('hidden');
     return;
   }
@@ -198,12 +314,14 @@ function showFile(file) {
 
   const sizeLabel = fileName.parentElement.querySelector('span');
 
-  if (sizeLabel) sizeLabel.textContent = formatFileSize(file.size);
+  if (sizeLabel) {
+    sizeLabel.textContent = formatFileSize(file.size);
+  }
 
   setAnalysisProgress(0, 'Preparing upload');
 
   if (currentUpload === file && uploadedCvId) {
-    setContinueState(false);
+    setContinueState(true);
     return;
   }
 
@@ -212,38 +330,66 @@ function showFile(file) {
   existingSkillGap = null;
 
   localStorage.removeItem('skillbridgeUploadedCvId');
+  localStorage.removeItem('skillbridgeUploadedCvName');
 
   setContinueState(false);
-  uploadStatus.textContent = 'Uploading CV to your account…';
+
+  uploadStatus.textContent =
+    'Uploading CV to your account…';
+
   setAnalysisProgress(0, 'Uploading CV');
 
-  uploadPromise = window.SkillBridgeApi.post('/api/v1/cvs/upload', (() => {
-    const formData = new FormData();
-    formData.append('cv', file, file.name);
-    return formData;
-  })(), {
-    onUploadProgress: ({ percent }) => {
-      setAnalysisProgress(percent, `Uploading CV • ${percent}%`);
+  const formData = new FormData();
+
+  formData.append('cv', file, file.name);
+
+  uploadPromise = window.SkillBridgeApi.post(
+    '/api/v1/cvs/upload',
+    formData,
+    {
+      onUploadProgress: ({ percent }) => {
+        setAnalysisProgress(
+          percent,
+          `Uploading CV • ${percent}%`,
+        );
+      },
     },
-  })
+  )
     .then((response) => {
       const payload = window.SkillBridgeApi.unwrap(response);
 
       if (response?.success === false) {
-        throw new Error(response.message || 'The API rejected the CV upload.');
+        throw new Error(
+          response.message || 'The API rejected the CV upload.',
+        );
       }
 
       const cv = payload?.cv || payload;
 
-      if (!cv?.id) throw new Error('The API response did not include the uploaded CV ID.');
+      if (!cv?.id) {
+        throw new Error(
+          'The API response did not include the uploaded CV ID.',
+        );
+      }
 
       uploadedCvId = cv.id;
 
-      localStorage.setItem('skillbridgeUploadedCvId', cv.id);
-      localStorage.setItem('skillbridgeUploadedCvName', cv.fileName || file.name);
+      localStorage.setItem(
+        'skillbridgeUploadedCvId',
+        cv.id,
+      );
+
+      localStorage.setItem(
+        'skillbridgeUploadedCvName',
+        cv.fileName || file.name,
+      );
 
       setAnalysisProgress(100, 'Upload complete');
+
       setContinueState(true);
+
+      uploadStatus.textContent =
+        'CV uploaded and ready for analysis.';
     })
     .catch((error) => {
       const guidance = {
@@ -253,16 +399,25 @@ function showFile(file) {
         415: ' The server rejected this file type. Choose a PDF or DOCX.',
       }[error.status] || '';
 
-      uploadError.textContent = `CV upload failed: ${error.message}${guidance}`;
+      uploadError.textContent =
+        `CV upload failed: ${error.message}${guidance}`;
+
       uploadError.classList.remove('hidden');
+
       setAnalysisProgress(0, 'Upload failed');
       setContinueState(false);
-      uploadStatus.textContent = 'CV upload failed. Try again after resolving the error.';
+
+      uploadStatus.textContent =
+        'CV upload failed. Try again after resolving the error.';
     })
     .finally(() => {
       uploadPromise = null;
     });
 }
+
+// =====================================================
+// 7. FILE INPUT EVENTS
+// =====================================================
 
 browseButton.addEventListener('click', (event) => {
   event.stopPropagation();
@@ -270,169 +425,305 @@ browseButton.addEventListener('click', (event) => {
 });
 
 uploadZone.addEventListener('click', (event) => {
-  if (event.target !== browseButton) fileInput.click();
+  if (event.target !== browseButton) {
+    fileInput.click();
+  }
 });
 
-fileInput.addEventListener('change', () => showFile(fileInput.files[0]));
+fileInput.addEventListener('change', () => {
+  showFile(fileInput.files[0]);
+});
 
 uploadZone.addEventListener('dragover', (event) => {
   event.preventDefault();
-  uploadZone.classList.add('border-[#C550E8]', 'bg-[#FFFDFF]');
+
+  uploadZone.classList.add(
+    'border-[#C550E8]',
+    'bg-[#FFFDFF]',
+  );
 });
 
 uploadZone.addEventListener('dragleave', (event) => {
   if (!uploadZone.contains(event.relatedTarget)) {
-    uploadZone.classList.remove('border-[#C550E8]', 'bg-[#FFFDFF]');
+    uploadZone.classList.remove(
+      'border-[#C550E8]',
+      'bg-[#FFFDFF]',
+    );
   }
 });
 
 uploadZone.addEventListener('drop', (event) => {
   event.preventDefault();
-  uploadZone.classList.remove('border-[#C550E8]', 'bg-[#FFFDFF]');
+
+  uploadZone.classList.remove(
+    'border-[#C550E8]',
+    'bg-[#FFFDFF]',
+  );
 
   const [file] = event.dataTransfer.files;
 
   if (!file) return;
 
   const transfer = new DataTransfer();
+
   transfer.items.add(file);
   fileInput.files = transfer.files;
 
   showFile(file);
 });
 
-document.getElementById('remove-file').addEventListener('click', async () => {
-  const removeButton = document.getElementById('remove-file');
-  removeButton.disabled = true;
+// =====================================================
+// 8. REMOVE UPLOADED CV
+// =====================================================
 
-  try {
-    if (uploadedCvId && window.SkillBridgeApi.session()) {
-      await window.SkillBridgeApi.delete(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}`);
+document
+  .getElementById('remove-file')
+  .addEventListener('click', async () => {
+    const removeButton =
+      document.getElementById('remove-file');
+
+    removeButton.disabled = true;
+
+    try {
+      if (
+        uploadedCvId &&
+        window.SkillBridgeApi.session()
+      ) {
+        await window.SkillBridgeApi.delete(
+          `/api/v1/cvs/${encodeURIComponent(uploadedCvId)}`,
+        );
+      }
+    } catch (error) {
+      uploadError.textContent =
+        `The uploaded CV could not be removed from your account: ${error.message}`;
+
+      uploadError.classList.remove('hidden');
+      removeButton.disabled = false;
+      return;
     }
-  } catch (error) {
-    uploadError.textContent = `The uploaded CV could not be removed from your account: ${error.message}`;
-    uploadError.classList.remove('hidden');
+
+    fileInput.value = '';
+    currentUpload = null;
+    uploadedCvId = null;
+    existingSkillGap = null;
+
+    localStorage.removeItem('skillbridgeUploadedCvId');
+    localStorage.removeItem('skillbridgeUploadedCvName');
+    localStorage.removeItem('skillbridgeSkillGapId');
+
+    uploadedPanel.classList.add('hidden');
+
+    setContinueState(false);
+    setAnalysisProgress(0, 'No file selected');
+
     removeButton.disabled = false;
-    return;
-  }
+  });
 
-  fileInput.value = '';
-  currentUpload = null;
-  uploadedCvId = null;
-  existingSkillGap = null;
+// =====================================================
+// 9. RETRY UPLOAD
+// =====================================================
 
-  localStorage.removeItem('skillbridgeUploadedCvId');
-  localStorage.removeItem('skillbridgeUploadedCvName');
+document
+  .getElementById('retry-parse')
+  .addEventListener('click', () => {
+    if (!fileInput.files.length) {
+      uploadError.textContent =
+        'Choose a PDF or DOCX file before retrying the upload.';
 
-  uploadedPanel.classList.add('hidden');
-  setContinueState(false);
-  setAnalysisProgress(0, 'No file selected');
+      uploadError.classList.remove('hidden');
+      return;
+    }
 
-  removeButton.disabled = false;
-});
+    currentUpload = null;
+    showFile(fileInput.files[0]);
+  });
 
-document.getElementById('retry-parse').addEventListener('click', () => {
-  if (!fileInput.files.length) {
-    uploadError.textContent = 'Choose a PDF or DOCX file before retrying the upload.';
-    uploadError.classList.remove('hidden');
-    return;
-  }
+// =====================================================
+// 10. COMPRESSION DIALOG
+// =====================================================
 
-  currentUpload = null;
-  showFile(fileInput.files[0]);
-});
+document
+  .querySelector('a[href="#compress"]')
+  ?.addEventListener('click', (event) => {
+    event.preventDefault();
+    compressorDialog.showModal();
+  });
 
-document.querySelector('a[href="#compress"]')?.addEventListener('click', (event) => {
-  event.preventDefault();
-  compressorDialog.showModal();
-});
-
-document.getElementById('close-compress-dialog').addEventListener('click', () => compressorDialog.close());
+document
+  .getElementById('close-compress-dialog')
+  .addEventListener('click', () => {
+    compressorDialog.close();
+  });
 
 compressorDialog.addEventListener('click', (event) => {
-  if (event.target === compressorDialog) compressorDialog.close();
+  if (event.target === compressorDialog) {
+    compressorDialog.close();
+  }
 });
 
-document.getElementById('choose-compressed-file').addEventListener('click', () => {
-  fileInput.accept = '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-  fileInput.click();
-  compressorDialog.close();
-});
+document
+  .getElementById('choose-compressed-file')
+  .addEventListener('click', () => {
+    fileInput.accept =
+      '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    fileInput.click();
+    compressorDialog.close();
+  });
+
+// =====================================================
+// 11. CONVERT SURVEY CAREER STAGE
+// =====================================================
+
+function getCareerStage(value) {
+  const careerStageMap = {
+    'final-year': 'Student',
+    graduate: 'Entry',
+    entry: 'Entry',
+    mid: 'Mid',
+    senior: 'Senior',
+    'career-pivot': 'Pivot',
+  };
+
+  return careerStageMap[value] || null;
+}
+
+// =====================================================
+// 12. CONTINUE TO CV ANALYSIS
+// =====================================================
 
 continueButton.addEventListener('click', async (event) => {
   event.preventDefault();
 
+  uploadError.textContent = '';
+  uploadError.classList.add('hidden');
+
   if (!fileInput.files.length && !uploadedCvId) {
-    uploadError.textContent = 'Choose a CV file before continuing.';
+    uploadError.textContent =
+      'Choose a CV file before continuing.';
+
     uploadError.classList.remove('hidden');
     setContinueState(false);
     return;
   }
 
+  // Wait for an ongoing upload to finish.
   if (!uploadedCvId) {
-    if (uploadPromise) await uploadPromise;
+    if (uploadPromise) {
+      await uploadPromise;
+    }
 
     if (!uploadedCvId) {
-      uploadError.textContent = 'Upload your CV successfully before continuing.';
+      uploadError.textContent =
+        'Upload your CV successfully before continuing.';
+
       uploadError.classList.remove('hidden');
       setContinueState(false);
       return;
     }
   }
 
+  // Do not generate another analysis if this CV
+  // already has a completed SkillGap.
   if (existingSkillGap) {
-    window.SkillBridgeApi.setLoading(continueButton, 'Opening career paths…');
+    window.SkillBridgeApi.setLoading(
+      continueButton,
+      'Opening career paths…',
+    );
+
     window.location.href = 'career-paths.html';
     return;
   }
 
-  const survey = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {};
-    } catch {
-      return {};
-    }
-  })();
+  // Read the information saved from survey.html.
+  const survey = getSurveyData();
 
-  const targetJobTitle = {
-    'fintech-data': 'Junior Fintech Data Analyst',
-    backend: 'Associate Backend Engineer',
-    'growth-product': 'Growth Product Associate',
-  }[survey.track];
+  const targetJobTitle =
+    survey.targetJobTitle?.trim();
 
-  if (!targetJobTitle) {
-    uploadError.textContent = 'Complete the profile survey and select a career focus before analyzing your CV.';
+  const industryFocus =
+    survey.industryFocus?.trim();
+
+  const primaryGoal =
+    survey.primaryGoal;
+
+  const careerStage =
+    getCareerStage(survey.availability);
+
+  // Validate the survey information before calling
+  // the backend analysis endpoint.
+  if (
+    !targetJobTitle ||
+    !industryFocus ||
+    !primaryGoal ||
+    !careerStage
+  ) {
+    uploadError.textContent =
+      'Complete your target job title, industry focus, primary goal, and career stage in the profile survey before analyzing your CV.';
+
     uploadError.classList.remove('hidden');
     return;
   }
 
-  const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
-
   continueButton.setAttribute('aria-disabled', 'true');
 
-  const stopLoading = window.SkillBridgeApi.setLoading(continueButton, 'Analyzing your CV…');
+  const stopLoading = window.SkillBridgeApi.setLoading(
+    continueButton,
+    'Analyzing your CV…',
+  );
 
   uploadStatus.textContent = 'Analyzing your CV…';
-  setAnalysisProgress(36, 'Analyzing CV…', true);
+
+  setAnalysisProgress(
+    36,
+    'Analyzing CV…',
+    true,
+  );
 
   try {
-    const response = await window.SkillBridgeApi.post(`/api/v1/cvs/${encodeURIComponent(uploadedCvId)}/analyze`, {
-      targetJobTitle,
-      industryFocus: survey.track === 'fintech-data' ? 'Financial Technology' : 'Technology',
-      careerStage,
-      primaryGoal: 'Gap Analysis',
-    });
+    // Send the user's actual survey choices to the backend.
+    const response = await window.SkillBridgeApi.post(
+      `/api/v1/cvs/${encodeURIComponent(uploadedCvId)}/analyze`,
+      {
+        targetJobTitle,
+        industryFocus,
+        careerStage,
+        primaryGoal,
+      },
+    );
 
-    const analysis = window.SkillBridgeApi.unwrap(response);
+    const analysis =
+      window.SkillBridgeApi.unwrap(response);
 
-    if (!analysis?.skillGapId) {
-      throw new Error('The API response did not include a skill-gap analysis ID.');
+    if (response?.success === false) {
+      throw new Error(
+        response.message || 'CV analysis failed.',
+      );
     }
 
-    localStorage.setItem('skillbridgeSkillGapId', analysis.skillGapId);
-    localStorage.setItem('skillbridgeUploadedCvId', uploadedCvId);
-    localStorage.setItem('skillbridgeSelectedCareer', targetJobTitle);
+    if (!analysis?.skillGapId) {
+      throw new Error(
+        'The API response did not include a skill-gap analysis ID.',
+      );
+    }
 
+    // Save the analysis information.
+    localStorage.setItem(
+      'skillbridgeSkillGapId',
+      analysis.skillGapId,
+    );
+
+    localStorage.setItem(
+      'skillbridgeUploadedCvId',
+      uploadedCvId,
+    );
+
+    localStorage.setItem(
+      'skillbridgeSelectedCareer',
+      targetJobTitle,
+    );
+
+    // Make the analysis available to other frontend pages.
     window.SkillBridgeApi.setAnalysisContext({
       skillGapId: analysis.skillGapId,
       careerGoal: targetJobTitle,
@@ -444,15 +735,22 @@ continueButton.addEventListener('click', async (event) => {
     };
 
     setAnalysisProgress(100, 'Analysis complete');
-    uploadStatus.textContent = 'Updating your account recommendations…';
 
-    const artifactResults = await window.SkillBridgeApi.refreshAnalysisArtifacts({
-      skillGapId: analysis.skillGapId,
-      careerGoal: targetJobTitle,
-      includeRoadmap: true,
-    });
+    uploadStatus.textContent =
+      'Updating your account recommendations…';
 
-    const generatedMatches = artifactResults.find((result) => result.name === 'matches')?.ok;
+    // Refresh recommendations and roadmap.
+    const artifactResults =
+      await window.SkillBridgeApi.refreshAnalysisArtifacts({
+        skillGapId: analysis.skillGapId,
+        careerGoal: targetJobTitle,
+        includeRoadmap: true,
+      });
+
+    const generatedMatches =
+      artifactResults?.find(
+        (result) => result.name === 'matches',
+      )?.ok;
 
     uploadStatus.textContent = generatedMatches
       ? 'CV analysis completed and your account recommendations were refreshed.'
@@ -461,16 +759,28 @@ continueButton.addEventListener('click', async (event) => {
     window.location.href = 'career-paths.html';
   } catch (error) {
     uploadError.textContent = error.message;
+
     uploadError.classList.remove('hidden');
-    uploadStatus.textContent = 'CV analysis could not be completed.';
+
     setAnalysisProgress(100, 'Upload complete');
+
     setContinueState(true);
+
+    uploadStatus.textContent =
+      'CV analysis could not be completed. Your uploaded CV is still available.';
+
   } finally {
     stopLoading();
   }
 });
 
+// =====================================================
+// 13. INITIALIZE SAVED CV INFORMATION
+// =====================================================
+
 loadSavedCv().catch((error) => {
-  uploadError.textContent = `Saved CV information could not be loaded: ${error.message}`;
+  uploadError.textContent =
+    `Saved CV information could not be loaded: ${error.message}`;
+
   uploadError.classList.remove('hidden');
 });

@@ -449,6 +449,56 @@ const loadApiRoadmap = async () => {
     roadmapApiPanel.append(summary);
 
     // -------------------------------------------------
+// Calculate and display overall roadmap progress
+// -------------------------------------------------
+
+const progressContainer = document.createElement("div");
+progressContainer.className = "mt-5";
+
+const progressHeader = document.createElement("div");
+progressHeader.className =
+  "mb-2 flex items-center justify-between text-sm";
+
+const progressLabel = document.createElement("span");
+progressLabel.className = "font-semibold";
+progressLabel.textContent = "Overall roadmap progress";
+
+const progressValue = document.createElement("span");
+progressValue.className = "font-bold text-[#731F94]";
+
+const progressTrack = document.createElement("div");
+progressTrack.className =
+  "h-2 overflow-hidden rounded-full bg-[#EDE7F3]";
+
+const progressBar = document.createElement("div");
+progressBar.className =
+  "h-full rounded-full bg-[#731F94] transition-all duration-300";
+
+progressTrack.append(progressBar);
+progressHeader.append(progressLabel, progressValue);
+progressContainer.append(progressHeader, progressTrack);
+
+roadmapApiPanel.append(progressContainer);
+
+const updateRoadmapProgress = () => {
+  const completedTasks = tasks.filter(
+    (task) => task.status === "done"
+  ).length;
+
+  const percentage = tasks.length
+    ? Math.round((completedTasks / tasks.length) * 100)
+    : 0;
+
+  progressValue.textContent =
+    `${percentage}% (${completedTasks}/${tasks.length} tasks)`;
+
+  progressBar.style.width = `${percentage}%`;
+};
+
+// Display the initial progress.
+updateRoadmapProgress();
+
+    // -------------------------------------------------
     // 8.8 Handle missing roadmap tasks
     // -------------------------------------------------
 
@@ -564,10 +614,13 @@ const loadApiRoadmap = async () => {
               }
             );
 
-            task.status = nextStatus;
+          task.status = nextStatus;
 
-            status.textContent =
-              `Status: ${nextStatus}`;
+          status.textContent =
+            `Status: ${nextStatus}`;
+
+          // Recalculate overall roadmap progress.
+          updateRoadmapProgress();
 
             updateButton.textContent =
               nextStatus === "done"
