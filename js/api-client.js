@@ -444,6 +444,52 @@
     }
   };
 
+  // Add a Sign out button to pages for signed-in users.
+  const addSignOutButton = () => {
+    if (!readSession()) return;
+
+    // Public pages do not get the button.
+    const page = window.location.pathname.split('/').pop().replace(/\.html$/, '');
+    if (['', 'index', 'signin', 'signup'].includes(page)) return;
+
+    const sidebar = document.querySelector('aside[id$="sidebar"]');
+    const header = document.querySelector('header');
+    const nav = sidebar?.querySelector('nav');
+
+    if (!nav && !header) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.signOut = '';
+    button.textContent = 'Sign out';
+    button.className = sidebar
+      ? 'w-full rounded-lg px-3 py-2.5 text-left font-semibold text-red-700 hover:bg-[#FFF0EF]'
+      : 'rounded-lg px-3 py-2 text-xs font-semibold text-red-700 hover:bg-[#FFF0EF]';
+
+    button.addEventListener('click', () => {
+      if (!window.confirm('Sign out of this browser?')) return;
+      clearSession();
+      window.location.href = 'signin.html';
+    });
+
+    if (nav) {
+      nav.append(button);
+      return;
+    }
+
+    // Header-only pages have no spare width on mobile, so use a new row.
+    const row = document.createElement('div');
+    row.className = 'mx-auto flex max-w-[1280px] justify-end px-5 pt-2';
+    row.append(button);
+    header.after(row);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addSignOutButton);
+  } else {
+    addSignOutButton();
+  }
+
   window.SkillBridgeApi = {
     baseUrl,
     request,
