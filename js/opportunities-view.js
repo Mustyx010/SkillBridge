@@ -35,11 +35,7 @@ const getField = (object, ...keys) => {
 const extractList = (value, depth = 0) => {
   if (Array.isArray(value)) return value;
 
-  if (
-    !value ||
-    typeof value !== 'object' ||
-    depth > 6
-  ) {
+  if (!value || typeof value !== 'object' || depth > 6) {
     return [];
   }
 
@@ -48,6 +44,7 @@ const extractList = (value, depth = 0) => {
     'results',
     'opportunities',
     'matches',
+    'matched_jobs',
     'data',
     'records',
   ];
@@ -115,6 +112,7 @@ const getWorkMode = (opportunity) => {
 
   if (value.includes('remote')) return 'remote';
   if (value.includes('hybrid')) return 'hybrid';
+
   if (
     value.includes('onsite') ||
     value.includes('on-site') ||
@@ -232,10 +230,7 @@ const toggleSidebar = (open) => {
   sidebar.classList.toggle('-translate-x-full', !open);
   backdrop.classList.toggle('hidden', !open);
 
-  menuButton.setAttribute(
-    'aria-expanded',
-    String(open)
-  );
+  menuButton.setAttribute('aria-expanded', String(open));
 
   menuButton.setAttribute(
     'aria-label',
@@ -352,10 +347,7 @@ const updateSaveState = () => {
   );
 
   if (detailSave) {
-    detailSave.setAttribute(
-      'aria-pressed',
-      String(saved)
-    );
+    detailSave.setAttribute('aria-pressed', String(saved));
 
     detailSave.setAttribute(
       'aria-label',
@@ -368,29 +360,17 @@ const updateSaveState = () => {
   }
 
   if (footerSave) {
-    footerSave.setAttribute(
-      'aria-pressed',
-      String(saved)
-    );
+    footerSave.setAttribute('aria-pressed', String(saved));
 
     footerSave.innerHTML = saved
       ? '<i class="ph ph-bookmark-simple-fill"></i>Saved for Later'
       : '<i class="ph ph-bookmark-simple"></i>Save for Later';
 
-    footerSave.classList.toggle(
-      'bg-[#731F94]',
-      saved
-    );
-
-    footerSave.classList.toggle(
-      'text-white',
-      saved
-    );
+    footerSave.classList.toggle('bg-[#731F94]', saved);
+    footerSave.classList.toggle('text-white', saved);
   }
 
-  const savedCount = document.getElementById(
-    'saved-count'
-  );
+  const savedCount = document.getElementById('saved-count');
 
   if (savedCount) {
     savedCount.textContent = String(savedRoles.size);
@@ -443,20 +423,10 @@ const selectCard = (card) => {
   cards.forEach((item) => {
     const selected = item === card;
 
-    item.setAttribute(
-      'aria-selected',
-      String(selected)
-    );
+    item.setAttribute('aria-selected', String(selected));
 
-    item.classList.toggle(
-      'border-l-4',
-      selected
-    );
-
-    item.classList.toggle(
-      'border-[#731F94]',
-      selected
-    );
+    item.classList.toggle('border-l-4', selected);
+    item.classList.toggle('border-[#731F94]', selected);
 
     item.classList.toggle(
       'shadow-[0_3px_14px_rgba(24,20,69,0.08)]',
@@ -551,8 +521,7 @@ const selectCard = (card) => {
           'opacity-50'
         );
 
-        detail.apply.textContent =
-          'Apply on Employer Site';
+        detail.apply.textContent = 'Apply on Employer Site';
       } else {
         detail.apply.href = '#';
         detail.apply.removeAttribute('target');
@@ -574,8 +543,7 @@ const selectCard = (card) => {
         'opacity-50'
       );
 
-      detail.apply.textContent =
-        'Select a live opportunity';
+      detail.apply.textContent = 'Select a live opportunity';
     }
   }
 
@@ -733,25 +701,11 @@ document
         .forEach((item) => {
           const active = item === button;
 
-          item.setAttribute(
-            'aria-pressed',
-            String(active)
-          );
+          item.setAttribute('aria-pressed', String(active));
 
-          item.classList.toggle(
-            'bg-[#BF39E8]',
-            active
-          );
-
-          item.classList.toggle(
-            'text-white',
-            active
-          );
-
-          item.classList.toggle(
-            'bg-[#F5F0FD]',
-            !active
-          );
+          item.classList.toggle('bg-[#BF39E8]', active);
+          item.classList.toggle('text-white', active);
+          item.classList.toggle('bg-[#F5F0FD]', !active);
         });
 
       locationFilter?.dispatchEvent(
@@ -896,8 +850,7 @@ if (detail.location) {
 }
 
 if (detail.salary) {
-  detail.salary.textContent =
-    'Compensation not listed';
+  detail.salary.textContent = 'Compensation not listed';
 }
 
 if (detail.fit) {
@@ -917,8 +870,7 @@ if (detail.apply) {
     'opacity-50'
   );
 
-  detail.apply.textContent =
-    'Select a live opportunity';
+  detail.apply.textContent = 'Select a live opportunity';
 }
 
 let matchScores = new Map();
@@ -942,7 +894,12 @@ const renderApiOpportunities = (opportunities) => {
     }
 
     const opportunityId = String(
-      getField(opportunity, 'id', 'opportunityId', 'opportunity_id') || ''
+      getField(
+        opportunity,
+        'id',
+        'opportunityId',
+        'opportunity_id'
+      ) || ''
     );
 
     const match = matchScores.get(opportunityId);
@@ -1016,6 +973,7 @@ const renderApiOpportunities = (opportunities) => {
         'compensation'
       ) || 'Compensation not listed';
 
+    // Check the opportunity first, then its matching record.
     const applicationUrl =
       getField(
         opportunity,
@@ -1024,8 +982,22 @@ const renderApiOpportunities = (opportunities) => {
         'applyUrl',
         'apply_url',
         'applicationLink',
-        'application_link'
-      ) || '';
+        'application_link',
+        'applyLink',
+        'apply_link'
+      ) ||
+      getField(
+        match,
+        'applicationUrl',
+        'application_url',
+        'applyUrl',
+        'apply_url',
+        'applicationLink',
+        'application_link',
+        'applyLink',
+        'apply_link'
+      ) ||
+      '';
 
     const requiredSkills =
       getField(
@@ -1037,6 +1009,7 @@ const renderApiOpportunities = (opportunities) => {
 
     const matchScore = getMatchScore(match);
 
+    // Read the explanation from either response.
     const matchExplanation =
       getField(
         match,
@@ -1044,6 +1017,16 @@ const renderApiOpportunities = (opportunities) => {
         'reason',
         'matchExplanation',
         'match_explanation',
+        'why_good_fit',
+        'description'
+      ) ||
+      getField(
+        opportunity,
+        'explanation',
+        'reason',
+        'matchExplanation',
+        'match_explanation',
+        'why_good_fit',
         'description'
       );
 
@@ -1056,6 +1039,7 @@ const renderApiOpportunities = (opportunities) => {
     card.dataset.company = company;
     card.dataset.location = workMode;
     card.dataset.eligibility = 'all';
+
     card.dataset.fit =
       matchScore === null ? '—' : String(matchScore);
 
