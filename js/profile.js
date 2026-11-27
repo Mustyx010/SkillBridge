@@ -43,14 +43,6 @@
   const fmt = (value) => `₦${Number(value).toLocaleString('en-NG')}`;
   const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
   const setField = (id, value) => { const el = document.getElementById(id); if (el) el.value = value || ''; };
-  const setCareerGoalField = (value) => {
-    const select = $('#criteria-role');
-    if (!select) return;
-    if (![...select.options].some((option) => option.value === value || option.textContent === value)) {
-      select.add(new Option(value, value));
-    }
-    select.value = value;
-  };
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('');
   setText('profile-name', name); setText('profile-name-mobile', name); setText('profile-initials', initials);
   const firstName = name.trim().split(/\s+/)[0] || 'Candidate';
@@ -224,19 +216,20 @@
   });
 
   $('#edit-criteria-button')?.addEventListener('click', () => {
-    setCareerGoalField(role); setField('criteria-availability', availability);
+    setField('criteria-role', role === 'Not selected yet' ? '' : role); setField('criteria-availability', availability);
     setField('criteria-min-salary', low); setField('criteria-max-salary', high); open('edit-criteria-dialog');
   });
   document.querySelectorAll('[data-close-criteria]').forEach((button) => button.addEventListener('click', () => close('edit-criteria-dialog')));
   $('#edit-criteria-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const careerGoal = $('#criteria-role').value.trim();
+    if (!careerGoal) return announce('Check your target role', 'Enter your primary target role.');
     const min = Number($('#criteria-min-salary').value); const max = Number($('#criteria-max-salary').value);
     if (!min || !max || max <= min) return announce('Check your salary range', 'Maximum salary must be greater than minimum salary.');
     const form = $('#edit-criteria-form');
     const submitButton = form.querySelector('[type="submit"]');
     const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Saving preferences…');
     try {
-      const careerGoal = $('#criteria-role').value;
       await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal });
       role = careerGoal;
       localStorage.setItem('skillbridgeSelectedCareer', careerGoal);
