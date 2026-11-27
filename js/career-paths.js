@@ -144,6 +144,45 @@ const skillFields = new Set([
 
 const normalizeSkill = (skill) => String(skill || '').trim().toLowerCase();
 
+// Career stages and industry used for the CV analysis come from the user's own
+// answers (account profile first, browser survey second). Nothing is guessed.
+const ALLOWED_CAREER_STAGES = ['Student', 'Entry', 'Mid', 'Senior', 'Pivot'];
+const SURVEY_STAGE_MAP = {
+  'final-year': 'Student',
+  graduate: 'Entry',
+  entry: 'Entry',
+  mid: 'Mid',
+  senior: 'Senior',
+  'career-pivot': 'Pivot',
+};
+
+const readLocalSurvey = () => {
+  try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
+  catch { return {}; }
+};
+
+const cleanText = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const resolveAnalysisProfile = async () => {
+  const local = readLocalSurvey();
+  let remote = {};
+  try {
+    const account = window.SkillBridgeApi.unwrap(await window.SkillBridgeApi.get('/api/v1/profiles/me'));
+    remote = account?.profile || {};
+  } catch {
+    // The browser copy of the survey is used when the account cannot be read.
+  }
+
+  const localStage = Object.prototype.hasOwnProperty.call(SURVEY_STAGE_MAP, local.availability)
+    ? SURVEY_STAGE_MAP[local.availability]
+    : '';
+
+  return {
+    industryFocus: cleanText(remote.industryFocus) || cleanText(local.industryFocus),
+    careerStage: ALLOWED_CAREER_STAGES.includes(remote.careerStage) ? remote.careerStage : localStage,
+  };
+};
+
 const addCareerCard = (candidate, index) => {
   const card = document.createElement('article');
   card.className = 'career-card rounded-xl bg-white p-6 shadow-[0_1px_3px_rgba(24,20,69,0.08)] sm:p-8';
@@ -255,19 +294,19 @@ careerList.addEventListener('click', async (event) => {
   const stopLoading = window.SkillBridgeApi.setLoading(button, 'Saving career goal…');
   setStatus(`Generating a skill-gap analysis for ${candidate.title}…`);
   try {
-    const survey = (() => {
-      try { return JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {}; }
-      catch { return {}; }
-    })();
-    const careerStage = survey.availability === 'final-year' ? 'Student' : 'Entry';
     const cvId = localStorage.getItem('skillbridgeUploadedCvId');
     if (!cvId) throw new Error('Your uploaded CV could not be identified. Return to CV upload and try again.');
+
+    const { industryFocus, careerStage } = await resolveAnalysisProfile();
+    if (!industryFocus || !careerStage) {
+      throw new Error('Your industry focus and career stage are needed to build an accurate roadmap. Complete those questions in the survey (survey.html), then try again.');
+    }
 
     const analysis = window.SkillBridgeApi.unwrap(await window.SkillBridgeApi.post(
       `/api/v1/cvs/${encodeURIComponent(cvId)}/analyze`,
       {
         targetJobTitle: candidate.title,
-        industryFocus: survey.track === 'fintech-data' ? 'Financial Technology' : 'Technology',
+        industryFocus,
         careerStage,
         primaryGoal: 'Gap Analysis',
       },
