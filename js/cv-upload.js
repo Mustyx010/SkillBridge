@@ -331,6 +331,7 @@ function showFile(file) {
 
   localStorage.removeItem('skillbridgeUploadedCvId');
   localStorage.removeItem('skillbridgeUploadedCvName');
+  localStorage.removeItem('skillbridgeSkillGapId');
 
   setContinueState(false);
 
@@ -358,13 +359,14 @@ function showFile(file) {
     .then((response) => {
       const payload = window.SkillBridgeApi.unwrap(response);
 
-      if (response?.success === false) {
+      if (payload?.success === false) {
         throw new Error(
-          response.message || 'The API rejected the CV upload.',
+          payload.message || 'The API rejected the CV upload.',
         );
       }
 
-      const cv = payload?.cv || payload;
+      const uploadData = payload?.data ?? payload;
+      const cv = uploadData?.cv || uploadData;
 
       if (!cv?.id) {
         throw new Error(
@@ -692,14 +694,17 @@ continueButton.addEventListener('click', async (event) => {
       },
     );
 
-    const analysis =
-      window.SkillBridgeApi.unwrap(response);
+    // Unwrap the API response.
+    // The backend returns the analysis information inside data.
+    const responseBody = window.SkillBridgeApi.unwrap(response);
 
-    if (response?.success === false) {
+    if (responseBody?.success === false) {
       throw new Error(
-        response.message || 'CV analysis failed.',
+        responseBody.message || 'CV analysis failed.',
       );
     }
+
+    const analysis = responseBody?.data ?? responseBody;
 
     if (!analysis?.skillGapId) {
       throw new Error(
@@ -707,7 +712,7 @@ continueButton.addEventListener('click', async (event) => {
       );
     }
 
-    // Save the analysis information.
+    // Save the successful analysis information.
     localStorage.setItem(
       'skillbridgeSkillGapId',
       analysis.skillGapId,
@@ -737,25 +742,39 @@ continueButton.addEventListener('click', async (event) => {
     setAnalysisProgress(100, 'Analysis complete');
 
     uploadStatus.textContent =
-      'Updating your account recommendations…';
+      'CV analysis completed. Updating your recommendations…';
 
-    // Refresh recommendations and roadmap.
-    const artifactResults =
-      await window.SkillBridgeApi.refreshAnalysisArtifacts({
-        skillGapId: analysis.skillGapId,
-        careerGoal: targetJobTitle,
-        includeRoadmap: true,
-      });
+    // Refresh recommendations and roadmap separately.
+    // These failures must not invalidate a successful CV analysis.
+    try {
+      const artifactResults =
+        await window.SkillBridgeApi.refreshAnalysisArtifacts({
+          skillGapId: analysis.skillGapId,
+          careerGoal: targetJobTitle,
+          includeRoadmap: true,
+        });
 
-    const generatedMatches =
-      artifactResults?.find(
-        (result) => result.name === 'matches',
-      )?.ok;
+      const generatedMatches =
+        Array.isArray(artifactResults) &&
+        artifactResults.some(
+          (result) =>
+            result.name === 'matches' && result.ok,
+        );
 
-    uploadStatus.textContent = generatedMatches
-      ? 'CV analysis completed and your account recommendations were refreshed.'
-      : 'CV analysis completed. Career matches will be generated when you open career paths.';
+      uploadStatus.textContent = generatedMatches
+        ? 'CV analysis completed and your recommendations were refreshed.'
+        : 'CV analysis completed. Some recommendations could not be refreshed.';
+    } catch (artifactError) {
+      console.error(
+        'CV analysis succeeded, but refreshing recommendations failed:',
+        artifactError,
+      );
 
+      uploadStatus.textContent =
+        'CV analysis completed, but some recommendations could not be refreshed.';
+    }
+
+    // Continue because the CV analysis itself succeeded.
     window.location.href = 'career-paths.html';
   } catch (error) {
     uploadError.textContent = error.message;
@@ -768,7 +787,6 @@ continueButton.addEventListener('click', async (event) => {
 
     uploadStatus.textContent =
       'CV analysis could not be completed. Your uploaded CV is still available.';
-
   } finally {
     stopLoading();
   }
