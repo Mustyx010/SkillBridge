@@ -134,23 +134,36 @@ const workModeLabel = (workMode) => {
   return labels[workMode] || 'Work mode not specified';
 };
 
-const daysRemaining = (deadline) => {
-  if (!deadline) return 'Not specified';
+// Compares calendar dates only, using the user's local date for "today".
+const closingText = (deadline) => {
+  const noDate = 'No closing date listed';
+  const parts = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(deadline || ''));
 
-  const deadlineTime = new Date(deadline).getTime();
+  if (!parts) return noDate;
 
-  if (!Number.isFinite(deadlineTime)) {
-    return 'Not specified';
+  const [year, month, day] = parts.slice(1).map(Number);
+  const closing = new Date(Date.UTC(year, month - 1, day));
+
+  // Reject impossible dates such as 31 February.
+  if (
+    closing.getUTCMonth() !== month - 1 ||
+    closing.getUTCDate() !== day
+  ) {
+    return noDate;
   }
 
-  const days = Math.ceil(
-    (deadlineTime - Date.now()) / 86400000
+  const now = new Date();
+  const today = Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
   );
+  const days = Math.round((closing.getTime() - today) / 86400000);
 
-  if (days < 0) return 'Closed';
+  if (days < 0) return 'Applications closed';
   if (days === 0) return 'Closes today';
 
-  return `${days} days`;
+  return `Closes in ${days} ${days === 1 ? 'day' : 'days'}`;
 };
 
 const safeApplicationUrl = (url) => {
@@ -313,7 +326,6 @@ if (searchInput) searchInput.value = initialQuery;
 const detail = {
   company: document.getElementById('detail-company'),
   role: document.getElementById('detail-role'),
-  recruitment: document.getElementById('detail-recruitment'),
   closing: document.getElementById('detail-close'),
   sector: document.getElementById('detail-sector'),
   team: document.getElementById('detail-team'),
@@ -321,25 +333,43 @@ const detail = {
   salary: document.getElementById('detail-salary'),
   fit: document.getElementById('detail-fit'),
   rationale: document.getElementById('detail-rationale'),
+  source: document.getElementById('detail-source'),
   icon: document.getElementById('detail-company-icon'),
   apply: document.getElementById('apply-selected-role'),
 };
 
 let selectedCard = null;
 
+// Show the details and action buttons only while a job is selected.
+const setDetailVisible = (visible) => {
+  document
+    .getElementById('opportunity-detail')
+    ?.classList.toggle('hidden', !visible);
+  document
+    .getElementById('opportunity-actions')
+    ?.classList.toggle('hidden', !visible);
+  document
+    .getElementById('opportunity-detail-placeholder')
+    ?.classList.toggle('hidden', visible);
+};
+
 // =====================================================
 // 6. SAVED OPPORTUNITIES
 // =====================================================
 
-let savedRoles = new Set(
-  safeRead('skillbridgeSavedRoles', [])
-);
+// The "skillbridge_" prefix means api-client.js clears this on account change.
+const SAVED_KEY = 'skillbridge_savedOpportunityIds';
+
+let savedIds = new Set(safeRead(SAVED_KEY, []));
 
 const selectedRole = () =>
   selectedCard?.dataset.role || '';
 
+const selectedId = () =>
+  selectedCard?.dataset.opportunityId || '';
+
 const updateSaveState = () => {
-  const saved = savedRoles.has(selectedRole());
+  const saved = savedIds.has(selectedId());
 
   const detailSave = document.getElementById('detail-save');
   const footerSave = document.getElementById(
@@ -354,43 +384,51 @@ const updateSaveState = () => {
       saved ? 'Remove saved opening' : 'Save this opening'
     );
 
-    detailSave.innerHTML = saved
-      ? '<i class="ph ph-bookmark-simple-fill"></i>'
-      : '<i class="ph ph-bookmark-simple"></i>';
+    detailSave.innerHTML =
+      '<i class="ph ph-bookmark-simple"></i>';
+
+    // Pale and purple classes must not be applied together.
+    detailSave.classList.toggle('bg-[#731F94]', saved);
+    detailSave.classList.toggle('text-white', saved);
+    detailSave.classList.toggle('bg-[#F0E9FF]', !saved);
+    detailSave.classList.toggle('text-[#625B6D]', !saved);
+    detailSave.classList.toggle('hover:text-[#731F94]', !saved);
   }
 
   if (footerSave) {
     footerSave.setAttribute('aria-pressed', String(saved));
 
     footerSave.innerHTML = saved
-      ? '<i class="ph ph-bookmark-simple-fill"></i>Saved for Later'
+      ? '<i class="ph ph-bookmark-simple"></i>Saved for Later'
       : '<i class="ph ph-bookmark-simple"></i>Save for Later';
 
     footerSave.classList.toggle('bg-[#731F94]', saved);
     footerSave.classList.toggle('text-white', saved);
+    footerSave.classList.toggle('bg-[#F0E9FF]', !saved);
+    footerSave.classList.toggle('hover:bg-[#E7DDF8]', !saved);
   }
 
   const savedCount = document.getElementById('saved-count');
 
   if (savedCount) {
-    savedCount.textContent = String(savedRoles.size);
+    savedCount.textContent = String(savedIds.size);
   }
 };
 
 const toggleSaved = () => {
-  const role = selectedRole();
+  const id = selectedId();
 
-  if (!role) return;
+  if (!id) return;
 
-  if (savedRoles.has(role)) {
-    savedRoles.delete(role);
+  if (savedIds.has(id)) {
+    savedIds.delete(id);
   } else {
-    savedRoles.add(role);
+    savedIds.add(id);
   }
 
   localStorage.setItem(
-    'skillbridgeSavedRoles',
-    JSON.stringify([...savedRoles])
+    SAVED_KEY,
+    JSON.stringify([...savedIds])
   );
 
   updateSaveState();
@@ -419,6 +457,14 @@ const selectCard = (card) => {
   if (!card) return;
 
   selectedCard = card;
+  setDetailVisible(true);
+
+  if (detail.source) {
+    detail.source.textContent = [
+      card.dataset.source ? `Source: ${card.dataset.source}.` : '',
+      'Check that this listing is still open before applying.',
+    ].filter(Boolean).join(' ');
+  }
 
   cards.forEach((item) => {
     const selected = item === card;
@@ -444,14 +490,9 @@ const selectCard = (card) => {
       card.dataset.role || 'Role not specified';
   }
 
-  if (detail.recruitment) {
-    detail.recruitment.textContent =
-      card.dataset.recruitment || '—';
-  }
-
   if (detail.closing) {
     detail.closing.textContent =
-      card.dataset.close || 'Not specified';
+      card.dataset.close || 'No closing date listed';
   }
 
   if (detail.sector) {
@@ -578,10 +619,15 @@ const updateVisibleCount = () => {
     );
   }
 
-  if (
-    visible.length &&
-    (!selectedCard || selectedCard.hidden)
-  ) {
+  if (!visible.length) {
+    selectedCard = null;
+    setDetailVisible(false);
+
+    if (cards.length && emptyState) {
+      emptyState.textContent =
+        'No roles match those filters. Try another search or location.';
+    }
+  } else if (!selectedCard || selectedCard.hidden) {
     selectCard(visible[0]);
   }
 };
@@ -608,7 +654,6 @@ function filterOpportunityCards() {
       !query || searchableText.includes(query);
 
     const workMode = card.dataset.location || 'all';
-    const eligibility = card.dataset.eligibility || 'all';
 
     const matchesLocation =
       location === 'all' ||
@@ -616,10 +661,6 @@ function filterOpportunityCards() {
       (
         location === 'flexible' &&
         ['hybrid', 'remote'].includes(workMode)
-      ) ||
-      (
-        location === 'nysc' &&
-        eligibility === 'nysc'
       );
 
     card.hidden = !(
@@ -829,10 +870,6 @@ if (detail.role) {
     'Live listing details will appear here.';
 }
 
-if (detail.recruitment) {
-  detail.recruitment.textContent = '—';
-}
-
 if (detail.closing) {
   detail.closing.textContent = '—';
 }
@@ -1038,12 +1075,14 @@ const renderApiOpportunities = (opportunities) => {
     card.dataset.role = title;
     card.dataset.company = company;
     card.dataset.location = workMode;
-    card.dataset.eligibility = 'all';
 
     card.dataset.fit =
       matchScore === null ? '—' : String(matchScore);
 
     card.dataset.salary = String(salary);
+    card.dataset.source = String(
+      getField(opportunity, 'sourcePlatform', 'source_platform') || ''
+    );
 
     card.dataset.work = [
       workModeLabel(workMode),
@@ -1054,8 +1093,8 @@ const renderApiOpportunities = (opportunities) => {
 
     card.dataset.sector = category;
     card.dataset.team = opportunityType;
-    card.dataset.close = daysRemaining(deadline);
-    card.dataset.recruitment = opportunityId || '—';
+    card.dataset.close = closingText(deadline);
+    card.dataset.opportunityId = opportunityId;
     card.dataset.applicationUrl = applicationUrl;
     card.dataset.apiOpportunity = 'true';
 
