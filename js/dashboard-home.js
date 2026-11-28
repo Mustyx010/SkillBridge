@@ -27,15 +27,14 @@ document.querySelectorAll('[data-candidate-name]').forEach((element) => {
 document.getElementById('topbar-user-name').textContent =
   `${firstName} ${lastName ? `${lastName[0]}.` : ''}`;
 
-const trackLabels = {
-  'fintech-data': 'Financial Technology & Data',
-  backend: 'Backend Engineer',
-  'growth-product': 'Growth Product',
-};
+const savedCareer = (() => {
+  try { return localStorage.getItem('skillbridgeSelectedCareer'); }
+  catch { return null; }
+})();
 
 const track =
-  trackLabels[surveyData.track] ||
-  surveyData.track ||
+  savedCareer ||
+  surveyData.targetJobTitle ||
   'Career goal not set';
 
 document.querySelectorAll('[data-track-name]').forEach((element) => {

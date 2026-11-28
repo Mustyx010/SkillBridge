@@ -120,7 +120,16 @@
 
   const open = (id) => document.getElementById(id)?.showModal();
   const close = (id) => document.getElementById(id)?.close();
-  const announce = (title, message) => { setText('profile-message-title', title); setText('profile-message', message); open('profile-message-dialog'); };
+  const announce = (title, message, action) => {
+    setText('profile-message-title', title);
+    setText('profile-message', message);
+    const link = document.getElementById('profile-message-action');
+    if (link) {
+      link.classList.toggle('hidden', !action);
+      if (action) { link.textContent = action.label; link.href = action.href; }
+    }
+    open('profile-message-dialog');
+  };
   const sidebar = $('#dashboard-sidebar');
   const sidebarBackdrop = $('#sidebar-backdrop');
   const sidebarButton = $('#dashboard-menu-button');
@@ -230,12 +239,18 @@
     const submitButton = form.querySelector('[type="submit"]');
     const stopLoading = window.SkillBridgeApi.setLoading(submitButton, 'Saving preferences…');
     try {
-      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal });
+      const roleChanged = role.trim().toLowerCase() !== careerGoal.toLowerCase();
+      await window.SkillBridgeApi.put('/api/v1/profiles/me', { careerGoal, targetJobTitle: careerGoal });
       role = careerGoal;
       localStorage.setItem('skillbridgeSelectedCareer', careerGoal);
       setText('target-role', careerGoal);
       close('edit-criteria-dialog');
-      announce('Career goal saved', 'The career goal synced to your account. Availability and salary changes were not saved because the documented profile API does not include those fields.');
+      const savedNote = 'Availability and salary changes were not saved because the documented profile API does not include those fields.';
+      if (roleChanged) {
+        announce('Career goal saved', `Your target role is now “${careerGoal}”. Your skill gap and roadmap still reflect your last analysis. Run a new analysis to update them. ${savedNote}`, { label: 'Update my roadmap', href: 'cv-upload.html' });
+      } else {
+        announce('Career goal saved', `The career goal synced to your account. ${savedNote}`);
+      }
     } catch (error) {
       announce('Preferences could not be saved', error.message);
     } finally {

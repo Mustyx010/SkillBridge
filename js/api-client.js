@@ -426,6 +426,63 @@
     }));
   };
 
+  // The answers that drive CV analysis and roadmaps. The account profile is
+  // the source of truth because it works on any device; the browser copy of
+  // the survey only fills in what the account does not have.
+  const CAREER_STAGES = ['Student', 'Entry', 'Mid', 'Senior', 'Pivot'];
+  const PRIMARY_GOALS = ['CV Review', 'Gap Analysis', 'Roadmap'];
+  const SURVEY_STAGE_MAP = {
+    'final-year': 'Student',
+    graduate: 'Entry',
+    entry: 'Entry',
+    mid: 'Mid',
+    senior: 'Senior',
+    'career-pivot': 'Pivot',
+  };
+
+  const getSurveyProfile = async () => {
+    let local = {};
+    let selectedCareer = '';
+
+    try {
+      local = JSON.parse(localStorage.getItem('skillbridge_survey') || '{}').data || {};
+      selectedCareer = localStorage.getItem('skillbridgeSelectedCareer') || '';
+    } catch {
+      local = {};
+    }
+
+    let remote = {};
+    let accountLoaded = false;
+
+    try {
+      const account = await request('/api/v1/profiles/me', { method: 'GET' });
+      remote = (account?.data ?? account)?.profile || {};
+      accountLoaded = true;
+    } catch {
+      // The browser copy is used when the account cannot be read.
+    }
+
+    const text = (value) => (typeof value === 'string' ? value.trim() : '');
+
+    const localStage = Object.prototype.hasOwnProperty.call(SURVEY_STAGE_MAP, local.availability)
+      ? SURVEY_STAGE_MAP[local.availability]
+      : '';
+
+    const pickGoal = (value) => (PRIMARY_GOALS.includes(value) ? value : '');
+
+    return {
+      targetRole:
+        text(remote.careerGoal) ||
+        text(remote.targetJobTitle) ||
+        text(selectedCareer) ||
+        text(local.targetJobTitle),
+      industryFocus: text(remote.industryFocus) || text(local.industryFocus),
+      careerStage: CAREER_STAGES.includes(remote.careerStage) ? remote.careerStage : localStage,
+      primaryGoal: pickGoal(remote.primaryGoal) || pickGoal(local.primaryGoal),
+      accountLoaded,
+    };
+  };
+
   const setAnalysisContext = ({
     skillGapId,
     careerGoal,
@@ -516,6 +573,7 @@
     showStatus,
     refreshAnalysisArtifacts,
     setAnalysisContext,
+    getSurveyProfile,
 
     unwrap: (response) => response?.data ?? response,
   };

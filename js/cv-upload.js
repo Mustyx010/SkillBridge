@@ -70,16 +70,17 @@ function listFrom(value, keys = []) {
   return null;
 }
 
-function getSurveyData() {
-  try {
-    const savedSurvey = JSON.parse(
-      localStorage.getItem('skillbridge_survey') || '{}',
-    );
+// A saved analysis can be reused only while it still matches what the user
+// says now. Older analyses (no stored industry or stage) are reused as before.
+function isAnalysisCurrent(gap, profile) {
+  const same = (a, b) =>
+    String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
 
-    return savedSurvey?.data || {};
-  } catch {
-    return {};
-  }
+  if (profile.targetRole && !same(gap.targetJobTitle, profile.targetRole)) return false;
+  if (gap.industryFocus && profile.industryFocus && !same(gap.industryFocus, profile.industryFocus)) return false;
+  if (gap.careerStage && profile.careerStage && gap.careerStage !== profile.careerStage) return false;
+
+  return true;
 }
 
 // =====================================================
@@ -574,23 +575,6 @@ document
   });
 
 // =====================================================
-// 11. CONVERT SURVEY CAREER STAGE
-// =====================================================
-
-function getCareerStage(value) {
-  const careerStageMap = {
-    'final-year': 'Student',
-    graduate: 'Entry',
-    entry: 'Entry',
-    mid: 'Mid',
-    senior: 'Senior',
-    'career-pivot': 'Pivot',
-  };
-
-  return careerStageMap[value] || null;
-}
-
-// =====================================================
 // 12. CONTINUE TO CV ANALYSIS
 // =====================================================
 
@@ -625,9 +609,24 @@ continueButton.addEventListener('click', async (event) => {
     }
   }
 
-  // Do not generate another analysis if this CV
-  // already has a completed SkillGap.
-  if (existingSkillGap) {
+  // Read the user's answers: the account first (works on any device),
+  // then this browser's survey copy.
+  const stopChecking = window.SkillBridgeApi.setLoading(
+    continueButton,
+    'Checking your profile…',
+  );
+
+  let profile;
+
+  try {
+    profile = await window.SkillBridgeApi.getSurveyProfile();
+  } finally {
+    stopChecking();
+  }
+
+  // Do not generate another analysis while the saved one still matches
+  // the user's current role, industry and career stage.
+  if (existingSkillGap && isAnalysisCurrent(existingSkillGap, profile)) {
     window.SkillBridgeApi.setLoading(
       continueButton,
       'Opening career paths…',
@@ -637,20 +636,10 @@ continueButton.addEventListener('click', async (event) => {
     return;
   }
 
-  // Read the information saved from survey.html.
-  const survey = getSurveyData();
-
-  const targetJobTitle =
-    survey.targetJobTitle?.trim();
-
-  const industryFocus =
-    survey.industryFocus?.trim();
-
-  const primaryGoal =
-    survey.primaryGoal;
-
-  const careerStage =
-    getCareerStage(survey.availability);
+  const targetJobTitle = profile.targetRole;
+  const industryFocus = profile.industryFocus;
+  const primaryGoal = profile.primaryGoal;
+  const careerStage = profile.careerStage;
 
   // Validate the survey information before calling
   // the backend analysis endpoint.
@@ -707,9 +696,23 @@ continueButton.addEventListener('click', async (event) => {
     const analysis = responseBody?.data ?? responseBody;
 
     if (!analysis?.skillGapId) {
-      throw new Error(
-        'The API response did not include a skill-gap analysis ID.',
-      );
+      // A CV Review has no skill gap by design: it only suggests careers.
+      if (primaryGoal !== 'CV Review') {
+        throw new Error(
+          'The API response did not include a skill-gap analysis ID.',
+        );
+      }
+
+      localStorage.setItem('skillbridgeUploadedCvId', uploadedCvId);
+      localStorage.setItem('skillbridgeSelectedCareer', targetJobTitle);
+
+      setAnalysisProgress(100, 'CV review complete');
+
+      uploadStatus.textContent =
+        'CV review completed. Choose a career path to continue.';
+
+      window.location.href = 'career-paths.html';
+      return;
     }
 
     // Save the successful analysis information.
