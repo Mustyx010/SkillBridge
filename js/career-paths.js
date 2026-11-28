@@ -95,7 +95,6 @@ const add = (title, details = {}) => {
     match: Number.isFinite(matchPercentage)
       ? { matchPercentage }
       : null,
-    source: 'CV recommendation',
   });
 };
 
@@ -146,18 +145,18 @@ const skillFields = new Set([
 const normalizeSkill = (skill) => String(skill || '').trim().toLowerCase();
 
 const addCareerCard = (candidate, index) => {
+  // Job cards carry an opportunity. All other cards are AI career suggestions.
+  const isJob = Boolean(candidate.opportunity);
   const card = document.createElement('article');
   card.className = 'career-card rounded-xl bg-white p-6 shadow-[0_1px_3px_rgba(24,20,69,0.08)] sm:p-8';
   card.dataset.role = candidate.title;
   const content = document.createElement('div');
   content.className = 'grid items-center gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]';
   const description = document.createElement('div');
-  const rank = makeText('span', 'rounded-full bg-[#F2E8FA] px-2.5 py-1 text-[10px] font-semibold text-[#8527A1]',
-    candidate.match ? `Rank #${index + 1} • API-verified match` : 'CV recommendation');
-  const source = makeText('span', 'rounded-full bg-[#EEE8FF] px-2.5 py-1 text-[10px] font-semibold text-[#4A4455]', candidate.source);
   const badges = document.createElement('div');
   badges.className = 'flex flex-wrap gap-1.5';
-  badges.append(rank, source);
+  badges.append(makeText('span', 'rounded-full bg-[#F2E8FA] px-2.5 py-1 text-[10px] font-semibold text-[#8527A1]',
+    isJob ? 'Job listing' : 'AI career suggestion'));
   description.append(badges, makeText('h2', 'mt-4 text-xl font-bold', candidate.title));
 
   const opportunity = candidate.opportunity;
@@ -184,7 +183,7 @@ const addCareerCard = (candidate, index) => {
           description.append(link);
         }
       } catch {
-        setStatus(`The API returned an invalid application link for ${candidate.title}.`, true);
+        setStatus(`This job has an invalid application link for ${candidate.title}.`, true);
       }
     }
   } else {
@@ -198,22 +197,27 @@ const addCareerCard = (candidate, index) => {
   actionPanel.className = 'rounded-xl bg-[#F5F0FD] p-5';
   if (candidate.match && Number.isFinite(candidate.match.matchPercentage)) {
     const score = Math.max(0, Math.min(100, candidate.match.matchPercentage));
-    const calibration = makeText('p', 'text-[10px] font-bold uppercase tracking-wide text-[#81798B]', 'Match calibration');
+    const calibration = makeText('p', 'text-[10px] font-bold uppercase tracking-wide text-[#81798B]', isJob ? 'Skill match' : 'AI estimate');
     const percentage = document.createElement('p');
     percentage.className = 'mt-1';
     percentage.append(makeText('strong', 'text-5xl font-extrabold text-[#8527A1]', `${score}%`), makeText('span', 'ml-1 text-xs', 'Fit'));
-    const factor = makeText('p', 'mt-4 flex justify-between text-[10px] font-medium', `${(candidate.match.matchedSkills || candidate.overlap || []).length} verified matching skill${(candidate.match.matchedSkills || candidate.overlap || []).length === 1 ? '' : 's'}`);
     const progress = document.createElement('div');
     progress.className = 'mt-1 h-2 overflow-hidden rounded-full bg-[#E5DDFA]';
     const fill = document.createElement('div');
     fill.className = 'h-full bg-[#8527A1]';
     fill.style.width = `${score}%`;
     progress.append(fill);
-    actionPanel.append(calibration, percentage, factor, progress);
+    actionPanel.append(calibration, percentage, progress);
+    // Skill counts and chips come only from a saved job match.
+    const matchedSkills = isJob ? candidate.match.matchedSkills || [] : [];
+    if (isJob) {
+      actionPanel.insertBefore(makeText('p', 'mt-4 text-[10px] font-medium',
+        `${matchedSkills.length} matching skill${matchedSkills.length === 1 ? '' : 's'}`), progress);
+    }
     const chips = document.createElement('div');
     chips.className = 'mt-3 flex flex-wrap gap-1 text-[10px]';
-    (candidate.match.matchedSkills || candidate.overlap || []).slice(0, 4).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-[#EAE2FF] px-2 py-1 text-[#8527A1]', skill)));
-    (candidate.match.missingSkills || []).slice(0, 2).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-white px-2 py-1 text-[#81798B]', `Develop: ${skill}`)));
+    matchedSkills.slice(0, 4).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-[#EAE2FF] px-2 py-1 text-[#8527A1]', skill)));
+    (isJob ? candidate.match.missingSkills || [] : []).slice(0, 2).forEach((skill) => chips.append(makeText('span', 'rounded-full bg-white px-2 py-1 text-[#81798B]', `Develop: ${skill}`)));
     if (chips.childElementCount) actionPanel.append(chips);
   } else if (candidate.overlap?.length) {
     actionPanel.append(makeText('p', 'text-xs font-semibold text-[#8527A1]', `${candidate.overlap.length} matching CV skill${candidate.overlap.length === 1 ? '' : 's'}`));
@@ -337,7 +341,7 @@ const loadCareerOptions = async () => {
         : []
     ));
     if (!matchingRefresh.find((result) => result.name === 'matches')?.ok) {
-      sourceErrors.push('job match generation: the API could not refresh matches');
+      sourceErrors.push('job matches could not be refreshed');
     }
     const skillGap = gaps.find((gap) => gap.cvId === cvId)
       || gaps.find((gap) => gap.id === localStorage.getItem('skillbridgeSkillGapId'));
@@ -357,26 +361,21 @@ const analysisResult = {
       const requiredSkills = [...(opportunity.requiredSkills || []), ...(opportunity.preferredSkills || [])];
       const overlap = requiredSkills.filter((skill) => skills.has(normalizeSkill(skill)));
       return { opportunity, match, overlap };
-    }).filter((item) => item.match || item.overlap.length);
+    }).filter((item) => item.match?.isRelevant === true);
 
-    const combined = [...recommendations];
-    matchedOpportunities
-      .sort((a, b) => {
-        const scoreA = Number.isFinite(a.match?.matchPercentage) ? a.match.matchPercentage : 0;
-        const scoreB = Number.isFinite(b.match?.matchPercentage) ? b.match.matchPercentage : 0;
-        return scoreB - scoreA || b.overlap.length - a.overlap.length;
-      })
-      .forEach(({ opportunity, match, overlap }) => {
-        const existing = combined.find((item) => item.title.toLowerCase() === opportunity.title?.toLowerCase());
-        if (existing) {
-          existing.opportunity = opportunity;
-          existing.match = match;
-          existing.overlap = overlap;
-          existing.source = 'CV-matched opportunity';
-        } else {
-          combined.push({ title: opportunity.title, opportunity, match, overlap, source: 'CV-matched opportunity' });
-        }
-      });
+    // Keep AI suggestions and every job listing as separate cards,
+    // even when their titles are the same.
+    matchedOpportunities.sort((a, b) => {
+      const scoreA = Number.isFinite(a.match?.matchPercentage) ? a.match.matchPercentage : -1;
+      const scoreB = Number.isFinite(b.match?.matchPercentage) ? b.match.matchPercentage : -1;
+      return scoreB - scoreA || b.overlap.length - a.overlap.length;
+    });
+    const combined = [
+      ...recommendations,
+      ...matchedOpportunities.map(({ opportunity, match, overlap }) => (
+        { title: opportunity.title, opportunity, match, overlap }
+      )),
+    ];
 
     candidates.splice(0, candidates.length, ...combined.filter((item) => item.title));
     careerList.replaceChildren();
@@ -386,11 +385,11 @@ const analysisResult = {
         'p',
         'rounded-xl bg-white p-5 text-sm leading-6 text-[#625B6D]',
         analysis
-          ? 'Your CV analysis did not return career recommendations, and no active opportunity matched the skills in the analysis. You can update your survey or upload a revised CV to try again.'
+          ? 'Your CV analysis did not return career recommendations, and no close job matches were found. You can update your survey or upload a revised CV to try again.'
           : `CV analysis could not be loaded: ${results[0].status === 'rejected' ? results[0].reason.message : 'No analysis was returned.'}`,
       ));
       setStatus(sourceErrors.length
-        ? `Some API data could not be loaded: ${sourceErrors.join('; ')}`
+        ? `Some data could not be loaded: ${sourceErrors.join('; ')}`
         : '');
       return;
     }
@@ -402,8 +401,8 @@ const analysisResult = {
       dashboardCta.classList.remove('pointer-events-none', 'opacity-50');
     }
     setStatus(sourceErrors.length
-      ? `Some API data could not be loaded: ${sourceErrors.join('; ')}`
-      : `${candidates.length} CV-derived career option${candidates.length === 1 ? '' : 's'} found.`);
+      ? `Some data could not be loaded: ${sourceErrors.join('; ')}`
+      : `${candidates.length} career option${candidates.length === 1 ? '' : 's'} found.${matchedOpportunities.length ? '' : ' No close job matches were found.'}`);
   } catch (error) {
     careerList.replaceChildren(makeText('p', 'rounded-xl bg-white p-5 text-sm text-[#625B6D]', error.message));
     if (opportunityCount) opportunityCount.textContent = '—';

@@ -801,7 +801,7 @@ const introCopy = document.querySelector(
 
 if (introCopy) {
   introCopy.textContent =
-    'Current vacancies and account-specific match scores are provided by the SkillBridge API.';
+    'Browse opportunities and see how your skills match. Check that a listing is still open before you apply.';
 }
 
 const sortingLabel = document.querySelector(
@@ -809,13 +809,13 @@ const sortingLabel = document.querySelector(
 )?.parentElement?.previousElementSibling;
 
 if (sortingLabel) {
-  sortingLabel.textContent = 'Live API opportunities';
+  sortingLabel.textContent = 'Opportunities';
 }
 
 if (resultCount?.parentElement) {
   resultCount.parentElement.replaceChildren(
     resultCount,
-    document.createTextNode(' Live positions')
+    document.createTextNode(' positions')
   );
 }
 
@@ -859,7 +859,7 @@ if (detail.fit) {
 
 if (detail.rationale) {
   detail.rationale.textContent =
-    'Listings and match scores load from the SkillBridge API.';
+    'Select an opportunity to see its match details.';
 }
 
 if (detail.apply) {
@@ -882,7 +882,7 @@ let matchScores = new Map();
 const renderApiOpportunities = (opportunities) => {
   if (!Array.isArray(opportunities)) {
     throw new Error(
-      'The API returned an invalid opportunities list.'
+      'The opportunities list could not be read.'
     );
   }
 
@@ -1138,7 +1138,7 @@ const renderApiOpportunities = (opportunities) => {
 
   if (!cards.length && emptyState) {
     emptyState.textContent =
-      'No active opportunities were returned by the API. Check whether opportunities have been added to the database.';
+      'There are no active opportunities right now. Please check again later.';
 
     emptyState.classList.remove('hidden');
   }
@@ -1251,9 +1251,13 @@ const loadApiOpportunities = async () => {
     }
 
     if (introBadge) {
-      introBadge.textContent = matchList.length
-        ? `${matchList.length} API matches`
-        : `${opportunities.length} live listings`;
+      const closeMatches = matchList.filter(
+        (match) => match.isRelevant === true
+      ).length;
+
+      introBadge.textContent = closeMatches
+        ? `${closeMatches} close ${closeMatches === 1 ? 'match' : 'matches'}`
+        : `${opportunities.length} listings`;
 
       introBadge.classList.remove('hidden');
     }
@@ -1264,7 +1268,7 @@ const loadApiOpportunities = async () => {
           `${cards.length} opportunities loaded, but match scores could not be fetched.`;
       } else {
         status.textContent =
-          `${cards.length} live opportunities loaded from the API.`;
+          `${cards.length} opportunities loaded.`;
       }
     }
   } catch (error) {
@@ -1281,12 +1285,12 @@ const loadApiOpportunities = async () => {
       status.classList.remove('sr-only');
 
       status.textContent =
-        `Live opportunities could not be loaded: ${message}`;
+        `Opportunities could not be loaded: ${message}`;
     }
 
     if (emptyState) {
       emptyState.textContent =
-        `No live opportunity data is available: ${message}`;
+        `No opportunity data is available: ${message}`;
 
       emptyState.classList.remove('hidden');
     }

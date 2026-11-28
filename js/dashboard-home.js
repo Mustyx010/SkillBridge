@@ -428,9 +428,9 @@ const renderApiMetrics = (
       ? 'Sign in to load your opportunities'
       : pending.has('matches')
       ? 'Loading account matches'
-      : matches.length
-      ? `${matches.length} API-generated matches`
-      : 'Listings from the opportunities API',
+      : matches.some((match) => match.isRelevant === true)
+      ? `${matches.filter((match) => match.isRelevant === true).length} suggested for you`
+      : 'Browse all job listings',
     'ph-briefcase'
   );
 
@@ -707,7 +707,8 @@ document.querySelector('main > section')?.after(dashboardApiStatus);
 const renderDashboardJobs = (
   opportunities,
   matches,
-  isLoading = false
+  isLoading = false,
+  matchesFailed = false
 ) => {
   if (!dashboardJobList) return;
 
@@ -719,7 +720,13 @@ const renderDashboardJobs = (
     opportunities.map((item) => [item.id, item])
   );
 
-  const matchItems = matches
+  // Suggest only the jobs the backend marked as relevant. There is no
+  // fallback to unrelated listings.
+  const relevantMatches = matches.filter(
+    (match) => match.isRelevant === true
+  );
+
+  const matchItems = relevantMatches
     .map((match) => {
       const opportunity =
         match.opportunity ||
@@ -732,16 +739,11 @@ const renderDashboardJobs = (
     })
     .filter((item) => item.opportunity);
 
-  const displayItems = matchItems.length
-    ? matchItems.sort(
-        (a, b) =>
-          (getMatchPercentage(b.match) ?? -1) -
-          (getMatchPercentage(a.match) ?? -1)
-      )
-    : opportunities.map((opportunity) => ({
-        opportunity,
-        match: null,
-      }));
+  const displayItems = matchItems.sort(
+    (a, b) =>
+      (getMatchPercentage(b.match) ?? -1) -
+      (getMatchPercentage(a.match) ?? -1)
+  );
 
   const uniqueItems = [
     ...new Map(
@@ -804,7 +806,7 @@ const renderDashboardJobs = (
 
     const score = percentage === null
       ? 'Match not calculated'
-      : `${percentage}% API match`;
+      : `${percentage}% match`;
 
     const matchLabel = makeText(
       'span',
@@ -826,7 +828,7 @@ const renderDashboardJobs = (
       match?.reason ||
       (requiredSkills.length
         ? `Required skills: ${requiredSkills.join(', ')}`
-        : 'The API did not provide match details for this role.');
+        : 'Match details are not available for this role.');
 
     card.append(
       makeText(
@@ -887,22 +889,15 @@ const renderDashboardJobs = (
   if (matchHeading) {
     matchHeading.textContent = !activeSession
       ? 'Your job opportunities'
-      : matches.length
-      ? 'Your API-generated job matches'
-      : 'Job opportunities from SkillBridge';
+      : 'Your suggested job matches';
   }
 
   const matchBadge = matchHeading?.parentElement?.querySelector('span');
 
   if (matchBadge) {
-    matchBadge.textContent = matches.length
-      ? `${matches.length} matches`
-      : `${opportunities.length} listings`;
+    matchBadge.textContent = `${matchItems.length} ${matchItems.length === 1 ? 'match' : 'matches'}`;
 
-    matchBadge.classList.toggle(
-      'hidden',
-      opportunities.length === 0
-    );
+    matchBadge.classList.toggle('hidden', matchItems.length === 0);
   }
 
   if (!uniqueItems.length) {
@@ -910,9 +905,9 @@ const renderDashboardJobs = (
       ? 'Sign in to load opportunities for your account.'
       : isLoading
       ? 'Loading opportunities from your account…'
-      : opportunities.length
-      ? 'No opportunities match your saved profile data.'
-      : 'No job opportunities were returned by the API.';
+      : matchesFailed
+      ? 'Your job matches could not be loaded. Refresh the page to try again.'
+      : 'No close job matches yet. Browse Job Opportunities to see all listings.';
 
     emptyState.classList.remove('hidden');
   } else {
@@ -1090,7 +1085,8 @@ const loadDashboardApiSummary = async () => {
     renderDashboardJobs(
       opportunities,
       matches,
-      pending.has('opportunities') || pending.has('matches')
+      pending.has('opportunities') || pending.has('matches'),
+      failures.has('matches')
     );
 
     const loadedCount =
@@ -1152,7 +1148,7 @@ const loadDashboardApiSummary = async () => {
       } catch (error) {
         failures.set(
           key,
-          error?.message || 'Unknown API error'
+          error?.message || 'Unknown error'
         );
       } finally {
         pending.delete(key);
